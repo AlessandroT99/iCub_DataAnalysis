@@ -45,7 +45,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
     if IMAGE_SAVING
-        mkdir ProcessedData;
+        mkdir ..\ProcessedData;
     end
 
     %% A priori informations
@@ -140,14 +140,14 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
 
     if DEBUG
 %         figure, hold on, grid on, plot(slope), hold off
-%         mkdir ProcessedData\PositionDerivativeSlope;
-%         path = strjoin(["ProcessedData\PositionDerivativeSlope\P",num2str(numPerson),".png"],"");
+%         mkdir ..\ProcessedData\PositionDerivativeSlope;
+%         path = strjoin(["..\ProcessedData\PositionDerivativeSlope\P",num2str(numPerson),".png"],"");
 %         exportgraphics(gcf,path)
 %         close(gcf);
 
         figure, hold on, grid on, plot(posStd), hold off
-%         mkdir ProcessedData\PositionDerivativeSTD;
-%         path = strjoin(["ProcessedData\PositionDerivativeSTD\P",num2str(numPerson),".png"],"");
+%         mkdir ..\ProcessedData\PositionDerivativeSTD;
+%         path = strjoin(["..\ProcessedData\PositionDerivativeSTD\P",num2str(numPerson),".png"],"");
 %         exportgraphics(gcf,path)
 %         close(gcf);
 
@@ -367,11 +367,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     
     % Figure saving for position
     if IMAGE_SAVING
-        mkdir ProcessedData\PositionVisualizing;
-        path = strjoin(["ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
+        mkdir ..\ProcessedData\PositionVisualizing;
+        path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
         exportgraphics(fig1,path)
-        mkdir ProcessedData\PositionProcessing;
-        path = strjoin(["ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
+        mkdir ..\ProcessedData\PositionProcessing;
+        path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
         exportgraphics(fig2,path)
     end
     
@@ -548,8 +548,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     
     % Figure saving for force
     if IMAGE_SAVING
-        mkdir ProcessedData\ForceSynchronization;
-        path = strjoin(["ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
+        mkdir ..\ProcessedData\ForceSynchronization;
+        path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
         exportgraphics(fig3,path)
     end
     

@@ -17,8 +17,8 @@
 clear all, close all, clc
 
 %% Reading input data of the baseline experiment
-posFilePath = "positions\leftHand\P\data.log";
-forceFilePath = "forces\leftArm\P\data.log";
+posFilePath = "..\positions\leftHand\P\data.log";
+forceFilePath = "..\forces\leftArm\P\data.log";
 
 posDataSet = readtable(posFilePath);
 forceDataSet = readtable(forceFilePath);

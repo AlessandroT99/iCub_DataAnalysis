@@ -76,8 +76,8 @@ function [meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks] = posFurtherAnalysis(synchPo
 
     % Figure saving for phase duration
     if IMAGE_SAVING
-        mkdir ProcessedData\PhaseDuration;
-        path = strjoin(["ProcessedData\PhaseDuration\P",num2str(numPerson),".png"],"");
+        mkdir ..\ProcessedData\PhaseDuration;
+        path = strjoin(["..\ProcessedData\PhaseDuration\P",num2str(numPerson),".png"],"");
         exportgraphics(fig1,path)
         close(fig1);
     end

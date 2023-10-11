@@ -30,7 +30,7 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 
 %% Input data
 numPeople = 32; 
-people = readtable("Dati Personali EXP2.xlsx");
+people = readtable("..\Dati Personali EXP2.xlsx");
 people = people(1:numPeople,:);
 
 %% Output initialization
