@@ -14,7 +14,9 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks] = posFurtherAnalysis(synchPosDataSet,numPerson,personParam)
+function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
+            maxPeaksAverage, minPeaksAverage, stdPos, meanPos] = ...
+              posFurtherAnalysis(synchPosDataSet,numPerson,personParam)
 % The main aim of this function is to elaborate position signals in order to extract
 % some interesting data that would be usefull to compare with the overrall
 % test population into some scatter plot or others
@@ -34,8 +36,6 @@ function [meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks] = posFurtherAnalysis(synchPo
     minPeaksVal = -minPeaksVal;
     maxLocalization = maxLocalization*10e-5;
     minLocalization = minLocalization*10e-5;
-    posUpperPhase = length(maxPeaksVal);
-    posLowerPhase = length(minPeaksVal);
 
     for i = 1:length(maxPeaksVal)
         if strcmp(personParam(5),"DX") == 1
@@ -58,9 +58,6 @@ function [meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks] = posFurtherAnalysis(synchPo
     meanHtoR = mean(HtoR);
     meanRtoH = mean(RtoH);
 
-    nMaxPeaks = length(maxPeaksVal);
-    nMinPeaks = length(minPeaksVal);
-    
     fig1 = figure;
     fig1.WindowState = 'maximized';
     hold on, grid on
@@ -81,4 +78,20 @@ function [meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks] = posFurtherAnalysis(synchPo
         exportgraphics(fig1,path)
         close(fig1);
     end
+
+    %% Peaks values
+    nMaxPeaks = length(maxPeaksVal);
+    nMinPeaks = length(minPeaksVal);
+
+    maxPeaksAverage = mean(maxPeaksVal);
+    minPeaksAverage = mean(minPeaksVal);
+
+    %% Std and mean
+    stdPos = std(synchPosDataSet(:,2));
+    meanPos = mean(synchPosDataSet(:,2));
+
+    %% Duration
+    experimentDuration = synchPosDataSet(end,1);
+
+    
 end

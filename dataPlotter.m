@@ -27,6 +27,7 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 % - end the further analysis on the position
 % - start the further analysis on the force
 % - plot scatter plots as further analysis output
+% - Define the force using Denavit-Hartenberg
 
 %% Input data
 numPeople = 32; 
@@ -37,6 +38,16 @@ people = people(1:numPeople,:);
 totalMeanHtoR = 0;
 totalMeanRtoH = 0;
 evaluatedPeople = 0;
+
+experimentDuration = zeros(1,numPeople);
+meanHtoR = zeros(1,numPeople);
+meanRtoH = zeros(1,numPeople);
+nMaxPeaks = zeros(1,numPeople);
+nMinPeaks = zeros(1,numPeople);
+maxPeaksAverage = zeros(1,numPeople);
+minPeaksAverage = zeros(1,numPeople);
+stdPos = zeros(1,numPeople);
+meanPos = zeros(1,numPeople);
 
 %% Simulation parameter
 BIG_PLOT_ENABLE = 0; % Allows to the plotting of the two big gender plot 
@@ -64,6 +75,10 @@ end
 for i = 1:height(people)
     % Find the correct data from the ones sent by iCub
     [posDataSet, forceDataSet] = fileReader(people, i);
+
+%     % Has been evaluated that the force RS has to be rotated and translated
+%     % into the EF RS.
+%     forceDataSet = forceTransformation(forceDataSet);
 
     % Before iterating check that the person has not an invalid dataset
     % which has to be skipped
