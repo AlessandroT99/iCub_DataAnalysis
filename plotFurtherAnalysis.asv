@@ -1,0 +1,147 @@
+% Copyright: (C) 2023 Department of COgNiTive Architecture for Collaborative Technologies
+%                     Istituto Italiano di Tecnologia
+% Author: Alessandro Tiozzo
+% email: alessandro.tiozzo@iit.it
+% Permission is granted to copy, distribute, and/or modify this program
+% under the terms of the GNU General Public License, version 2 or any
+% later version published by the Free Software Foundation.
+% 
+% A copy of the license can be found at
+% http://www.robotcub.org/icub/license/gpl.txt
+% 
+% This program is distributed in the hope that it will be useful, but
+% WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+% Public License for more details
+
+function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
+                                maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
+                                totalMeanRtoH, totalMeanHtoR)
+% This function takes in input the data generated from the position and
+% force further analysis functions and plot usefull scatter and other
+% diagrams in order to visualize trends or similars.
+    
+    %% Simulation parameters
+    IMAGE_SAVING = 1;
+    nTest = length(experimentDuration); % Number of test analyzed
+    c = linspace(1,10,nTest); % Vector used to change scatter points color
+
+    mkdir ..\ProcessedData\Scatters
+
+    %% Experiment duration
+    figure('Name','Experiment duration scatter');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    xline(4,'k--','LineWidth',2.2)
+    scatter(experimentDuration,1:nTest,50,c,'filled')
+    title("Distribution of experiment duration")
+    legend("Desidered duration")
+    xlabel("Elapsed Time [ min ]")
+    ylabel("# Test")
+    hold off
+
+    if IMAGE_SAVING
+        exportgraphics(gca,"..\ProcessedData\Scatters\ExperimentDuration.png")
+    end
+    
+    %% Phase durations
+    figure('Name','Phases duration scatter');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    scatter(meanRtoH*60,1:nTest,50,'blue','filled')
+    scatter(meanHtoR*60,1:nTest,50,'red','filled')
+    xline(1.5,'k--','LineWidth',2.2)
+    title("Distribution of phases duration")
+    legend('Robot to Human','Human to Robot','Desidered duration')
+    xlabel("Elapsed Time [ s ]")
+    ylabel("# Test")
+    hold off
+
+    if IMAGE_SAVING
+        exportgraphics(gca,"..\ProcessedData\Scatters\PhaseDuration.png")
+    end
+    
+    %% Peaks number
+    figure('Name','Number of peaks scatter');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    scatter(nMaxPeaks,1:nTest,50,'red','filled')
+    scatter(nMinPeaks,1:nTest,50,'green','filled')
+    xline(80,'k--','LineWidth',2.2)
+    title("Distribution of peaks number")
+    legend('# Maximums','# Minimums','Desidered #')
+    xlabel("# peaks")
+    ylabel("# Test")
+    hold off
+
+    if IMAGE_SAVING
+        exportgraphics(gca,"..\ProcessedData\Scatters\PeaksNumber.png")
+    end
+    
+    figure('Name','Number of peaks scatter vs. experiment duration');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    scatter(nMaxPeaks,experimentDuration,50,'red','filled')
+    scatter(nMinPeaks,experimentDuration,50,'green','filled')
+    xline(80,'k--','LineWidth',2.2)
+    title("Distribution of peaks values")
+    legend('# Maximums','# Minimums','Desidered #')
+    xlabel("# peaks")
+    ylabel("Elapsed Time [ min ]")
+    hold off
+    
+    if IMAGE_SAVING
+        exportgraphics(gca,"..\ProcessedData\Scatters\PeaksNumber-ExperimentDuration.png")
+    end
+
+    %% Peaks values
+    figure('Name','Values of peaks scatter');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    scatter(maxPeaksAverage.*100,1:nTest,50,'red','filled')
+    scatter(minPeaksAverage.*100,1:nTest,50,'green','filled')
+    % xline(posA dx)
+    % xline(posB dx)
+    % xline(posB sx)
+    % xline(posA sx)
+    % text(mean(posA sx,posB sx),5,"iCub DX hand")
+    % text(mean(posA dx,posB dx),5,"iCub SX hand")
+    title("Distribution of peaks values")
+    legend('Maximums average','Minimums average')
+    xlabel("Peaks value [ cm ]")
+    ylabel("# Test")
+    hold off
+    
+    if IMAGE_SAVING
+        exportgraphics(gca,"..\ProcessedData\Scatters\PeaksValues.png")
+    end
+
+    %% Standard deviation
+    figure('Name','Standard deviation scatter');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    scatter(stdPos.*100,1:nTest,50,c,'filled')
+    title("Distribution of standard deviation")
+    xlabel("Standard deviation [ cm ]")
+    ylabel("# Test")
+    hold off
+    
+    if IMAGE_SAVING
+        exportgraphics(gcf,"..\ProcessedData\Scatters\StandardDeviation.png")
+    end
+
+    %% Mean values
+    figure('Name','Mean values scatter');
+    gcf.WindowState = 'maximized';
+    grid on, hold on
+    scatter(meanPos.*100,1:nTest,50,c,'filled')
+    title("Distribution of mean values")
+    xlabel("Mean [ cm ]")
+    ylabel("# Test")
+    hold off
+
+    if IMAGE_SAVING
+        exportgraphics(gcf,"..\ProcessedData\Scatters\MeanValues.png")
+    end
+
+end

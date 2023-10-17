@@ -16,14 +16,13 @@
 
 function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
             maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
-            movementRange, maxMinAverageDistance, peaksVariation, ...
-            peaksInitialAndFinalVariation, cableTensionEfficiency] = ...
+            movementRange, maxMinAverageDistance, peaksInitialAndFinalVariation, cableTensionEfficiency] = ...
               posFurtherAnalysis(synchPosDataSet,numPerson,personParam)
 % The main aim of this function is to elaborate position signals in order to extract
 % some interesting data that would be usefull to compare with the overrall
 % test population into some scatter plot or others
 
-%% OUTPUT PARAMETERS EXPLANATION
+% OUTPUT PARAMETERS EXPLANATION
 % experimentDuration = Duration of the experiments in minutes
 % meanHtoR = Average time for the Human to Robot phase in minutes
 % meanRtoH = Average time for the Robot to Human phase in minutes
@@ -40,8 +39,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
 % peaksInitialAndFinalVariation = difference between the initial peaks and
 %                                 the last one in meters, this could be helpfull 
 %                                 to evaluate the coordination
-% cableTensionEfficiency = efficiency of the cable tension, evaluating the
-%                          difference between the ideal robot position and the real one
+% cableTensionEfficiency = efficiency of the cable tension, evaluat
 
     %% Parameters for the simulation     
     frequency = 100;

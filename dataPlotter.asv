@@ -38,21 +38,21 @@ totalMeanHtoR = 0;
 totalMeanRtoH = 0;
 evaluatedPeople = 0;
 
-notConsideredValue = 1e3; % Value at which a variable is initialized, and used to known is it has been written
-experimentDuration = notConsideredValue.*ones(1,numPeople);
-meanHtoR = notConsideredValue.*ones(1,numPeople);
-meanRtoH = notConsideredValue.*ones(1,numPeople);
-nMaxPeaks = notConsideredValue.*ones(1,numPeople);
-nMinPeaks = notConsideredValue.*ones(1,numPeople);
-maxPeaksAverage = notConsideredValue.*ones(1,numPeople);
-minPeaksAverage = notConsideredValue.*ones(1,numPeople);
-stdPos = notConsideredValue.*ones(1,numPeople);
-meanPos = notConsideredValue.*ones(1,numPeople);
-movementRange = notConsideredValue.*ones(1,numPeople);
-maxMinAverageDistance = notConsideredValue.*ones(1,numPeople);
-peaksVariation = notConsideredValue.*ones(1,numPeople);
-peaksInitialAndFinalVariation = notConsideredValue.*ones(1,numPeople);
-cableTensionEfficiency = notConsideredValue.*ones(1,numPeople);
+notConsideredValue = 1e3; % Value at which a variable is initialized, and used to known is it has been used
+experimentDuration = 1e3.*ones(1,numPeople);
+meanHtoR = 1e3.*ones(1,numPeople);
+meanRtoH = 1e3.*ones(1,numPeople);
+nMaxPeaks = 1e3.*ones(1,numPeople);
+nMinPeaks = 1e3.*ones(1,numPeople);
+maxPeaksAverage = 1e3.*ones(1,numPeople);
+minPeaksAverage = 1e3.*ones(1,numPeople);
+stdPos = 1e3.*ones(1,numPeople);
+meanPos = 1e3.*ones(1,numPeople);
+movementRange = 1e3.*ones(1,numPeople);
+maxMinAverageDistance = 1e3.*ones(1,numPeople);
+peaksVariation = 1e3.*ones(1,numPeople);
+peaksInitialAndFinalVariation = 1e3.*ones(1,numPeople);
+cableTensionEfficiency = 1e3.*ones(1,numPeople);
 
 %% Simulation parameter
 BIG_PLOT_ENABLE = 0; % Allows to the plotting of the two big gender plot 
@@ -179,26 +179,25 @@ totalMeanRtoH = totalMeanRtoH/evaluatedPeople;
 
 % In case of not evaluated test, remove the indices not used in the
 % output variables
-experimentDuration = experimentDuration(experimentDuration~=notConsideredValue);
-meanHtoR = meanHtoR(meanHtoR~=notConsideredValue);
-meanRtoH = meanRtoH(meanRtoH~=notConsideredValue);
-nMaxPeaks = nMaxPeaks(nMaxPeaks~=notConsideredValue);
-nMinPeaks = nMinPeaks(nMinPeaks~=notConsideredValue);
-maxPeaksAverage = maxPeaksAverage(maxPeaksAverage~=notConsideredValue);
-minPeaksAverage = minPeaksAverage(minPeaksAverage~=notConsideredValue);
-stdPos = stdPos(stdPos~=notConsideredValue);
-meanPos = meanPos(meanPos~=notConsideredValue);
-movementRange = movementRange(movementRange~=notConsideredValue);
-maxMinAverageDistance = maxMinAverageDistance(maxMinAverageDistance~=notConsideredValue);
-peaksVariation = peaksVariation(peaksVariation~=notConsideredValue);
-peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFinalVariation~=notConsideredValue);
-cableTensionEfficiency = cableTensionEfficiency(cableTensionEfficiency~=notConsideredValue);
+experimentDuration = experimentDuration(experimentDuration~=1e3);
+meanHtoR = meanHtoR(meanHtoR~=1e3);
+meanRtoH = meanRtoH(meanRtoH~=1e3);
+nMaxPeaks = nMaxPeaks(nMaxPeaks~=1e3);
+nMinPeaks = nMinPeaks(nMinPeaks~=1e3);
+maxPeaksAverage = maxPeaksAverage(maxPeaksAverage~=1e3);
+minPeaksAverage = minPeaksAverage(minPeaksAverage~=1e3);
+stdPos = stdPos(stdPos~=1e3);
+meanPos = meanPos(meanPos~=1e3);
+movementRange = movementRange(movementRange~=1e3);
+maxMinAverageDistance = maxMinAverageDistance(maxMinAverageDistance~=1e3);
+peaksVariation = peaksVariation(peaksVariation~=1e3);
+peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFinalVariation~=1e3);
+cableTensionEfficiency = cableTensionEfficiency(cableTensionEfficiency~=1e3);
 
 %% Further analysis plotting
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
-                                movementRange, maxMinAverageDistance, peaksVariation, ...
-                                peaksInitialAndFinalVariation, cableTensionEfficiency);
+                                totalMeanRtoH, totalMeanHtoR);
 
 %% Conclusion of the main
 close all;

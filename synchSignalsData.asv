@@ -179,6 +179,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     % Basically in the lines above a new boundary is evaluated,
     % considering the mean between the upper boundary and the mean of the
     % signal, used as lower treshold for peaks finding
+    
+%     maxLocalization = maxLocalization*10e-5;
+%     minLocalization = minLocalization*10e-5;
 
     % The just got boundaries are used to check for a period including the last
     % robot phase, and choosing the end point just outside this boundaries
@@ -243,6 +246,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
         % Basically in the lines above a new boundary is evaluated,
         % considering the mean between the upper boundary and the mean of the
         % signal, used as lower treshold for peaks finding
+        
+%         maxLocalization = maxLocalization*10e-5;
+%         minLocalization = minLocalization*10e-5;
     
         % The just got boundaries are used to check for a period including the last
         % robot phase, and choosing the end point just outside this boundaries
@@ -262,17 +268,17 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     derivativeCuttedElapsedTime = elapsedTime(derivativePosStart:derivativePosEnd)-elapsedTime(derivativePosStart);
     
     % Resizing also minimum and maximum values
-    maxLocalization = (maxLocalization)/(100*60);
-    maxLocalization = maxLocalization(maxLocalization>0);
-    maxPeaksVal = maxPeaksVal(end-length(maxLocalization)+1:end);
-    maxLocalization = maxLocalization(maxLocalization<=length(derivativeCuttedElapsedTime));
+    maxLocalization = maxLocalization(maxLocalization<=derivativePosEnd);
     maxPeaksVal = maxPeaksVal(1:length(maxLocalization));
+    maxLocalization = maxLocalization(maxLocalization>=derivativePosStart);
+    maxPeaksVal = maxPeaksVal(end-length(maxLocalization)+1:end);
+    maxLocalization = maxLocalization-derivativePosStart;
 
-    minLocalization = (minLocalization)/(100*60);
-    minLocalization = minLocalization(minLocalization>0);
-    minPeaksVal = minPeaksVal(end-length(minLocalization)+1:end);
-    minLocalization = minLocalization(minLocalization<=length(derivativeCuttedElapsedTime));
+    minLocalization = minLocalization(minLocalization<=derivativePosEnd);
     minPeaksVal = minPeaksVal(1:length(minLocalization));
+    minLocalization = minLocalization(minLocalization>=derivativePosStart);
+    minPeaksVal = minPeaksVal(end-length(minLocalization)+1:end);
+    minLocalization = minLocalization-derivativePosStart;
     
     %% Plot results
     subplot(4,1,3), hold on, grid on
@@ -292,8 +298,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     
     subplot(4,1,4), hold on, grid on
     plot(derivativeCuttedElapsedTime,cuttedFilteredPosDerivative,'DisplayName','y_{cutted}')
-    plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximum peaks')
-    plot(minLocalization,minPeaksVal,'go','DisplayName','Minimum peaks')
+    plot(derivativeCuttedElapsedTime(maxLocalization),maxPeaksVal,'ro','DisplayName','Maximum peaks')
+    plot(derivativeCuttedElapsedTime(minLocalization),minPeaksVal,'go','DisplayName','Minimum peaks')
     yline(upperPeaksBound,'k--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'k--','DisplayName','Lower bound')
     yline(secureUpperPeaksBound,'r--','DisplayName','Secure Higher bound')
@@ -319,23 +325,23 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     posStart = min(minLocalization(1),maxLocalization(1));
     posEnd = max(minLocalization(end),maxLocalization(end));
 
+%     maxLocalization = maxLocalization*10e-5-elapsedTime(posStart);
+%     minLocalization = minLocalization*10e-5-elapsedTime(posStart);
+    % Resizing minimum and maximum values
+    maxLocalization = maxLocalization(maxLocalization<=posEnd);
+    maxPeaksVal = maxPeaksVal(1:length(maxLocalization));
+    maxLocalization = maxLocalization(maxLocalization>=posStart);
+    maxPeaksVal = maxPeaksVal(end-length(maxLocalization),end);
+
+    minLocalization = minLocalization(minLocalization<=posEnd);
+    minPeaksVal = minPeaksVal(1:length(minLocalization));
+    minLocalization = minLocalization(minLocalization>=posStart);
+    minPeaksVal = minPeaksVal(end-length(minLocalization),end);
+
 
     cuttedPosDataSet = firstCutPosDataSet(posStart:posEnd);
     cuttedElapsedTime = elapsedTime(posStart:posEnd)-elapsedTime(posStart);
     cuttedAverageBehavior = cutPosAverage(posStart:posEnd);
-
-    % Resizing minimum and maximum values
-    maxLocalization = (maxLocalization-posStart)/(100*60);
-    maxLocalization = maxLocalization(maxLocalization>0);
-    maxPeaksVal = maxPeaksVal(end-length(maxLocalization)+1:end);
-    maxLocalization = maxLocalization(maxLocalization<=length(cuttedElapsedTime));
-    maxPeaksVal = maxPeaksVal(1:length(maxLocalization));
-
-    minLocalization = (minLocalization-posStart)/(100*60);
-    minLocalization = minLocalization(minLocalization>0);
-    minPeaksVal = minPeaksVal(end-length(minLocalization)+1:end);
-    minLocalization = minLocalization(minLocalization<=length(cuttedElapsedTime));
-    minPeaksVal = minPeaksVal(1:length(minLocalization));
 
     timeDelayFromOriginalPos = derivativePosStart;
     
@@ -368,8 +374,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     subplot(2,1,2), hold on, grid on
     plot(cuttedElapsedTime,cuttedPosDataSet,'k-','DisplayName', 'y position_{cutted}')
     plot(cuttedElapsedTime,cuttedAverageBehavior,'b--','DisplayName','Average behavior')
-    plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
-    plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
+    plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'ro','DisplayName','Maximums')
+    plot(cuttedElapsedTime(minLocalization),minPeaksVal,'go','DisplayName','Minimums')
     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
     title("Cutted signal starting and ending points")
@@ -491,27 +497,24 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     minPeaksVal = -minPeaksVal;
     upperPeaksBound = mean(maxPeaksVal);
     lowerPeaksBound = mean(minPeaksVal);
+%     maxLocalization = maxLocalization*10e-5;
+%     minLocalization = minLocalization*10e-5;
     
-    % Resizing minimum and maximum values
-    maxLocalization = (maxLocalization)/(100*60);
-    minLocalization = (minLocalization)/(100*60);
-
     highestValue = max(cuttedSynchForceDataSet); 
     lowestValue = min(cuttedSynchForceDataSet);
     
     % Plot results
     subplot(3,1,3), grid on, hold on
     plot(cuttedElapsedTime,cuttedSynchForceDataSet,'k-','DisplayName','Synched force')
-    plot(cuttedElapsedTime,averageEnv,'b--','DisplayName','Average behavior')
-    plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
-    plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
-    yline(upperPeaksBound,'r--','DisplayName','Higher bound')
-    yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
+    plot(cuttedElapsedTime,averageEnv,'r--','DisplayName','Average behavior')
+    plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'go',cuttedElapsedTime(minLocalization),minPeaksVal,'go')
+    yline(upperPeaksBound,'k--','Higher bound')
+    yline(lowerPeaksBound,'k--','Lower bound')
     xlabel("Elapsed time [ min ]")
     ylabel("Force [ N ]")
     ylim([lowestValue,highestValue])
     title("Final processed force signal")
-    legend('show','Location','eastoutside')
+    legend("Synched force", "Average behavior",'Location','eastoutside')
     hold off
     sgtitle(defaultTitleName)
     
@@ -538,11 +541,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
     [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
     minPeaksVal = -minPeaksVal;
-    
-    % Resizing minimum and maximum values
-    maxLocalization = (maxLocalization)/(100*60);
-    minLocalization = (minLocalization)/(100*60);
-
+%     maxLocalization = maxLocalization*10e-5;
+%     minLocalization = minLocalization*10e-5;
     posUpperPhase = length(maxPeaksVal);
     posLowerPhase = length(minPeaksVal);
     

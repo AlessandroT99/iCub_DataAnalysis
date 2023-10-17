@@ -14,6 +14,10 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
+% TODO: 
+% - Add the boundaries of position in order to recognise human side and
+%   robot side
+
 function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personParameters,BIG_PLOT_ENABLE)
 % The following function is used in order to plot togheter the force and
 % the position signal, firstly in the gender subplot, then in a single
