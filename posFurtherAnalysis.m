@@ -14,9 +14,12 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
+% TODO:
+% - Elaborate the yellow underlined values
+
 function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
             maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
-            movementRange, maxMinAverageDistance, peaksVariation, ...
+            movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
             peaksInitialAndFinalVariation, cableTensionEfficiency] = ...
               posFurtherAnalysis(synchPosDataSet,numPerson,personParam)
 % The main aim of this function is to elaborate position signals in order to extract
@@ -115,5 +118,28 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
 
     %% Duration
     experimentDuration = synchPosDataSet(end,1);
+
+    %% Movement range & Max e Min average distance
+    maxMinAverageDistance = 0;
+    movementRange = zeros(1,min(length(maxPeaksVal),length(minPeaksVal)));
+    for i = 1:min(length(maxPeaksVal),length(minPeaksVal))
+        movementRange(i) = abs(maxPeaksVal(i)-minPeaksVal(i));
+        maxMinAverageDistance = maxMinAverageDistance + movementRange(i);
+    end
+    maxMinAverageDistance = maxMinAverageDistance/i;
+    p = polyfit(1:length(movementRange),movementRange,4);
+    movementRange = polyval(p,linspace(1,length(movementRange)));
+
+    %% Peaks variation 
+    p = polyfit(1:length(maxPeaksVal),maxPeaksVal,4);
+    maxPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
+    p = polyfit(1:length(minPeaksVal),minPeaksVal,4);
+    minPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
+    
+    %% Peaks initial and final variation
+    peaksInitialAndFinalVariation = abs(maxPeaksVariation(end)-minPeaksVariation(end))-abs(maxPeaksVariation(1)-minPeaksVariation(1));
+
+    %% Cable tension efficiency based on positions
+    cableTensionEfficiency = 0;
 
 end

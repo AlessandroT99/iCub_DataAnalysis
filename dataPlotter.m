@@ -10,8 +10,8 @@
 % http://www.robotcub.org/icub/license/gpl.txt
 % 
 % This program is distributed in the hope that it will be useful, but
-% WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+% WITHOUT ANY WARRANTY; without even the implied warranty
+% of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
 clear all, close all,  clc
@@ -24,12 +24,14 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 
 % TODO: 
 % - find a way to save the two scrollable plots as image.
+% - end the further analysis on the position
 % - start the further analysis on the force
 % - plot scatter plots as further analysis output
 % - Define the force using Denavit-Hartenberg
+% - Solve error line 223
 
 %% Input data
-numPeople = 32; 
+numPeople = 32+1; % The +1 is the baseline test
 people = readtable("..\Dati Personali EXP2.xlsx");
 people = people(1:numPeople,:);
 
@@ -48,16 +50,19 @@ maxPeaksAverage = notConsideredValue.*ones(1,numPeople);
 minPeaksAverage = notConsideredValue.*ones(1,numPeople);
 stdPos = notConsideredValue.*ones(1,numPeople);
 meanPos = notConsideredValue.*ones(1,numPeople);
-movementRange = notConsideredValue.*ones(1,numPeople);
+movementRange = notConsideredValue.*ones(numPeople,100);
 maxMinAverageDistance = notConsideredValue.*ones(1,numPeople);
-peaksVariation = notConsideredValue.*ones(1,numPeople);
+maxPeaksVariation = notConsideredValue.*ones(numPeople,100);
+minPeaksVariation = notConsideredValue.*ones(numPeople,100);
 peaksInitialAndFinalVariation = notConsideredValue.*ones(1,numPeople);
 cableTensionEfficiency = notConsideredValue.*ones(1,numPeople);
 
 %% Simulation parameter
 BIG_PLOT_ENABLE = 0; % Allows to the plotting of the two big gender plot 
-PAUSE_PEOPLE = 0;    % Array containing number of people for which the synch 
+PAUSE_PEOPLE = -1;    % Array containing number of people for which the synch 
                      % shall put in pause to handle graphs
+AXIS_3PLOT = 0;      % Allows plotting all the 3 force and position components
+BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
 
 %% Usefull data to be saved
 [nDX, nSX, nM, nF, plotPosM, plotPosF] = parametersUpdate(people); 
@@ -78,26 +83,49 @@ if BIG_PLOT_ENABLE
 end
 
 for i = 1:height(people)
-    % Find the correct data from the ones sent by iCub
-    [posDataSet, forceDataSet] = fileReader(people, i);
+    if BaseLineEvaluationDone == 0
+        posFilePath = "..\positions\leftHand\P\data.log";
+        forceFilePath = "..\forces\leftArm\P\data.log";
 
-%     % Has been evaluated that the force RS has to be rotated and translated
-%     % into the EF RS.
-%     forceDataSet = forceTransformation(forceDataSet);
+        posDataSet = readtable(posFilePath);
+        forceDataSet = readtable(forceFilePath);
+        
+        posDataSet = renamevars(posDataSet,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8","Var9"], ...
+                                           ["Counter","Time","xPos","yPos","zPos","q1","q2","q3","q4"]);
+        forceDataSet = renamevars(forceDataSet,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
+                                       ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
+    else
+        % Find the correct data from the ones sent by iCub
+        [posDataSet, forceDataSet] = fileReader(people, i-1);
+    end
 
     % Before iterating check that the person has not an invalid dataset
     % which has to be skipped
     if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0
-        evaluatedPeople = evaluatedPeople + 1;
-        personParam = ["Gender: ", people.Genere(i), "  -  ", "Human Hand: ", people.Mano(i), "  -  ", "Age: ", people.Et_(i)];
-        fprintf("\n- Elaborating data from person N. %d...\n",i);
+        if BaseLineEvaluationDone == 0
+            personParam = ["Baseline Test","  ","-","  Robot Hand: ","SX"];
+            fprintf("\n- Elaborating data from Baseline test...\n");
+        else
+            evaluatedPeople = evaluatedPeople + 1;
+            personParam = ["Gender: ", people.Genere(i-1), "  -  ", "Human Hand: ", people.Mano(i-1), "  -  ", "Age: ", people.Et_(i-1)];
+            fprintf("\n- Elaborating data from person N. %d...\n",i-1);
+        end
+
+        % Plots the 3 axis components of force and position
+        if AXIS_3PLOT
+            print3Axis(posDataSet, forceDataSet,i-1);
+        end
+    
+%         % Has been evaluated that the force RS has to be rotated and translated
+%         % into the EF RS.
+%         forceDataSet = forceTransformation(forceDataSet);
 
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet] = ...
-          synchSignalsData(posDataSet, forceDataSet, i, ...
+          synchSignalsData(posDataSet, forceDataSet, i-1, ...
             personParam,PAUSE_PEOPLE);   
         
-        if BIG_PLOT_ENABLE
+        if BIG_PLOT_ENABLE && BaseLineEvaluationDone
             if strcmp(people.Genere(i),"M") == 1
                 % Defining the subplot in the males figure
                 actualNM = actualNM + 1;
@@ -118,25 +146,30 @@ for i = 1:height(people)
 
         % Plot results obtained previosly in a single involved subplot
         % depending on the gender and save them separately for each test
-        combinePosForcePlots(synchPosDataSet, synchForceDataSet, i, ...
+        combinePosForcePlots(synchPosDataSet, synchForceDataSet, i-1, ...
             personParam,BIG_PLOT_ENABLE);
 
         %% Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
-        fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(i)],"");
+        fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(i-1)],"");
         save(fileName, "synchPosDataSet", "i", 'personParam');
 
         %% Further analysis
         [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
-            movementRange(i), maxMinAverageDistance(i), peaksVariation(i), ...
+            movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), cableTensionEfficiency(i)] = ...
-            posFurtherAnalysis(synchPosDataSet,i, personParam);
-        forceFurtherAnalysis(synchForceDataSet,i,personParam);
+            posFurtherAnalysis(synchPosDataSet,i-1, personParam);
+        
+%         forceFurtherAnalysis(synchForceDataSet,i-1,personParam);
     
         % Output parameters collection
-        totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
-        totalMeanRtoH = totalMeanRtoH + meanRtoH(i);
+        if BaseLineEvaluationDone
+            totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
+            totalMeanRtoH = totalMeanRtoH + meanRtoH(i);
+        else
+            BaseLineEvaluationDone = 1;
+        end
     end
 end
 
@@ -188,16 +221,17 @@ maxPeaksAverage = maxPeaksAverage(maxPeaksAverage~=notConsideredValue);
 minPeaksAverage = minPeaksAverage(minPeaksAverage~=notConsideredValue);
 stdPos = stdPos(stdPos~=notConsideredValue);
 meanPos = meanPos(meanPos~=notConsideredValue);
-movementRange = movementRange(movementRange~=notConsideredValue);
+movementRange = movementRange(movementRange~=notConsideredValue,:);
 maxMinAverageDistance = maxMinAverageDistance(maxMinAverageDistance~=notConsideredValue);
-peaksVariation = peaksVariation(peaksVariation~=notConsideredValue);
+maxPeaksVariation = maxPeaksVariation(maxPeaksVariation~=notConsideredValue,:);
+minPeaksVariation = minPeaksVariation(minPeaksVariation~=notConsideredValue,:);
 peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFinalVariation~=notConsideredValue);
 cableTensionEfficiency = cableTensionEfficiency(cableTensionEfficiency~=notConsideredValue);
 
 %% Further analysis plotting
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
-                                movementRange, maxMinAverageDistance, peaksVariation, ...
+                                movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, cableTensionEfficiency);
 
 %% Conclusion of the main
