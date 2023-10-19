@@ -14,13 +14,10 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-% TODO:
-% - Elaborate the yellow underlined values
-
 function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
-                                peaksInitialAndFinalVariation, cableTensionEfficiency)
+                                peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER)
 % This function takes in input the data generated from the position and
 % force further analysis functions and plot usefull scatter and other
 % diagrams in order to visualize trends or similars.
@@ -29,8 +26,17 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     IMAGE_SAVING = 1;
     nTest = length(experimentDuration); % Number of test analyzed
     brightGreen = [0.22,1,0.08];
-    clearRed = [1,0.55,0];
-    clearBlue = [0,1,1];
+    clearRed = [1,0.4,0];
+    clearBlue = [0,0.6,1];
+
+    customColors = zeros(36,3);
+    customColors(1:9,:) = brewermap(9,'Set1');
+    customColors(10:17,:) = brewermap(8,'Set2');
+    customColors(18:25,:) = brewermap(8,'Pastel1');
+    customColors(26:33,:) = brewermap(8,'Pastel2');
+    textFont = 16;
+    EmptyPointLine = 1.5;
+    MarkerDimension = 80;
 
     mkdir ..\ProcessedData\Scatters
 
@@ -38,8 +44,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig1 = figure('Name','Experiment duration scatter');
     fig1.WindowState = 'maximized';
     grid on, hold on
-    scatter(experimentDuration(1),1,50,brightGreen,'filled')
-    scatter(experimentDuration(2:end),2:nTest,50,'black','filled')
+    scatter(experimentDuration(1),1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(experimentDuration(BASELINE_NUMBER+1:end),BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
     xline(4,'k--','LineWidth',2.2)
     title("Distribution of experiment duration")
     legend("BaseLine","Desidered duration")
@@ -56,10 +62,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig2 = figure('Name','Phases duration scatter');
     fig2.WindowState = 'maximized';
     grid on, hold on
-    scatter(meanRtoH(1)*60,1,50,clearBlue,'filled')
-    scatter(meanHtoR(1)*60,1,50,clearRed,'filled')
-    scatter(meanRtoH(2:end)*60,2:nTest,50,'blue','filled')
-    scatter(meanHtoR(2:end)*60,2:nTest,50,'red','filled')
+    scatter(meanRtoH(1:BASELINE_NUMBER)*60,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
+    scatter(meanHtoR(1:BASELINE_NUMBER)*60,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(meanRtoH(BASELINE_NUMBER+1:end)*60,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(meanHtoR(BASELINE_NUMBER+1:end)*60,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
     xline(1.5,'k--','LineWidth',2.2)
     title("Distribution of phases duration")
     legend("BaseLine RtoH","BaseLine HtoR",'Robot to Human','Human to Robot','Desidered duration')
@@ -76,10 +82,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig3 = figure('Name','Number of peaks scatter');
     fig3.WindowState = 'maximized';
     grid on, hold on
-    scatter(nMaxPeaks(1),1,50,clearRed,'filled')
-    scatter(nMinPeaks(1),1,50,clearBlue,'filled')
-    scatter(nMaxPeaks(2:end),2:nTest,50,'red','filled')
-    scatter(nMinPeaks(2:end),2:nTest,50,'blue','filled')
+    scatter(nMaxPeaks(1:BASELINE_NUMBER),1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(nMinPeaks(1:BASELINE_NUMBER),1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
+    scatter(nMaxPeaks(BASELINE_NUMBER+1:end),BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(nMinPeaks(BASELINE_NUMBER+1:end),BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
     xline(80,'k--','LineWidth',2.2)
     title("Distribution of peaks number")
     legend('Baseline Maximums','Baseline Minimums','# Maximums','# Minimums','Desidered #')
@@ -95,10 +101,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig4 = figure('Name','Number of peaks scatter vs. experiment duration');
     fig4.WindowState = 'maximized';
     grid on, hold on
-    scatter(nMaxPeaks(1),experimentDuration(1),50,clearRed,'filled')
-    scatter(nMinPeaks(1),experimentDuration(1),50,clearBlue,'filled')
-    scatter(nMaxPeaks(2:end),experimentDuration(2:end),50,'red','filled')
-    scatter(nMinPeaks(2:end),experimentDuration(2:end),50,'blue','filled')
+    scatter(nMaxPeaks(1:BASELINE_NUMBER),experimentDuration(1:BASELINE_NUMBER),MarkerDimension,clearRed,'filled')
+    scatter(nMinPeaks(1:BASELINE_NUMBER),experimentDuration(1:BASELINE_NUMBER),MarkerDimension,clearBlue,'filled')
+    scatter(nMaxPeaks(BASELINE_NUMBER+1:end),experimentDuration(BASELINE_NUMBER+1:end),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(nMinPeaks(BASELINE_NUMBER+1:end),experimentDuration(BASELINE_NUMBER+1:end),MarkerDimension,'blue','LineWidth',EmptyPointLine)
     xline(80,'k--','LineWidth',2.2)
     title("Distribution of peaks number vs. experiment duration")
     legend('Baseline Maximums','Baseline Minimums','# Maximums','# Minimums','Desidered #')
@@ -115,16 +121,16 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig5 = figure('Name','Values of peaks scatter');
     fig5.WindowState = 'maximized';
     grid on, hold on
-    scatter(maxPeaksAverage(1).*100,1,50,clearRed,'filled')
-    scatter(minPeaksAverage(1).*100,1,50,clearBlue,'filled')
-    scatter(maxPeaksAverage(2:end).*100,2:nTest,50,'red','filled')
-    scatter(minPeaksAverage(2:end).*100,2:nTest,50,'blue','filled')
-    % xline(posA dx)
-    % xline(posB dx)
-    % xline(posB sx)
-    % xline(posA sx)
-    % text(mean(posA sx,posB sx),5,"iCub DX hand")
-    % text(mean(posA dx,posB dx),5,"iCub SX hand")
+    scatter(maxPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(minPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
+    scatter(maxPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(minPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
+%     xline(posA dx)
+%     xline(posB dx)
+%     xline(posB sx)
+%     xline(posA sx)
+%     text(mean(posA sx,posB sx),5,"iCub DX hand")
+%     text(mean(posA dx,posB dx),5,"iCub SX hand")
     title("Distribution of position peaks values")
     legend('Baseline Maximums average','Baseline Minimums average','Maximums average','Minimums average')
     xlabel("Peaks value [ cm ]")
@@ -140,8 +146,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig6 = figure('Name','Standard deviation scatter');
     fig6.WindowState = 'maximized';
     grid on, hold on
-    scatter(stdPos(1).*100,1,50,brightGreen,'filled')
-    scatter(stdPos(2:end).*100,2:nTest,50,'black','filled')
+    scatter(stdPos(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(stdPos(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
     title("Distribution of position standard deviation")
     legend("Baseline Std","Std")
     xlabel("Standard deviation [ cm ]")
@@ -157,8 +163,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig7 = figure('Name','Mean values scatter');
     fig7.WindowState = 'maximized';
     grid on, hold on
-    scatter(meanPos(1).*100,1,50,brightGreen,'filled')
-    scatter(meanPos(2:end).*100,2:nTest,50,'black','filled')
+    scatter(meanPos(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(meanPos(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
     title("Distribution of position mean values")
     legend("Baseline mean value","Mean values")
     xlabel("Mean [ cm ]")
@@ -174,11 +180,18 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig8 = figure('Name','Movement range plot');
     fig8.WindowState = 'maximized';
     grid on, hold on
-    plot(1:size(movementRange,2),movementRange(1,:).*100,'k--')
-    plot(1:size(movementRange,2),movementRange(2:end,:).*100)
+    plot(1:size(movementRange,2),movementRange(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
+    h = plot(1:size(movementRange,2),movementRange(BASELINE_NUMBER+1:end,:).*100,'LineWidth',1.5);
+
+    legendName(1:BASELINE_NUMBER) = "Baseline";
+    for i = 1:size(movementRange,1)-BASELINE_NUMBER
+        set(h(i),'Color',customColors(i,:));
+        legendName(i+BASELINE_NUMBER) = strjoin(["Test N. ",num2str(i)],"");
+    end
+
     title("Distribution of position movement ranges")
-    legend("Baseline movement range")
-    xlabel("Simulation progress")
+    legend(legendName,'Location','eastoutside')
+    xlabel("Simulation progress [ % ]")
     ylabel("Movement [ cm ]")
     hold off
 
@@ -191,8 +204,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig9 = figure('Name','Average distances bewteen MAX e min scatter');
     fig9.WindowState = 'maximized';
     grid on, hold on
-    scatter(maxMinAverageDistance(1).*100,1,50,brightGreen,'filled')
-    scatter(maxMinAverageDistance(2:end).*100,2:nTest,50,'black','filled')
+    scatter(maxMinAverageDistance(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(maxMinAverageDistance(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
     title("Distribution of position Average distances bewteen MAX e min")
     legend("Baseline Average distance","Average distances")
     xlabel("Average distance bewteen MAX e min [ cm ]")
@@ -208,13 +221,25 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig10 = figure('Name','Peaks variation plot');
     fig10.WindowState = 'maximized';
     grid on, hold on
-    plot(1:size(maxPeaksVariation,2),maxPeaksVariation(1,:).*100,'r--')
-    plot(1:size(minPeaksVariation,2),minPeaksVariation(1,:).*100,'b--')
-    plot(1:size(maxPeaksVariation,2),maxPeaksVariation(2:end,:).*100)
-    plot(1:size(minPeaksVariation,2),minPeaksVariation(2:end,:).*100)
+    plot(1:size(maxPeaksVariation,2),maxPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
+    hmax = plot(1:size(maxPeaksVariation,2),maxPeaksVariation(BASELINE_NUMBER+1:end,:).*100,'-','LineWidth',1.5);
+    plot(1:size(minPeaksVariation,2),minPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
+    hmin = plot(1:size(minPeaksVariation,2),minPeaksVariation(BASELINE_NUMBER+1:end,:).*100.,'-','LineWidth',1.5);
+    plot(1:size(maxPeaksVariation,2),maxPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
+    plot(1:size(minPeaksVariation,2),minPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
+    
+    legendName(1:BASELINE_NUMBER) = "Baseline variation";
+    for i = 1:size(maxPeaksVariation,1)-BASELINE_NUMBER
+        set(hmax(i),'Color',customColors(i,:));
+        set(hmin(i),'Color',customColors(i,:));
+        legendName(i+BASELINE_NUMBER) = strjoin(["Test N. ",num2str(i)," variation"],"");
+    end
+
+    text(50,-15,"HUMAN DX HAND",'HorizontalAlignment','center','FontSize', textFont)
+    text(50,15,"HUMAN SX HAND",'HorizontalAlignment','center','FontSize', textFont)
     title("Distribution of position movement ranges")
-    legend("Baseline MAX peaks variation","Baseline min peaks variation")
-    xlabel("Simulation progress")
+    legend(legendName,'Location','eastoutside')
+    xlabel("Simulation progress [ % ]")
     ylabel("Variation [ cm ]")
     hold off
 
@@ -227,8 +252,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig11 = figure('Name','Initial and final movement range variation scatter');
     fig11.WindowState = 'maximized';
     grid on, hold on
-    scatter(peaksInitialAndFinalVariation(1).*100,1,50,brightGreen,'filled')
-    scatter(peaksInitialAndFinalVariation(2:end).*100,2:nTest,50,'black','filled')
+    scatter(peaksInitialAndFinalVariation(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(peaksInitialAndFinalVariation(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
     title("Distribution of position Initial and final movement range variation")
     legend("Baseline variation","Variations")
     xlabel("Average distance bewteen MAX e min [ cm ]")
@@ -240,6 +265,27 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
 %         close(fig11);
     end
 
-    %% Cable tension efficiency based on positions
+    %% Synchronism efficiency based on positions
+    fig12 = figure('Name','Synchronism efficiency plot');
+    fig12.WindowState = 'maximized';
+    grid on, hold on
+    h = plot(1:size(synchroEfficiency,2),synchroEfficiency.*100,'LineWidth',1.5);
+
+    for i = 1:size(synchroEfficiency,1)
+        set(h(i),'Color',customColors(i,:));
+        legendName(i) = strjoin(["Test N. ",num2str(i)],"");
+    end
+
+    title("Distribution of position movement ranges")
+    legend(legendName,'Location','eastoutside')
+    ylim([0,100])
+    xlabel("Simulation progress [ % ]")
+    ylabel("Efficiency [ % ]")
+    hold off
+
+    if IMAGE_SAVING
+        exportgraphics(fig12,"..\ProcessedData\Scatters\SynchroEfficience.png")
+%         close(fig12);
+    end
 
 end

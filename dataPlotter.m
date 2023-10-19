@@ -24,14 +24,21 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 
 % TODO: 
 % - find a way to save the two scrollable plots as image.
-% - end the further analysis on the position
 % - start the further analysis on the force
 % - plot scatter plots as further analysis output
 % - Define the force using Denavit-Hartenberg
-% - Solve error line 223
+
+%% Simulation parameter
+BIG_PLOT_ENABLE = 0;        % Allows to the plotting of the two big gender plot 
+PAUSE_PEOPLE = -1;          % Array containing number of people for which the synch 
+                            %   shall put in pause to handle graphs (-1 == noone pause)
+AXIS_3PLOT = 0;             % Allows plotting all the 3 force and position components
+BASELINE_NUMBER = 1;        % Number of baseline in the simulation
+BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
+posBaseline = 0;            % Variable where the pos baseline is saved
 
 %% Input data
-numPeople = 32+1; % The +1 is the baseline test
+numPeople = 32+BASELINE_NUMBER; 
 people = readtable("..\Dati Personali EXP2.xlsx");
 people = people(1:numPeople,:);
 
@@ -55,14 +62,7 @@ maxMinAverageDistance = notConsideredValue.*ones(1,numPeople);
 maxPeaksVariation = notConsideredValue.*ones(numPeople,100);
 minPeaksVariation = notConsideredValue.*ones(numPeople,100);
 peaksInitialAndFinalVariation = notConsideredValue.*ones(1,numPeople);
-cableTensionEfficiency = notConsideredValue.*ones(1,numPeople);
-
-%% Simulation parameter
-BIG_PLOT_ENABLE = 0; % Allows to the plotting of the two big gender plot 
-PAUSE_PEOPLE = -1;    % Array containing number of people for which the synch 
-                     % shall put in pause to handle graphs
-AXIS_3PLOT = 0;      % Allows plotting all the 3 force and position components
-BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
+synchroEfficiency = notConsideredValue.*ones(numPeople,100);
 
 %% Usefull data to be saved
 [nDX, nSX, nM, nF, plotPosM, plotPosF] = parametersUpdate(people); 
@@ -96,24 +96,29 @@ for i = 1:height(people)
                                        ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
     else
         % Find the correct data from the ones sent by iCub
-        [posDataSet, forceDataSet] = fileReader(people, i-1);
+        [posDataSet, forceDataSet] = fileReader(people, i-BASELINE_NUMBER);
     end
 
     % Before iterating check that the person has not an invalid dataset
     % which has to be skipped
     if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0
         if BaseLineEvaluationDone == 0
-            personParam = ["Baseline Test","  ","-","  Robot Hand: ","SX"];
-            fprintf("\n- Elaborating data from Baseline test...\n");
+            fprintf("\n- Elaborating data from Baseline test ");
+            if i == 1
+                personParam = ["Baseline Test","  ","-","  Robot Hand: ","SX"];
+            else
+                personParam = ["Baseline Test","  ","-","  Robot Hand: ","DX"];
+            end
+            fprintf("N. %d...\n",i);
         else
             evaluatedPeople = evaluatedPeople + 1;
-            personParam = ["Gender: ", people.Genere(i-1), "  -  ", "Human Hand: ", people.Mano(i-1), "  -  ", "Age: ", people.Et_(i-1)];
-            fprintf("\n- Elaborating data from person N. %d...\n",i-1);
+            personParam = ["Gender: ", people.Genere(i-BASELINE_NUMBER), "  -  ", "Human Hand: ", people.Mano(i-BASELINE_NUMBER), "  -  ", "Age: ", people.Et_(i-BASELINE_NUMBER)];
+            fprintf("\n- Elaborating data from person N. %d...\n",i-BASELINE_NUMBER);
         end
 
         % Plots the 3 axis components of force and position
         if AXIS_3PLOT
-            print3Axis(posDataSet, forceDataSet,i-1);
+            print3Axis(posDataSet, forceDataSet,i-BASELINE_NUMBER);
         end
     
 %         % Has been evaluated that the force RS has to be rotated and translated
@@ -122,7 +127,7 @@ for i = 1:height(people)
 
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet] = ...
-          synchSignalsData(posDataSet, forceDataSet, i-1, ...
+          synchSignalsData(posDataSet, forceDataSet, i-BASELINE_NUMBER, ...
             personParam,PAUSE_PEOPLE);   
         
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone
@@ -146,29 +151,32 @@ for i = 1:height(people)
 
         % Plot results obtained previosly in a single involved subplot
         % depending on the gender and save them separately for each test
-        combinePosForcePlots(synchPosDataSet, synchForceDataSet, i-1, ...
+        combinePosForcePlots(synchPosDataSet, synchForceDataSet, i-BASELINE_NUMBER, ...
             personParam,BIG_PLOT_ENABLE);
 
         %% Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
-        fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(i-1)],"");
+        fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(i-BASELINE_NUMBER)],"");
         save(fileName, "synchPosDataSet", "i", 'personParam');
 
         %% Further analysis
         [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
-            peaksInitialAndFinalVariation(i), cableTensionEfficiency(i)] = ...
-            posFurtherAnalysis(synchPosDataSet,i-1, personParam);
+            peaksInitialAndFinalVariation(i), synchroEfficiency(i,:)] = ...
+            posFurtherAnalysis(synchPosDataSet,i-BASELINE_NUMBER, personParam, posBaseline);
         
-%         forceFurtherAnalysis(synchForceDataSet,i-1,personParam);
+%         forceFurtherAnalysis(synchForceDataSet,i-BASELINE_NUMBER,personParam);
     
         % Output parameters collection
         if BaseLineEvaluationDone
             totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
             totalMeanRtoH = totalMeanRtoH + meanRtoH(i);
-        else
-            BaseLineEvaluationDone = 1;
+        else 
+            if BASELINE_NUMBER == i
+                BaseLineEvaluationDone = 1;
+            end
+            posBaseline(:,i) = synchPosDataSet(:,2); % Save the baseline sets
         end
     end
 end
@@ -206,7 +214,12 @@ if BIG_PLOT_ENABLE
     % close all
 end
 
+% save stateBeforeOverallPlot;
+
 %% Output parameters evaluation
+
+% load stateBeforeOverallPlot.mat;
+
 totalMeanHtoR = totalMeanHtoR/evaluatedPeople;  
 totalMeanRtoH = totalMeanRtoH/evaluatedPeople;
 
@@ -221,18 +234,18 @@ maxPeaksAverage = maxPeaksAverage(maxPeaksAverage~=notConsideredValue);
 minPeaksAverage = minPeaksAverage(minPeaksAverage~=notConsideredValue);
 stdPos = stdPos(stdPos~=notConsideredValue);
 meanPos = meanPos(meanPos~=notConsideredValue);
-movementRange = movementRange(movementRange~=notConsideredValue,:);
+movementRange = movementRange(movementRange(:,1)~=notConsideredValue,:);
 maxMinAverageDistance = maxMinAverageDistance(maxMinAverageDistance~=notConsideredValue);
-maxPeaksVariation = maxPeaksVariation(maxPeaksVariation~=notConsideredValue,:);
-minPeaksVariation = minPeaksVariation(minPeaksVariation~=notConsideredValue,:);
+maxPeaksVariation = maxPeaksVariation(maxPeaksVariation(:,1)~=notConsideredValue,:);
+minPeaksVariation = minPeaksVariation(minPeaksVariation(:,1)~=notConsideredValue,:);
 peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFinalVariation~=notConsideredValue);
-cableTensionEfficiency = cableTensionEfficiency(cableTensionEfficiency~=notConsideredValue);
+synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
 
 %% Further analysis plotting
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
-                                peaksInitialAndFinalVariation, cableTensionEfficiency);
+                                peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER);
 
 %% Conclusion of the main
 close all;

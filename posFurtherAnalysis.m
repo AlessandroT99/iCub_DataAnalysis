@@ -14,14 +14,11 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-% TODO:
-% - Elaborate the yellow underlined values
-
 function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
             maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
             movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
-            peaksInitialAndFinalVariation, cableTensionEfficiency] = ...
-              posFurtherAnalysis(synchPosDataSet,numPerson,personParam)
+            peaksInitialAndFinalVariation, synchroEfficiency] = ...
+              posFurtherAnalysis(synchPosDataSet,numPerson,personParam,baseline)
 % The main aim of this function is to elaborate position signals in order to extract
 % some interesting data that would be usefull to compare with the overrall
 % test population into some scatter plot or others
@@ -43,11 +40,11 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
 % peaksInitialAndFinalVariation = difference between the initial peaks and
 %                                 the last one in meters, this could be helpfull 
 %                                 to evaluate the coordination
-% cableTensionEfficiency = efficiency of the cable tension, evaluating the
-%                          difference between the ideal robot position and the real one
+% synchroEfficiency = efficiency of the synchronism of the movement 
 
     %% Parameters for the simulation     
     frequency = 100;
+    fittingOrder = 4; % Order used into the polyfit functions
     IMAGE_SAVING = 0;
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParam],"");
 
@@ -127,19 +124,32 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
         maxMinAverageDistance = maxMinAverageDistance + movementRange(i);
     end
     maxMinAverageDistance = maxMinAverageDistance/i;
-    p = polyfit(1:length(movementRange),movementRange,4);
+    p = polyfit(1:length(movementRange),movementRange,fittingOrder);
     movementRange = polyval(p,linspace(1,length(movementRange)));
 
     %% Peaks variation 
-    p = polyfit(1:length(maxPeaksVal),maxPeaksVal,4);
+    p = polyfit(1:length(maxPeaksVal),maxPeaksVal,fittingOrder);
     maxPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
-    p = polyfit(1:length(minPeaksVal),minPeaksVal,4);
+    p = polyfit(1:length(minPeaksVal),minPeaksVal,fittingOrder);
     minPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
     
     %% Peaks initial and final variation
     peaksInitialAndFinalVariation = abs(maxPeaksVariation(end)-minPeaksVariation(end))-abs(maxPeaksVariation(1)-minPeaksVariation(1));
 
-    %% Cable tension efficiency based on positions
-    cableTensionEfficiency = 0;
+%     %% Synchronism efficiency based on positions
+%     % This variable is defined looking at the difference bewteen the
+%     % reached point and the ideal one finded in the baseline, then the
+%     % overral amount of points is interpolated
+%     if numPerson ~= 1 % The baseline it is skipped
+%         if strcmp(personParam(5),"DX") == 1 
+%             synchroEfficiency = 100-abs(baseline(:,1)-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
+%         else
+%             synchroEfficiency = 100-abs(baseline(:,2)-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
+%         end
+%         p = polyfit(1:length(synchroEfficiency),synchroEfficiency,fittingOrder);
+%         synchroEfficiency = polyval(p,linspace(1,length(synchroEfficiency)));
+%     end
+
+      synchroEfficiency = zeros(1,100);
 
 end
