@@ -33,7 +33,11 @@ function print3Axis(posDataSet, forceDataSet, numPerson)
 
     mkdir ..\ProcessedData;
     mkdir ..\ProcessedData\3AxisPosition;
-    path = strjoin(["..\ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
+    if numPerson < 0
+        path = strjoin(["..\ProcessedData\3AxisPosition\B",num2str(3+numPerson),".png"],"");
+    else
+        path = strjoin(["..\ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
+    end
     exportgraphics(fig1,path);
     close(fig1);
 
@@ -52,7 +56,11 @@ function print3Axis(posDataSet, forceDataSet, numPerson)
     legend('show','Location','eastoutside')
 
     mkdir ..\ProcessedData\3AxisForce;
-    path = strjoin(["..\ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
+    if numPerson < 0
+        path = strjoin(["..\ProcessedData\3AxisForce\B",num2str(3+numPerson),".png"],"");
+    else
+        path = strjoin(["..\ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
+    end
     exportgraphics(fig2,path);
     close(fig2);
 end

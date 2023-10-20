@@ -22,10 +22,6 @@ function [posDataSet, forceDataSet] = fileReader(peopleDataSet, personSubSet)
 % OUTPUT:   
 % posDataSet = dataset of person numSubSet for posData
 % forceDataSet = dataset of person numSubSet for forceDataSet
-    
-    % Importing this type of data raise a warning for the variable names
-    % settings, which I overwrite, so I just shut it off in the following
-    warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
 
     % Exclude people who are not valid as dataSet
     if strcmp(peopleDataSet.Note(personSubSet),"No video") == 0 && ...

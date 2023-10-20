@@ -22,6 +22,10 @@ fprintf("Starting the data analysis...\n")
 % Suppress the warning about creating folder that already exist
 warning('OFF','MATLAB:MKDIR:DirectoryExists');
 
+% Importing this type of data raise a warning for the variable names
+% settings, which I overwrite, so I just shut it off in the following
+warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
+
 % TODO: 
 % - find a way to save the two scrollable plots as image.
 % - start the further analysis on the force
@@ -103,9 +107,13 @@ for i = 1:height(people)
                                            ["Counter","Time","xPos","yPos","zPos","q1","q2","q3","q4"]);
         forceDataSet = renamevars(forceDataSet,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
                                        ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
+    
+        numP = i-BASELINE_NUMBER-1;
+
     else
+        numP = i-BASELINE_NUMBER;
         % Find the correct data from the ones sent by iCub
-        [posDataSet, forceDataSet] = fileReader(people, i-BASELINE_NUMBER);
+        [posDataSet, forceDataSet] = fileReader(people, numP);
     end
 
     % Before iterating check that the person has not an invalid dataset
@@ -121,13 +129,13 @@ for i = 1:height(people)
             fprintf("N. %d...\n",i);
         else
             evaluatedPeople = evaluatedPeople + 1;
-            personParam = ["Gender: ", people.Genere(i-BASELINE_NUMBER), "  -  ", "Human Hand: ", people.Mano(i-BASELINE_NUMBER), "  -  ", "Age: ", people.Et_(i-BASELINE_NUMBER)];
-            fprintf("\n- Elaborating data from person N. %d...\n",i-BASELINE_NUMBER);
+            personParam = ["Gender: ", people.Genere(numP), "  -  ", "Human Hand: ", people.Mano(numP), "  -  ", "Age: ", people.Et_(i-BASELINE_NUMBER)];
+            fprintf("\n- Elaborating data from person N. %d...\n",numP);
         end
 
         % Plots the 3 axis components of force and position
         if AXIS_3PLOT
-            print3Axis(posDataSet, forceDataSet,i-BASELINE_NUMBER);
+            print3Axis(posDataSet, forceDataSet,numP);
         end
     
 %         % Has been evaluated that the force RS has to be rotated and translated
@@ -136,7 +144,7 @@ for i = 1:height(people)
 
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet] = ...
-          synchSignalsData(posDataSet, forceDataSet, i-BASELINE_NUMBER, ...
+          synchSignalsData(posDataSet, forceDataSet, numP, ...
             personParam,PAUSE_PEOPLE);   
         
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone
@@ -160,29 +168,33 @@ for i = 1:height(people)
 
         % Plot results obtained previosly in a single involved subplot
         % depending on the gender and save them separately for each test
-        combinePosForcePlots(synchPosDataSet, synchForceDataSet, i-BASELINE_NUMBER, ...
+        combinePosForcePlots(synchPosDataSet, synchForceDataSet, numP, ...
             personParam,BIG_PLOT_ENABLE);
 
         %% Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
-        fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(i-BASELINE_NUMBER)],"");
-        save(fileName, "synchPosDataSet", "i", 'personParam');
+        if numP < 0
+            fileName = strjoin(["..\ProcessedData\SimulationData\B",num2str(3+numP)],"");
+        else
+            fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(numP)],"");
+        end
+        save(fileName, "synchPosDataSet", "numP", 'personParam');
 
         %% Further analysis
         [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), synchroEfficiency(i,:)] = ...
-            posFurtherAnalysis(synchPosDataSet,i-BASELINE_NUMBER, personParam, posBaseline);
+            posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline);
         
-%         forceFurtherAnalysis(synchForceDataSet,i-BASELINE_NUMBER,personParam);
+%         forceFurtherAnalysis(synchForceDataSet,numP,personParam);
     
         % Output parameters collection
         if BaseLineEvaluationDone
             totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
             totalMeanRtoH = totalMeanRtoH + meanRtoH(i);
         else 
-            if BASELINE_NUMBER-1 == i
+            if BASELINE_NUMBER == i
                 BaseLineEvaluationDone = 1;
             end
             posBaseline{i} = synchPosDataSet(:,2); % Save the baseline sets

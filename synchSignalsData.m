@@ -382,10 +382,18 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     % Figure saving for position
     if IMAGE_SAVING
         mkdir ..\ProcessedData\PositionVisualizing;
-        path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\PositionVisualizing\B",num2str(3+numPerson),".png"],"");
+        else
+            path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
+        end
         exportgraphics(fig1,path)
         mkdir ..\ProcessedData\PositionProcessing;
-        path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\PositionProcessing\B",num2str(3+numPerson),".png"],"");
+        else
+            path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
+        end
         exportgraphics(fig2,path)
     end
     
@@ -572,7 +580,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     % Figure saving for force
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForceSynchronization;
-        path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\ForceSynchronization\B",num2str(3+numPerson),".png"],"");
+        else
+            path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
+        end
         exportgraphics(fig3,path)
     end
     

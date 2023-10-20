@@ -96,7 +96,11 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     % Figure saving for phase duration
     if IMAGE_SAVING
         mkdir ..\ProcessedData\PhaseDuration;
-        path = strjoin(["..\ProcessedData\PhaseDuration\P",num2str(numPerson),".png"],"");
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\PhaseDuration\B",num2str(3+numPerson),".png"],"");
+        else    
+            path = strjoin(["..\ProcessedData\PhaseDuration\P",num2str(numPerson),".png"],"");
+        end
         exportgraphics(gcf,path)
     end
 
