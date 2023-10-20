@@ -27,19 +27,21 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 % - start the further analysis on the force
 % - plot scatter plots as further analysis output
 % - Define the force using Denavit-Hartenberg
+% - Solve the name of the file and the plot title during baseline, has to
+%   be always negative
 
 %% Simulation parameter
 BIG_PLOT_ENABLE = 0;        % Allows to the plotting of the two big gender plot 
-PAUSE_PEOPLE = -1;          % Array containing number of people for which the synch 
-                            %   shall put in pause to handle graphs (-1 == noone pause)
-AXIS_3PLOT = 0;             % Allows plotting all the 3 force and position components
-BASELINE_NUMBER = 1;        % Number of baseline in the simulation
+PAUSE_PEOPLE = -5;          % Array containing number of people for which the synch 
+                            %   shall put in pause to handle graphs (-5 == noone pause)
+AXIS_3PLOT = 1;             % Allows plotting all the 3 force and position components
+BASELINE_NUMBER = 2;        % Number of baseline in the simulation
 BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
-posBaseline = 0;            % Variable where the pos baseline is saved
+posBaseline = [];            % Variable where the pos baseline is saved
 
 %% Input data
 numPeople = 32+BASELINE_NUMBER; 
-people = readtable("..\Dati Personali EXP2.xlsx");
+people = readtable("..\InputData\Dati Personali EXP2.xlsx");
 people = people(1:numPeople,:);
 
 %% Output initialization
@@ -84,8 +86,15 @@ end
 
 for i = 1:height(people)
     if BaseLineEvaluationDone == 0
-        posFilePath = "..\positions\leftHand\P\data.log";
-        forceFilePath = "..\forces\leftArm\P\data.log";
+        if i == 1
+            posFilePath = "..\InputData\positions\leftHand\P0_L_Base\data.log";
+            forceFilePath = "..\InputData\forces\leftArm\P0_L_Base\data.log";
+        else
+            if i == 2
+                posFilePath = "..\InputData\positions\rightHand\P0_R_Base\data.log";
+                forceFilePath = "..\InputData\forces\rightArm\P0_R_Base\data.log";
+            end
+        end
 
         posDataSet = readtable(posFilePath);
         forceDataSet = readtable(forceFilePath);
@@ -173,10 +182,10 @@ for i = 1:height(people)
             totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
             totalMeanRtoH = totalMeanRtoH + meanRtoH(i);
         else 
-            if BASELINE_NUMBER == i
+            if BASELINE_NUMBER-1 == i
                 BaseLineEvaluationDone = 1;
             end
-            posBaseline(:,i) = synchPosDataSet(:,2); % Save the baseline sets
+            posBaseline{i} = synchPosDataSet(:,2); % Save the baseline sets
         end
     end
 end

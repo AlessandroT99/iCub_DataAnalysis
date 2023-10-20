@@ -142,9 +142,9 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
 %     % overral amount of points is interpolated
 %     if numPerson ~= 1 % The baseline it is skipped
 %         if strcmp(personParam(5),"DX") == 1 
-%             synchroEfficiency = 100-abs(baseline(:,1)-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
+%             synchroEfficiency = 100-abs(baseline{1}-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
 %         else
-%             synchroEfficiency = 100-abs(baseline(:,2)-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
+%             synchroEfficiency = 100-abs(baseline{2}-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
 %         end
 %         p = polyfit(1:length(synchroEfficiency),synchroEfficiency,fittingOrder);
 %         synchroEfficiency = polyval(p,linspace(1,length(synchroEfficiency)));

@@ -459,7 +459,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
         synchForceElapsedTime = minutesDataPointsConverter(synchForceDataSet);
     else
         % The opposite situation, so it will be forward-shifted using some zeros
-        synchForceDataSet = [sum(forceDataSet.Time(1)<=posDataSet.Time);forceDataSet];
+        zeroMatrix = array2table(zeros(sum(forceDataSet.Time(1)>posDataSet.Time),size(forceDataSet,2)));
+        zeroMatrix = renamevars(zeroMatrix,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
+                                             ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
+        synchForceDataSet = [zeroMatrix;forceDataSet];
         synchForceElapsedTime = minutesDataPointsConverter(synchForceDataSet);
     end
     
