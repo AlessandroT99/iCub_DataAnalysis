@@ -14,8 +14,8 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
-    synchSignalsData(posDataSet, forceDataSet, numPerson, personParameters, pausePeople)
+function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundaries] = ...
+    synchSignalsData(posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -372,6 +372,19 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
+    if numPerson >= 0
+        if strcmp(personParameters(5),"DX") == 1
+            yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
+            yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
+            text(0.1,baselineBoundaries(1,1)+sign(baselineBoundaries(1,1))*0.14*baselineBoundaries(1,1),'Human Phase','FontSize',14)
+            text(0.1,baselineBoundaries(2,1)-sign(baselineBoundaries(2,1))*0.08*baselineBoundaries(2,1),'Robot Phase','FontSize',14)
+        else
+            yline(baselineBoundaries(1,2),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
+            yline(baselineBoundaries(2,2),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
+            text(0.1,baselineBoundaries(1,2)+sign(baselineBoundaries(1,2))*0.14*baselineBoundaries(1,2),'Robot Phase','FontSize',14)
+            text(0.1,baselineBoundaries(2,2)-sign(baselineBoundaries(2,2))*0.08*baselineBoundaries(2,2),'Human Phase','FontSize',14)
+        end
+    end
     title("Cutted signal starting and ending points")
     xlabel("Elapsed time [ min ]")
     ylabel("Position [ m ]")
@@ -379,6 +392,12 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet] = ...
     hold off
     sgtitle(defaultTitleName)
     
+    if numPerson < 0 
+        newBaselineBoundaries = baselineBoundaries;
+        newBaselineBoundaries(1,3+numPerson) = upperPeaksBound;
+        newBaselineBoundaries(2,3+numPerson) = lowerPeaksBound;
+    end
+
     % Figure saving for position
     if IMAGE_SAVING
         mkdir ..\ProcessedData\PositionVisualizing;

@@ -45,7 +45,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     %% Parameters for the simulation     
     frequency = 100;
     fittingOrder = 4; % Order used into the polyfit functions
-    IMAGE_SAVING = 0;
+    IMAGE_SAVING = 1;
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParam],"");
 
     %% Phase duration evaluation
@@ -80,7 +80,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     meanHtoR = mean(HtoR);
     meanRtoH = mean(RtoH);
 
-    figure;
+    fig1 = figure('Name','Phases duration');
     fig1.WindowState = 'maximized';
     hold on, grid on
     plot(HtoR.*60,'r-','DisplayName','Human to Robot phase')

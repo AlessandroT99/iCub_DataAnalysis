@@ -41,7 +41,8 @@ PAUSE_PEOPLE = -5;          % Array containing number of people for which the sy
 AXIS_3PLOT = 1;             % Allows plotting all the 3 force and position components
 BASELINE_NUMBER = 2;        % Number of baseline in the simulation
 BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
-posBaseline = [];            % Variable where the pos baseline is saved
+posBaseline = [];           % Variable where the pos baseline is saved
+baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
 
 %% Input data
 numPeople = 32+BASELINE_NUMBER; 
@@ -143,9 +144,9 @@ for i = 1:height(people)
 %         forceDataSet = forceTransformation(forceDataSet);
 
         % Synchronizing the two dataset to show them in a single plot
-        [synchPosDataSet, synchForceDataSet] = ...
+        [synchPosDataSet, synchForceDataSet, baselineBoundaries] = ...
           synchSignalsData(posDataSet, forceDataSet, numP, ...
-            personParam,PAUSE_PEOPLE);   
+            personParam,PAUSE_PEOPLE,baselineBoundaries);   
         
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone
             if strcmp(people.Genere(i),"M") == 1
