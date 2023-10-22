@@ -56,8 +56,6 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
     [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
     minPeaksVal = -minPeaksVal;
-    maxLocalization = maxLocalization*10e-5;
-    minLocalization = minLocalization*10e-5;
 
     for i = 1:length(maxPeaksVal)
         if strcmp(personParam(5),"DX") == 1
@@ -140,20 +138,35 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     %% Peaks initial and final variation
     peaksInitialAndFinalVariation = abs(maxPeaksVariation(end)-minPeaksVariation(end))-abs(maxPeaksVariation(1)-minPeaksVariation(1));
 
-%     %% Synchronism efficiency based on positions
-%     % This variable is defined looking at the difference bewteen the
-%     % reached point and the ideal one finded in the baseline, then the
-%     % overral amount of points is interpolated
-%     if numPerson ~= 1 % The baseline it is skipped
-%         if strcmp(personParam(5),"DX") == 1 
-%             synchroEfficiency = 100-abs(baseline{1}-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
-%         else
-%             synchroEfficiency = 100-abs(baseline{2}-synchPosDataSet(:,2))/VALOREDACAPIRE*100;
-%         end
-%         p = polyfit(1:length(synchroEfficiency),synchroEfficiency,fittingOrder);
-%         synchroEfficiency = polyval(p,linspace(1,length(synchroEfficiency)));
-%     end
-
-      synchroEfficiency = zeros(1,100);
+    %% Synchronism efficiency based on positions
+    % Baseline signal analysis
+    if numPerson >= 0 % The baseline it is skipped        
+        maximumMovementTime = 0.5;
+        if strcmp(personParam(5),"DX") == 1 
+            [envHigh, envLow] = envelope(baseline{1},maximumMovementTime*frequency*0.8,'peak');
+        else
+            [envHigh, envLow] = envelope(baseline{2},maximumMovementTime*frequency*0.8,'peak');
+        end
+        averageEnv = (envLow+envHigh)/2;
+        
+        [maxPeaksVal, ~] = findpeaks(averageEnv);
+        [minPeaksVal, ~] = findpeaks(-averageEnv);
+        minPeaksVal = -minPeaksVal;
+        baseMaxPeaksAverage = mean(maxPeaksVal);
+        baseminPeaksAverage = mean(minPeaksVal);
+    
+        p = polyfit(1:length(maxPeaksVal),maxPeaksVal,fittingOrder);
+        baseMaxPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
+        p = polyfit(1:length(minPeaksVal),minPeaksVal,fittingOrder);
+        baseMinPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
+    
+        
+        upperSynchroEfficiency = 100-abs(baseMaxPeaksVariation-maxPeaksVariation)./abs(baseMaxPeaksAverage-baseminPeaksAverage).*100;
+        lowerSynchroEfficiency = 100-abs(baseMinPeaksVariation-minPeaksVariation)./abs(baseMaxPeaksAverage-baseminPeaksAverage).*100;
+        
+        synchroEfficiency = (upperSynchroEfficiency+lowerSynchroEfficiency)./2;
+    else
+        synchroEfficiency = zeros(1,100);
+    end
 
 end

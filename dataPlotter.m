@@ -236,11 +236,7 @@ if BIG_PLOT_ENABLE
     % close all
 end
 
-% save stateBeforeOverallPlot;
-
 %% Output parameters evaluation
-
-% load stateBeforeOverallPlot.mat;
 
 totalMeanHtoR = totalMeanHtoR/evaluatedPeople;  
 totalMeanRtoH = totalMeanRtoH/evaluatedPeople;
@@ -264,6 +260,7 @@ peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFin
 synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
 
 %% Further analysis plotting
+fprintf("\nStarting further analysis...\n")
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...

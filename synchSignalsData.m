@@ -396,6 +396,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         newBaselineBoundaries = baselineBoundaries;
         newBaselineBoundaries(1,3+numPerson) = upperPeaksBound;
         newBaselineBoundaries(2,3+numPerson) = lowerPeaksBound;
+    else
+        newBaselineBoundaries = baselineBoundaries;
     end
 
     % Figure saving for position

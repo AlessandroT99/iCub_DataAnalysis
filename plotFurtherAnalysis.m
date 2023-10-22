@@ -14,6 +14,9 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
+% TODO:
+% - Adust the number of the tests visualized in the legend
+
 function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
@@ -266,17 +269,19 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     end
 
     %% Synchronism efficiency based on positions
+    synchroEfficiency = synchroEfficiency(BASELINE_NUMBER+1:end,:);
     fig12 = figure('Name','Synchronism efficiency plot');
     fig12.WindowState = 'maximized';
     grid on, hold on
-    h = plot(1:size(synchroEfficiency,2),synchroEfficiency.*100,'LineWidth',1.5);
+    h = plot(1:size(synchroEfficiency,2),synchroEfficiency,'LineWidth',1.5);
 
+    legendName = strings(size(synchroEfficiency,1));
     for i = 1:size(synchroEfficiency,1)
         set(h(i),'Color',customColors(i,:));
         legendName(i) = strjoin(["Test N. ",num2str(i)],"");
     end
 
-    title("Distribution of position movement ranges")
+    title("Distribution of synchronism efficiency")
     legend(legendName,'Location','eastoutside')
     ylim([0,100])
     xlabel("Simulation progress [ % ]")
