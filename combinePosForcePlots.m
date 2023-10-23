@@ -28,6 +28,7 @@ function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personP
     %% Initial parameters
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     IMAGE_SAVING = 1; % Put to 1 in order to save the main plots
+    PAUSE_TIME = 2;
 
     %% Position and force combining
     % Firstly the trend of the two signals is evaluated getting an average of
@@ -122,6 +123,7 @@ function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personP
         else
             path = strjoin(["..\ProcessedData\ForcePositionComparison\P",num2str(numPerson),".png"],"");
         end
+        pause(PAUSE_TIME);
         exportgraphics(fig4,path)
         close(fig4);
     end

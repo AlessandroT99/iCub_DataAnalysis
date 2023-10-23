@@ -138,16 +138,12 @@ for i = 1:height(people)
         if AXIS_3PLOT
             print3Axis(posDataSet, forceDataSet,numP);
         end
-    
-%         % Has been evaluated that the force RS has to be rotated and translated
-%         % into the EF RS.
-%         forceDataSet = forceTransformation(forceDataSet);
 
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet, baselineBoundaries] = ...
           synchSignalsData(posDataSet, forceDataSet, numP, ...
             personParam,PAUSE_PEOPLE,baselineBoundaries);   
-        
+
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone
             if strcmp(people.Genere(i),"M") == 1
                 % Defining the subplot in the males figure

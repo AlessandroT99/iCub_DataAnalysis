@@ -37,6 +37,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Parameters for the simulation 
     DEBUG = 0;                  % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;           % Put to 1 in order to save the main plots
+    PAUSE_TIME = 1;
     axisYLimMultiplier = 1.5;   % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
@@ -138,12 +139,14 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
 %         figure, hold on, grid on, plot(slope), hold off
 %         mkdir ..\ProcessedData\PositionDerivativeSlope;
 %         path = strjoin(["..\ProcessedData\PositionDerivativeSlope\P",num2str(numPerson),".png"],"");
+%         pause(PAUSE_TIME);
 %         exportgraphics(gcf,path)
 %         close(gcf);
 
         figure, hold on, grid on, plot(posStd), hold off
 %         mkdir ..\ProcessedData\PositionDerivativeSTD;
 %         path = strjoin(["..\ProcessedData\PositionDerivativeSTD\P",num2str(numPerson),".png"],"");
+%         pause(PAUSE_TIME);
 %         exportgraphics(gcf,path)
 %         close(gcf);
 
@@ -309,7 +312,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % In order to cut data which are not complete, the starting and ending
     % position are shifted to the nearest peak, in the just cutted signal.
     cutPosAverage = firstAverageEnv(derivativePosStart:derivativePosEnd);
-    firstCutPosDataSet = posDataSet.yPos(derivativePosStart:derivativePosEnd);
+    firstCutPosDataSet = posDataSet(derivativePosStart:derivativePosEnd,:);
     [maxPeaksVal, maxLocalization] = findpeaks(cutPosAverage,'MinPeakHeight',mean(cutPosAverage));
     [minPeaksVal, minLocalization] = findpeaks(-cutPosAverage,'MinPeakHeight',-mean(cutPosAverage));
     minPeaksVal = -minPeaksVal;
@@ -320,7 +323,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     posEnd = max(minLocalization(end),maxLocalization(end));
 
 
-    cuttedPosDataSet = firstCutPosDataSet(posStart:posEnd);
+    cuttedPosDataSet = firstCutPosDataSet(posStart:posEnd,:);
     cuttedElapsedTime = elapsedTime(posStart:posEnd)-elapsedTime(posStart);
     cuttedAverageBehavior = cutPosAverage(posStart:posEnd);
 
@@ -366,7 +369,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     hold off
 
     subplot(2,1,2), hold on, grid on
-    plot(cuttedElapsedTime,cuttedPosDataSet,'k-','DisplayName', 'y position_{cutted}')
+    plot(cuttedElapsedTime,cuttedPosDataSet.yPos,'k-','DisplayName', 'y position_{cutted}')
     plot(cuttedElapsedTime,cuttedAverageBehavior,'b--','DisplayName','Average behavior')
     plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
@@ -408,6 +411,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         else
             path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
         end
+        pause(PAUSE_TIME);
         exportgraphics(fig1,path)
         mkdir ..\ProcessedData\PositionProcessing;
         if numPerson < 0
@@ -415,6 +419,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         else
             path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
         end
+        pause(PAUSE_TIME);
         exportgraphics(fig2,path)
     end
     
@@ -497,8 +502,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     
     % Now the force has to be interpolated in the position time stamp in order
     % to set the same start and stop point
+    FxSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fx,1:height(posDataSet));
     FySynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fy,1:height(posDataSet));
-    
+    FzSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fz,1:height(posDataSet));
+
+
     % Plot results
     subplot(3,1,2), grid on, hold on
     plot(elapsedTime,FySynchForceDataSet,'DisplayName','Filtered force')
@@ -510,12 +518,22 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     legend('show','Location','eastoutside')
     hold off
     
-    %% Remove greetings and closing and taking only Fy as interesting data
-    cuttedSynchForceDataSet = FySynchForceDataSet(posStart:posEnd);
+    %% Remove greetings and closing
+    FxCuttedSynchForceDataSet = FxSynchForceDataSet(posStart:posEnd);
+    FyCuttedSynchForceDataSet = FySynchForceDataSet(posStart:posEnd);
+    FzCuttedSynchForceDataSet = FzSynchForceDataSet(posStart:posEnd);
+    cuttedSynchForceDataSet = table(cuttedElapsedTime',FxCuttedSynchForceDataSet',FyCuttedSynchForceDataSet',FzCuttedSynchForceDataSet', ...
+                                    'VariableNames',["Time","Fx","Fy","Fz"]);
+    save synchBaseLine;
     
+    % Has been evaluated that the force RS has to be rotated and translated
+    % into the EF RS with respect to the OF
+%     finalCuttedSynchForceDataSet = forceTransformation(cuttedPosDataSet, cuttedSynchForceDataSet,posStart, posEnd);
+    finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+
     %% Finding min e MAX peaks of the force
     maximumMovementTime = 0.1;
-    [envHigh, envLow] = envelope(cuttedSynchForceDataSet,maximumMovementTime*frequency*0.8,'peak');
+    [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
     averageEnv = (envLow+envHigh)/2;
     
     [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
@@ -528,12 +546,12 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     maxLocalization = (maxLocalization)/(100*60);
     minLocalization = (minLocalization)/(100*60);
 
-    highestValue = max(cuttedSynchForceDataSet); 
-    lowestValue = min(cuttedSynchForceDataSet);
+    highestValue = max(finalCuttedSynchForceDataSet.Fy); 
+    lowestValue = min(finalCuttedSynchForceDataSet.Fy);
     
     % Plot results
     subplot(3,1,3), grid on, hold on
-    plot(cuttedElapsedTime,cuttedSynchForceDataSet,'k-','DisplayName','Synched force')
+    plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Synched force')
     plot(cuttedElapsedTime,averageEnv,'b--','DisplayName','Average behavior')
     plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
@@ -564,7 +582,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % So to count the correct number of phases another envelop is done,
     % rounding each phase to almost a single peak.
     maximumMovementTime = 1;
-    [envHigh, envLow] = envelope(cuttedSynchForceDataSet,maximumMovementTime*frequency*0.8,'peak');
+    [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
     averageEnv = (envLow+envHigh)/2;
     
     [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
@@ -585,7 +603,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         fprintf("\t- N. min: %d\n",posLowerPhase)
     
         figure, hold on, grid on
-        plot(cuttedElapsedTime,cuttedSynchForceDataSet,'DisplayName','Synched force')
+        plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'DisplayName','Synched force')
         plot(cuttedElapsedTime,averageEnv,'r--','DisplayName','Average behavior')
         plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'go',cuttedElapsedTime(minLocalization),minPeaksVal,'go')
         yline(upperPeaksBound,'k--','Higher bound')
@@ -606,12 +624,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         else
             path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
         end
+        pause(PAUSE_TIME);
         exportgraphics(fig3,path)
     end
     
     %% Ultimate synched data set saving
-    ultimateSynchPosDataSet = [cuttedElapsedTime',cuttedPosDataSet];
-    ultimateSynchForceDataSet = [cuttedElapsedTime',cuttedSynchForceDataSet'];
+    ultimateSynchPosDataSet = [cuttedPosDataSet.Time,cuttedPosDataSet.yPos];
+    ultimateSynchForceDataSet = [finalCuttedSynchForceDataSet.Time,finalCuttedSynchForceDataSet.Fy];
 
     %% Force pause for online evaluation
     if sum(find(pausePeople == numPerson)) > 0

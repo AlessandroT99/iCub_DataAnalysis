@@ -47,6 +47,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     fittingOrder = 4; % Order used into the polyfit functions
     IMAGE_SAVING = 1;
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParam],"");
+    PAUSE_TIME = 2;
 
     %% Phase duration evaluation
     maximumMovementTime = 0.5;
@@ -93,6 +94,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
 
     % Figure saving for phase duration
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         mkdir ..\ProcessedData\PhaseDuration;
         if numPerson < 0
             path = strjoin(["..\ProcessedData\PhaseDuration\B",num2str(3+numPerson),".png"],"");

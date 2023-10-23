@@ -14,6 +14,15 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function forceDataSet = forceTransformation(forceDataSet)
-
+function forceDataSet = forceTransformation(forceDataSet, numPerson)
+% This function is used to transform the force in order to have the wanted
+% Fy resultant referenced to the OF. So being initially referred to th F/T
+% sensor reference frame, using fwd kinematics the signal is transformed
+% into the hand reference frame and then its rotated to the OF using the
+% quaternions.
+    if numPerson < 0
+        % up to know the only dataset that could be analyzed that way are
+        % the baseline sets.
+        
+    end
 end

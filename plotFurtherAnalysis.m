@@ -27,6 +27,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     
     %% Simulation parameters
     IMAGE_SAVING = 1;
+    PAUSE_TIME = 1;
     nTest = length(experimentDuration); % Number of test analyzed
     brightGreen = [0.22,1,0.08];
     clearRed = [1,0.4,0];
@@ -57,8 +58,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig1,"..\ProcessedData\Scatters\ExperimentDuration.png")
-%         close(fig1);
+        close(fig1);
     end
     
     %% Phase durations
@@ -77,8 +79,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig2,"..\ProcessedData\Scatters\PhaseDuration.png")
-%         close(fig2);
+        close(fig2);
     end
     
     %% Peaks number
@@ -97,8 +100,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig3,"..\ProcessedData\Scatters\PeaksNumber.png")
-%         close(fig3);
+        close(fig3);
     end
     
     fig4 = figure('Name','Number of peaks scatter vs. experiment duration');
@@ -116,8 +120,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
     
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig4,"..\ProcessedData\Scatters\PeaksNumber-ExperimentDuration.png")
-%         close(fig4);
+        close(fig4);
     end
 
     %% Peaks values
@@ -128,12 +133,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     scatter(minPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
     scatter(maxPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
     scatter(minPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     xline(posA dx)
-%     xline(posB dx)
-%     xline(posB sx)
-%     xline(posA sx)
-%     text(mean(posA sx,posB sx),5,"iCub DX hand")
-%     text(mean(posA dx,posB dx),5,"iCub SX hand")
+    xline(maxPeaksAverage(1:BASELINE_NUMBER))
+    xline(minPeaksAverage(1:BASELINE_NUMBER))
+    text(mean(maxPeaksAverage(1),minPeaksAverage(1)),5,"iCub DX hand")
+    text(mean(maxPeaksAverage(BASELINE_NUMBER),minPeaksAverage(BASELINE_NUMBER)),5,"iCub SX hand")
     title("Distribution of position peaks values")
     legend('Baseline Maximums average','Baseline Minimums average','Maximums average','Minimums average')
     xlabel("Peaks value [ cm ]")
@@ -141,8 +144,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
     
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig5,"..\ProcessedData\Scatters\PeaksValues.png")
-%         close(fig5);
+        close(fig5);
     end
 
     %% Standard deviation
@@ -158,8 +162,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
     
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig6,"..\ProcessedData\Scatters\StandardDeviation.png")
-%         close(fig6);
+        close(fig6);
     end
 
     %% Mean values
@@ -175,8 +180,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig7,"..\ProcessedData\Scatters\MeanValues.png")
-%         close(fig7);
+        close(fig7);
     end
 
     %% Movement range
@@ -199,8 +205,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig8,"..\ProcessedData\Scatters\MovementRange.png")
-%         close(fig8);
+        close(fig8);
     end
 
     %% Max e Min average distance
@@ -216,8 +223,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig9,"..\ProcessedData\Scatters\MaxMinAverageDistance.png")
-%         close(fig9);
+        close(fig9);
     end
 
     %% Peaks variation 
@@ -247,8 +255,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig10,"..\ProcessedData\Scatters\PeaksVariation.png")
-%         close(fig10);
+        close(fig10);
     end
     
     %% Peaks initial and final variation
@@ -264,8 +273,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig11,"..\ProcessedData\Scatters\PeaksInitialFinalVariation.png")
-%         close(fig11);
+        close(fig11);
     end
 
     %% Synchronism efficiency based on positions
@@ -289,8 +299,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     hold off
 
     if IMAGE_SAVING
+        pause(PAUSE_TIME);
         exportgraphics(fig12,"..\ProcessedData\Scatters\SynchroEfficience.png")
-%         close(fig12);
+        close(fig12);
     end
 
 end
