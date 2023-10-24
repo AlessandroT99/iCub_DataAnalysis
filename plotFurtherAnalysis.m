@@ -41,6 +41,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     textFont = 16;
     EmptyPointLine = 1.5;
     MarkerDimension = 80;
+    DottedLineWidth = 2;
 
     mkdir ..\ProcessedData\Scatters
 
@@ -50,7 +51,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     grid on, hold on
     scatter(experimentDuration(1),1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
     scatter(experimentDuration(BASELINE_NUMBER+1:end),BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
-    xline(4,'k--','LineWidth',2.2)
+    xline(4,'k--','LineWidth',DottedLineWidth)
     title("Distribution of experiment duration")
     legend("BaseLine","Desidered duration")
     xlabel("Elapsed Time [ min ]")
@@ -71,7 +72,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     scatter(meanHtoR(1:BASELINE_NUMBER)*60,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
     scatter(meanRtoH(BASELINE_NUMBER+1:end)*60,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
     scatter(meanHtoR(BASELINE_NUMBER+1:end)*60,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
-    xline(1.5,'k--','LineWidth',2.2)
+    xline(1.5,'k--','LineWidth',DottedLineWidth)
     title("Distribution of phases duration")
     legend("BaseLine RtoH","BaseLine HtoR",'Robot to Human','Human to Robot','Desidered duration')
     xlabel("Elapsed Time [ s ]")
@@ -92,7 +93,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     scatter(nMinPeaks(1:BASELINE_NUMBER),1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
     scatter(nMaxPeaks(BASELINE_NUMBER+1:end),BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
     scatter(nMinPeaks(BASELINE_NUMBER+1:end),BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    xline(80,'k--','LineWidth',2.2)
+    xline(80,'k--','LineWidth',DottedLineWidth)
     title("Distribution of peaks number")
     legend('Baseline Maximums','Baseline Minimums','# Maximums','# Minimums','Desidered #')
     xlabel("# peaks")
@@ -112,7 +113,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     scatter(nMinPeaks(1:BASELINE_NUMBER),experimentDuration(1:BASELINE_NUMBER),MarkerDimension,clearBlue,'filled')
     scatter(nMaxPeaks(BASELINE_NUMBER+1:end),experimentDuration(BASELINE_NUMBER+1:end),MarkerDimension,'red','LineWidth',EmptyPointLine)
     scatter(nMinPeaks(BASELINE_NUMBER+1:end),experimentDuration(BASELINE_NUMBER+1:end),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    xline(80,'k--','LineWidth',2.2)
+    xline(80,'k--','LineWidth',DottedLineWidth)
     title("Distribution of peaks number vs. experiment duration")
     legend('Baseline Maximums','Baseline Minimums','# Maximums','# Minimums','Desidered #')
     xlabel("# peaks")
@@ -133,10 +134,15 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     scatter(minPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
     scatter(maxPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
     scatter(minPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    xline(maxPeaksAverage(1:BASELINE_NUMBER))
-    xline(minPeaksAverage(1:BASELINE_NUMBER))
-    text(mean(maxPeaksAverage(1),minPeaksAverage(1)),5,"iCub DX hand")
-    text(mean(maxPeaksAverage(BASELINE_NUMBER),minPeaksAverage(BASELINE_NUMBER)),5,"iCub SX hand")
+    xline(maxPeaksAverage(1:BASELINE_NUMBER)*100,'k--','LineWidth',DottedLineWidth)
+    xline(minPeaksAverage(1:BASELINE_NUMBER)*100,'k--','LineWidth',DottedLineWidth)
+    % Replot something in order to have the correct legend and the dotted line behind all
+    scatter(maxPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(minPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
+    scatter(maxPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(minPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    text((maxPeaksAverage(1)+minPeaksAverage(1))/2*100,1,"iCub DX hand",'FontSize',12,'HorizontalAlignment','center')
+    text((maxPeaksAverage(BASELINE_NUMBER)+minPeaksAverage(BASELINE_NUMBER))/2*100,1,"iCub SX hand",'FontSize',12,'HorizontalAlignment','center')
     title("Distribution of position peaks values")
     legend('Baseline Maximums average','Baseline Minimums average','Maximums average','Minimums average')
     xlabel("Peaks value [ cm ]")
@@ -171,6 +177,11 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig7 = figure('Name','Mean values scatter');
     fig7.WindowState = 'maximized';
     grid on, hold on
+    scatter(meanPos(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(meanPos(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
+    xline(meanPos(1).*100,'k--','LineWidth',DottedLineWidth)
+    xline(meanPos(BASELINE_NUMBER).*100,'k--','LineWidth',DottedLineWidth)
+    % Replot something in order to have the correct legend and the dotted line behind all
     scatter(meanPos(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
     scatter(meanPos(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'black','LineWidth',EmptyPointLine)
     title("Distribution of position mean values")
@@ -285,7 +296,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     grid on, hold on
     h = plot(1:size(synchroEfficiency,2),synchroEfficiency,'LineWidth',1.5);
 
-    legendName = strings(size(synchroEfficiency,1));
+    legendName = strings(1,size(synchroEfficiency,1));
     for i = 1:size(synchroEfficiency,1)
         set(h(i),'Color',customColors(i,:));
         legendName(i) = strjoin(["Test N. ",num2str(i)],"");

@@ -16,7 +16,7 @@
 
 clear all, close all,  clc
 
-tic
+tStart = tic;
 fprintf("Starting the data analysis...\n")
 
 % Suppress the warning about creating folder that already exist
@@ -25,6 +25,10 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 % Importing this type of data raise a warning for the variable names
 % settings, which I overwrite, so I just shut it off in the following
 warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
+
+% While importing iCub model, a warning of home position is showed, but
+% does not concern with it use, so it has been suppressed.
+warning('OFF','robotics:robotmanip:joint:ResettingHomePosition');
 
 % TODO: 
 % - find a way to save the two scrollable plots as image.
@@ -48,6 +52,18 @@ baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of 
 numPeople = 32+BASELINE_NUMBER; 
 people = readtable("..\InputData\Dati Personali EXP2.xlsx");
 people = people(1:numPeople,:);
+
+% The following command is part of the robotic toolbox
+% Whilst the iCub model has been downloaded from
+% "https://github.com/robotology/icub-models"
+
+% Has been chosen the Paris01 iCub due to the low number of reference
+% frames included, in fact almost all the other models included also the
+% skin reference frames, which where not usefull for this purpose.
+iCub = importrobot("..\icub-models\iCub\robots\iCubParis01\model.urdf");
+% % Code use to identify the unusefull warning
+% [msg,warnID] = lastwarn
+% show(iCub);
 
 %% Output initialization
 totalMeanHtoR = 0;
@@ -92,12 +108,12 @@ end
 for i = 1:height(people)
     if BaseLineEvaluationDone == 0
         if i == 1
-            posFilePath = "..\InputData\positions\leftHand\P0_L_Base\data.log";
-            forceFilePath = "..\InputData\forces\leftArm\P0_L_Base\data.log";
+            posFilePath = "..\InputData\positions\leftHand\P0_L_Hard\data.log";
+            forceFilePath = "..\InputData\forces\leftArm\P0_L_Hard\data.log";
         else
             if i == 2
-                posFilePath = "..\InputData\positions\rightHand\P0_R_Base\data.log";
-                forceFilePath = "..\InputData\forces\rightArm\P0_R_Base\data.log";
+                posFilePath = "..\InputData\positions\rightHand\P0_R_Hard\data.log";
+                forceFilePath = "..\InputData\forces\rightArm\P0_R_Hard\data.log";
             end
         end
 
@@ -120,6 +136,7 @@ for i = 1:height(people)
     % Before iterating check that the person has not an invalid dataset
     % which has to be skipped
     if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0
+        personTime = tic;
         if BaseLineEvaluationDone == 0
             fprintf("\n- Elaborating data from Baseline test ");
             if i == 1
@@ -136,12 +153,15 @@ for i = 1:height(people)
 
         % Plots the 3 axis components of force and position
         if AXIS_3PLOT
+            tic
+            fprintf("   .Plotting all components of position and force...")
             print3Axis(posDataSet, forceDataSet,numP);
+            fprintf("               Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         end
 
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet, baselineBoundaries] = ...
-          synchSignalsData(posDataSet, forceDataSet, numP, ...
+          synchSignalsData(iCub, posDataSet, forceDataSet, numP, ...
             personParam,PAUSE_PEOPLE,baselineBoundaries);   
 
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone
@@ -165,8 +185,11 @@ for i = 1:height(people)
 
         % Plot results obtained previosly in a single involved subplot
         % depending on the gender and save them separately for each test
+        tic
+        fprintf("   .Plotting the combination of force and position...")
         combinePosForcePlots(synchPosDataSet, synchForceDataSet, numP, ...
             personParam,BIG_PLOT_ENABLE);
+        fprintf("              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
         %% Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
@@ -178,14 +201,20 @@ for i = 1:height(people)
         save(fileName, "synchPosDataSet", "numP", 'personParam');
 
         %% Further analysis
+        tic
+        fprintf("   .Computing further analysis on the position...")
         [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), synchroEfficiency(i,:)] = ...
             posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline);
+        fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
+%         tic
+%         fprintf("   .Computing further analysis on the force...")
 %         forceFurtherAnalysis(synchForceDataSet,numP,personParam);
-    
+%         fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+
         % Output parameters collection
         if BaseLineEvaluationDone
             totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
@@ -196,6 +225,8 @@ for i = 1:height(people)
             end
             posBaseline{i} = synchPosDataSet(:,2); % Save the baseline sets
         end
+
+        fprintf("The total computational time for this test has been %s minutes.\n",duration(0,0,toc(personTime),'Format','mm:ss.SS'))
     end
 end
 
@@ -256,14 +287,16 @@ peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFin
 synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
 
 %% Further analysis plotting
-fprintf("\nStarting further analysis...\n")
+tic
+fprintf("\nPlotting position further analysis results...")
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER);
+fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
 %% Conclusion of the main
 close all;
 
 fprintf("\nProcess of analysis complete!\n")
-toc
+fprintf("The simulation has been executed in %s minutes\n",duration(0,0,toc(tStart),'Format','mm:ss.SS'))

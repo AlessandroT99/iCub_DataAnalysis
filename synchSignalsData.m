@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundaries] = ...
-    synchSignalsData(posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries)
+    synchSignalsData(robot, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -44,6 +44,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     if IMAGE_SAVING
         mkdir ..\ProcessedData;
     end
+
+    tic
+    fprintf("   .Computing position cutting...")
 
     %% A priori informations
     experimentDuration = 24000;
@@ -422,8 +425,14 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         pause(PAUSE_TIME);
         exportgraphics(fig2,path)
     end
+
+    % Reference "tic" at the beginning in the "Parameters for the simulation" section 
+    fprintf("                                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS')) 
     
     %% FORCE ANALYSIS
+    tic
+    fprintf("   .Computing force signal cutting and synching...")
+
     % Interpolating the force data, 
     % Notice that the force only need to find the initial point, the last will
     % be the same of the position
@@ -490,16 +499,17 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         % If the force has more samples than position, than it has smaller starting time,
         % and a positive difference with the position one, so it needs to be back-shifted
         synchForceDataSet = forceDataSet(forceDataSet.Time>=posDataSet.Time(1),:);
-        synchForceElapsedTime = minutesDataPointsConverter(synchForceDataSet);
     else
         % The opposite situation, so it will be forward-shifted using some zeros
         zeroMatrix = array2table(zeros(sum(forceDataSet.Time(1)>posDataSet.Time),size(forceDataSet,2)));
         zeroMatrix = renamevars(zeroMatrix,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
                                              ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
         synchForceDataSet = [zeroMatrix;forceDataSet];
-        synchForceElapsedTime = minutesDataPointsConverter(synchForceDataSet);
     end
     
+    forceStart = posStart+derivativePosStart;
+    forceEnd = posEnd+derivativePosStart;
+
     % Now the force has to be interpolated in the position time stamp in order
     % to set the same start and stop point
     FxSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fx,1:height(posDataSet));
@@ -510,8 +520,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % Plot results
     subplot(3,1,2), grid on, hold on
     plot(elapsedTime,FySynchForceDataSet,'DisplayName','Filtered force')
-    plot(elapsedTime(posStart),FySynchForceDataSet(posStart),'ro','DisplayName','Starting point')
-    plot(elapsedTime(posEnd),FySynchForceDataSet(posEnd),'bo','DisplayName','Ending point')
+    plot(elapsedTime(forceStart),FySynchForceDataSet(forceStart),'ro','DisplayName','Starting point')
+    plot(elapsedTime(forceEnd),FySynchForceDataSet(forceEnd),'bo','DisplayName','Ending point')
     xlabel("Elapsed time [ min ]")
     ylabel("Force [ N ]")
     title("Definition of starting and ending points")
@@ -519,19 +529,33 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     hold off
     
     %% Remove greetings and closing
-    FxCuttedSynchForceDataSet = FxSynchForceDataSet(posStart:posEnd);
-    FyCuttedSynchForceDataSet = FySynchForceDataSet(posStart:posEnd);
-    FzCuttedSynchForceDataSet = FzSynchForceDataSet(posStart:posEnd);
+    FxCuttedSynchForceDataSet = FxSynchForceDataSet(forceStart:forceEnd);
+    FyCuttedSynchForceDataSet = FySynchForceDataSet(forceStart:forceEnd);
+    FzCuttedSynchForceDataSet = FzSynchForceDataSet(forceStart:forceEnd);
     cuttedSynchForceDataSet = table(cuttedElapsedTime',FxCuttedSynchForceDataSet',FyCuttedSynchForceDataSet',FzCuttedSynchForceDataSet', ...
                                     'VariableNames',["Time","Fx","Fy","Fz"]);
-    save synchBaseLine;
+    % Reference "tic" in the "Force analysis" section 
+    fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+
+    %     save synchBaseLine;
     
+    %% Force transformation
     % Has been evaluated that the force RS has to be rotated and translated
     % into the EF RS with respect to the OF
-%     finalCuttedSynchForceDataSet = forceTransformation(cuttedPosDataSet, cuttedSynchForceDataSet,posStart, posEnd);
-    finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+    tic
+    fprintf("   .Computing force transformation...")
+    if numPerson < 0 % Up to know this procedure can only be done on the baselines
+        finalCuttedSynchForceDataSet = forceTransformation(robot, posDataSet, cuttedPosDataSet, ...
+            cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
+    else
+        finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+    end
+    fprintf("                              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
     %% Finding min e MAX peaks of the force
+    tic
+    fprintf("   .Concluding computation of usefull parameters of the force...")
+    
     maximumMovementTime = 0.1;
     [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
     averageEnv = (envLow+envHigh)/2;
@@ -550,8 +574,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     lowestValue = min(finalCuttedSynchForceDataSet.Fy);
     
     % Plot results
+    figure(fig3);
     subplot(3,1,3), grid on, hold on
-    plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Synched force')
+    plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Transformed synched force')
     plot(cuttedElapsedTime,averageEnv,'b--','DisplayName','Average behavior')
     plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
@@ -627,10 +652,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         pause(PAUSE_TIME);
         exportgraphics(fig3,path)
     end
+
+    % Reference "tic" at the beginning in the "Finding min e MAX peaks of the force" section 
+    fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Ultimate synched data set saving
-    ultimateSynchPosDataSet = [cuttedPosDataSet.Time,cuttedPosDataSet.yPos];
-    ultimateSynchForceDataSet = [finalCuttedSynchForceDataSet.Time,finalCuttedSynchForceDataSet.Fy];
+    ultimateSynchPosDataSet = [minutesDataPointsConverter(cuttedPosDataSet)',cuttedPosDataSet.yPos];
+    ultimateSynchForceDataSet = [minutesDataPointsConverter(finalCuttedSynchForceDataSet)',finalCuttedSynchForceDataSet.Fy];
 
     %% Force pause for online evaluation
     if sum(find(pausePeople == numPerson)) > 0
