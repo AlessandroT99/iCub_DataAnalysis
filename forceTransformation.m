@@ -36,8 +36,11 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
     IMAGE_SAVING = 1; % Used to save some chosen plots
     PAUSE_TIME = 8; % Used to let the window of the plot get the full resolution size before saving
     Y_RANGE = 5; % Newton absolute range for force plotting
+    I_KIN_ERROR_EVALUATION = 1; % If 0 the stated error is not evaluated
     
     %% Input data
+    tic
+    fprintf("\n       .Reading data files...")
     if numPerson == -2
         jointDataSet = readtable("..\InputData\joints\leftArm\P0_L_Hard\data.log");
     else 
@@ -68,8 +71,12 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
     armJointsA = [-30.0 20.0 8.0 70.0 -3.0 -10.0 -5.0];
     armJointsB = [-30.0 36.0 -18.0 50.0 -3.0 -10.0 -5.0];
     torsoJoints = [0,0,0];
+
+    fprintf("                                            Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Synchronizing joints signal with position
+    tic
+    fprintf("       .Computing joint data synchronization...")
     % Find the initial delay between the two sampled signals
     initialTimeDelay = initialPosDataSet.Time(1)-jointDataSet.Time(1);
     
@@ -96,20 +103,43 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
     cuttedSynchJointDataSet = array2table(tmpCuttedSynchJointDataSet);
     cuttedSynchJointDataSet = renamevars(cuttedSynchJointDataSet,1:width(cuttedSynchJointDataSet),["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
     cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchForceDataSet)';
+
+    fprintf("                          Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Procedure of force transformation
     newCuttedSynchForceDataSet = cuttedSynchForceDataSet;
     R_HtoOF = cell(1,height(cuttedSynchForceDataSet));
+
+    if I_KIN_ERROR_EVALUATION
+        NUMBER_OF_SAMPLES = 500;
+        jointError = zeros(NUMBER_OF_SAMPLES,length([torsoJoints,armJointsA]));
+    end
+
+    tic
+    fprintf("       .Evaluation of the rotation matrix of the first set of data...")
+
     for i = 1:height(cuttedSynchForceDataSet)
         % 1. Rotation matrix from hand to OF
-        q0 = cuttedPosDataSet.q1(i);
-        q1 = cuttedPosDataSet.q2(i);
-        q2 = cuttedPosDataSet.q3(i);
-        q3 = cuttedPosDataSet.q4(i);
+        R_HtoOF = axis2dcm(cuttedPosDataSet.ax(i),cuttedPosDataSet.ay(i),cuttedPosDataSet.az(i),cuttedPosDataSet.theta(i));
         
-        R_HtoOF = [2*(q0^2+q1^2)-1, 2*(q1*q2-q0*q3), 2*(q1*q3+q0*q2);
-                   2*(q1*q2+q0*q3), 2*(q0^2*q2^2)-1, 2*(q2*q3-q0*q3); 
-                   2*(q1*q3-q0*q2), 2*(q2*q3+q0*q1), 2*(q0^2*q3^2)-1];
+%         q0 = cuttedPosDataSet.ax(i);
+%         q1 = cuttedPosDataSet.ay(i);
+%         q2 = cuttedPosDataSet.az(i);
+%         q3 = cuttedPosDataSet.theta(i);
+% 
+%         % Before use it, the quaternion has to be normalized and it could
+%         % take more than one iteration
+%         while abs(norm([q0,q1,q2,q3]) - 1) > 1e-15
+%             q0 = q0/norm([q0,q1,q2,q3]);
+%             q1 = q1/norm([q0,q1,q2,q3]);
+%             q2 = q2/norm([q0,q1,q2,q3]);
+%             q3 = q3/norm([q0,q1,q2,q3]);
+% %             norm([q0,q1,q2,q3])
+%         end
+% 
+%         R_HtoOF = [q0^2+q1^2-q2^2-q3^2, 2*(q1*q2-q0*q3), 2*(q1*q3+q0*q2);
+%                    2*(q1*q2+q0*q3), q0^2-q1^2+q2^2-q3^2, 2*(q2*q3-q0*q1); 
+%                    2*(q1*q3-q0*q2), 2*(q2*q3+q0*q1), q0^2-q1^2-q2^2+q3^2];
         
         % 2. Transformation matrix from T/F sensor to Hand
         armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
@@ -134,6 +164,22 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
         newCuttedSynchForceDataSet.Fx(i) = F(1);
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);
+        
+        if i == 1
+            fprintf("    Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+            tic
+            fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
+        end
+
+        if I_KIN_ERROR_EVALUATION
+            if i < NUMBER_OF_SAMPLES
+                jointError(i,:) = iKinErrorEvaluation(robot, cuttedPosDataSet(i,3:5), armJoints, torsoJoints, R_HtoOF, "SX");
+            end
+        end
+
+        if i == 1
+            fprintf(" Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+        end
     end
     
     fig1 = figure('Name','Force transformation');
@@ -176,7 +222,42 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
         exportgraphics(fig1,path)
         close(fig1);
     end
-         
+
+    %% Joint Error plotting
+    tic
+    fprintf("       .Joint error plotting...")
+    if I_KIN_ERROR_EVALUATION
+        clearBlue = [0,0.6,1];
+        meanError = zeros(size(jointError,2),1);
+        standardError = zeros(size(jointError,2),1);
+        for i = 1:size(jointError,2)
+            meanError(i) = mean(jointError(:,i));
+            standardError(i) = std(jointError(:,i))/sqrt(length(jointError(:,i)));
+        end
+
+        fig2 = figure("Name",'Joint error');
+        fig2.WindowState = 'maximized';
+        hold on, grid on
+        b1 = bar(1:size(jointError,2),meanError,0.7,'k');
+        b1.FaceColor = clearBlue;
+        errorbar(1:length(meanError), meanError, standardError, 'k', 'LineStyle','none','CapSize',15,'LineWidth',1.5)
+        title("Joint Error Trend",defaultTitleName)
+        ylabel('Error [degrees]'), xlabel("Joint number")
+
+        if IMAGE_SAVING
+            mkdir ..\ProcessedData\iKinJointsError;
+            if numPerson < 0
+                path = strjoin(["..\ProcessedData\iKinJointsError\B",num2str(3+numPerson),".png"],"");
+            else
+                path = strjoin(["..\ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
+            end
+            pause(PAUSE_TIME);
+            exportgraphics(fig2,path)
+        end
+    end    
+
+    fprintf("                        Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+
     %% DH matrices evaluation for POS A from hand to OF - ONLY HAND REFERENCE SYSTEM - USEFULL FOR GRAPH PLOTTING
     % if POS_SHOWING
     %     figure, title("Definition of POS A")

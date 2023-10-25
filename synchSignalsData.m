@@ -542,7 +542,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Force transformation
     % Has been evaluated that the force RS has to be rotated and translated
     % into the EF RS with respect to the OF
-    tic
+    forceTransformTime = tic;
     fprintf("   .Computing force transformation...")
     if numPerson < 0 % Up to know this procedure can only be done on the baselines
         finalCuttedSynchForceDataSet = forceTransformation(robot, posDataSet, cuttedPosDataSet, ...
@@ -550,7 +550,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     else
         finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
     end
-    fprintf("                              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+    fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
 
     %% Finding min e MAX peaks of the force
     tic
