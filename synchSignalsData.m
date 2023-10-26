@@ -35,10 +35,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
 %                      It also can be an array of people!
 
     %% Parameters for the simulation 
-    DEBUG = 0;                  % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
-    IMAGE_SAVING = 1;           % Put to 1 in order to save the main plots
-    PAUSE_TIME = 1;
-    axisYLimMultiplier = 1.5;   % Multiplies the chosen y limits for axis plotting
+    DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
+    IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
+    PAUSE_TIME = 1;                         % Used to let the window of the plot get the full resolution size before saving
+    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
+    axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
     if IMAGE_SAVING
@@ -378,23 +379,24 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
-    if numPerson >= 0
+    if numPerson > 0
+        textPosX = cuttedElapsedTime(end)+0.1;
         if strcmp(personParameters(5),"DX") == 1
             yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
-            text(0.1,baselineBoundaries(1,1)+sign(baselineBoundaries(1,1))*0.14*baselineBoundaries(1,1),'Human Phase','FontSize',14)
-            text(0.1,baselineBoundaries(2,1)-sign(baselineBoundaries(2,1))*0.08*baselineBoundaries(2,1),'Robot Phase','FontSize',14)
+            text(textPosX,baselineBoundaries(1,1),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle')
+            text(textPosX,baselineBoundaries(2,1),'Robot Phase','FontSize',10, 'VerticalAlignment', 'middle')
         else
             yline(baselineBoundaries(1,2),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,2),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
-            text(0.1,baselineBoundaries(1,2)+sign(baselineBoundaries(1,2))*0.14*baselineBoundaries(1,2),'Robot Phase','FontSize',14)
-            text(0.1,baselineBoundaries(2,2)-sign(baselineBoundaries(2,2))*0.08*baselineBoundaries(2,2),'Human Phase','FontSize',14)
+            text(textPosX,baselineBoundaries(1,2),'Robot Phase','FontSize',10, 'VerticalAlignment', 'middle')
+            text(textPosX,baselineBoundaries(2,2),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle')
         end
     end
     title("Cutted signal starting and ending points")
     xlabel("Elapsed time [ min ]")
     ylabel("Position [ m ]")
-    legend('show','Location','eastoutside')
+    legend('show','Location','westoutside')
     hold off
     sgtitle(defaultTitleName)
     
@@ -540,17 +542,21 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %     save synchBaseLine;
     
     %% Force transformation
-    % Has been evaluated that the force RS has to be rotated and translated
-    % into the EF RS with respect to the OF
-    forceTransformTime = tic;
-    fprintf("   .Computing force transformation...")
-    if numPerson < 0 % Up to know this procedure can only be done on the baselines
-        finalCuttedSynchForceDataSet = forceTransformation(robot, posDataSet, cuttedPosDataSet, ...
-            cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
+    if FORCE_TRANSFORMATION_EVALUATION
+        % Has been evaluated that the force RS has to be rotated and translated
+        % into the EF RS with respect to the OF
+        forceTransformTime = tic;
+        fprintf("   .Computing force transformation...")
+        if numPerson < 0 % Up to know this procedure can only be done on the baselines
+            finalCuttedSynchForceDataSet = forceTransformation(robot, posDataSet, cuttedPosDataSet, ...
+                cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
+        else
+            finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+        end
+        fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
     else
         finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
     end
-    fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
 
     %% Finding min e MAX peaks of the force
     tic

@@ -54,7 +54,7 @@ function [posDataSet, forceDataSet] = fileReader(peopleDataSet, personSubSet)
         
         % Rename the table columns
         posDataSet = renamevars(posDataSet,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8","Var9"], ...
-                                           ["Counter","Time","xPos","yPos","zPos","ax","ay","az","theta");
+                                           ["Counter","Time","xPos","yPos","zPos","ax","ay","az","theta"]);
         forceDataSet = renamevars(forceDataSet,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
                                                ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
     else

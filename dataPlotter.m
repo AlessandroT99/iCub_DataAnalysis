@@ -51,7 +51,8 @@ baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of 
 %% Input data
 numPeople = 32+BASELINE_NUMBER; 
 people = readtable("..\InputData\Dati Personali EXP2.xlsx");
-people = people(1:numPeople,:);
+people = people(1:numPeople-BASELINE_NUMBER,:);
+
 
 % The following command is part of the robotic toolbox
 % Whilst the iCub model has been downloaded from
@@ -86,9 +87,13 @@ maxPeaksVariation = notConsideredValue.*ones(numPeople,100);
 minPeaksVariation = notConsideredValue.*ones(numPeople,100);
 peaksInitialAndFinalVariation = notConsideredValue.*ones(1,numPeople);
 synchroEfficiency = notConsideredValue.*ones(numPeople,100);
+posAPeaksStd = notConsideredValue.*ones(1,numPeople);
+posBPeaksStd = notConsideredValue.*ones(1,numPeople);
+posAPeaksmean = notConsideredValue.*ones(1,numPeople);
+posBPeaksmean = notConsideredValue.*ones(1,numPeople);
 
 %% Usefull data to be saved
-[nDX, nSX, nM, nF, plotPosM, plotPosF] = parametersUpdate(people); 
+[nDX, nSX, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(people); 
 
 % Create figures for subplots
 if BIG_PLOT_ENABLE
@@ -105,7 +110,7 @@ if BIG_PLOT_ENABLE
     actualNF = 0; % number of females already analyzed
 end
 
-for i = 1:height(people)
+for i = 1:numPeople
     if BaseLineEvaluationDone == 0
         if i == 1
             posFilePath = "..\InputData\positions\leftHand\P0_L_Hard\data.log";
@@ -206,7 +211,8 @@ for i = 1:height(people)
         [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
-            peaksInitialAndFinalVariation(i), synchroEfficiency(i,:)] = ...
+            peaksInitialAndFinalVariation(i), synchroEfficiency(i,:), posAPeaksStd(i), ...
+            posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i)] = ...
             posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline);
         fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
@@ -285,14 +291,22 @@ maxPeaksVariation = maxPeaksVariation(maxPeaksVariation(:,1)~=notConsideredValue
 minPeaksVariation = minPeaksVariation(minPeaksVariation(:,1)~=notConsideredValue,:);
 peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFinalVariation~=notConsideredValue);
 synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
+% All the following values are already in cm
+posAPeaksStd = posAPeaksStd(posAPeaksStd~=notConsideredValue).*100;
+posBPeaksStd = posBPeaksStd(posBPeaksStd~=notConsideredValue).*100;
+posAPeaksmean = posAPeaksmean(posAPeaksmean~=notConsideredValue).*100;
+posBPeaksmean = posBPeaksmean(posBPeaksmean~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
+% save furtherAnalysisData;
+% load furtherAnalysisData;
 fprintf("\nPlotting position further analysis results...")
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
-                                peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER);
+                                peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader);
 fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
 %% Conclusion of the main

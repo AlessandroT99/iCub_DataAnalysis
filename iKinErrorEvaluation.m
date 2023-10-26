@@ -16,16 +16,20 @@
 
 % NOTICE THAT THE "jointError" IS IN DEGREES
 
+% TODO:
+% - analyticalInverseKinematics()
+
 function jointError = iKinErrorEvaluation(robot, cuttedPosDataSet, armJoints, torsoJoints, rotMatrix, handInvolved)
 % This function is used to test the generated position from direct
 % kinematics and understand if using inverse kinematics would be possible
 % to get to the desidered joints with a very small error
 
-    maxErrorOrientation = 1e-1;
-    maxErrorPosition = 1e-3;
+    maxErrorOrientation = 1;
+    maxErrorPosition = 1;
 
     ik = inverseKinematics('RigidBodyTree',robot);
-    ik.SolverParameters.MaxIterations = 1000;
+    ik.SolverAlgorithm = 'LevenbergMarquardt';
+    %ik.SolverParameters.MaxIterations = 2000;
     
     % To check orthogonormality of the matrix uncomment the following and
     % look for a similar eye(3)
@@ -34,6 +38,9 @@ function jointError = iKinErrorEvaluation(robot, cuttedPosDataSet, armJoints, to
 
     pose = [rotMatrix', table2array(cuttedPosDataSet)';zeros(1,3),1];
     initialGuess = homeConfiguration(robot);
+    jointSol = zeros(1,length([torsoJoints,armJoints]));
+    realJoints = [torsoJoints,armJoints];
+%     jointError = 100*ones(1,length(realJoints));
     
     if strcmp(handInvolved,"DX") == 1
         [configSol, solInfo] = ik('r_hand',pose,[maxErrorOrientation.*ones(1,3),maxErrorPosition.*ones(1,3)],initialGuess);
@@ -43,12 +50,10 @@ function jointError = iKinErrorEvaluation(robot, cuttedPosDataSet, armJoints, to
         jointNumber = [13:15,16:22];
     end
 
-    jointSol = zeros(1,length([torsoJoints,armJoints]));
     for j = 1:length(jointNumber)
         jointSol(j) = configSol(jointNumber(j)).JointPosition;
     end
     
-    realJoints = [torsoJoints,armJoints];
     jointError = mod((realJoints-jointSol).*180/pi,360); % IN DEGREES
     for i = 1:length(jointError)
         if jointError(i) > 180

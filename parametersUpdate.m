@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [nDX, nSX, nM, nF, plotPosM, plotPosF] = parametersUpdate(dataSet)
+function [nDX, nSX, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(dataSet)
 % This function is used in order to update the total number of person that
 % holds the listed parameters:
 % - DX arm used
@@ -37,6 +37,7 @@ function [nDX, nSX, nM, nF, plotPosM, plotPosF] = parametersUpdate(dataSet)
     nFSX = 0;                   % Number of SX females which took the test
     even = 2:2:height(dataSet); % Array containing even numbers
     odds = 1:2:height(dataSet); % Array containing odd numbers
+    
     
     for numPerson = 1:height(dataSet)
          % Exclude people who are not valid as dataSet
@@ -67,8 +68,18 @@ function [nDX, nSX, nM, nF, plotPosM, plotPosF] = parametersUpdate(dataSet)
                     plotPosF = [plotPosF, odds(nFSX)];
                 end
             end
-            
+           
+            if dataSet.Lead_Fol(numPerson) >= 5
+                personWhoFeelsFollowerOrLeader(numPerson) = 1;
+            else
+                if dataSet.Lead_Fol(numPerson) <= 3
+                    personWhoFeelsFollowerOrLeader(numPerson) = -1;
+                else
+                    personWhoFeelsFollowerOrLeader(numPerson) = 2;
+                end
+            end
         end
     end
-
+    personWhoFeelsFollowerOrLeader = personWhoFeelsFollowerOrLeader(personWhoFeelsFollowerOrLeader~=0);
+    personWhoFeelsFollowerOrLeader(personWhoFeelsFollowerOrLeader==2) = zeros(1,sum(personWhoFeelsFollowerOrLeader==2));
 end

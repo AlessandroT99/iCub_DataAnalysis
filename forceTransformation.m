@@ -32,10 +32,10 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
 % NB: the OF in .urdf model is know as "root link"
 
     %% Simulation parameters
-    POS_SHOWING = 0; % Used to plot some examples
-    IMAGE_SAVING = 1; % Used to save some chosen plots
-    PAUSE_TIME = 8; % Used to let the window of the plot get the full resolution size before saving
-    Y_RANGE = 5; % Newton absolute range for force plotting
+    POS_SHOWING = 0;            % Used to plot some examples
+    IMAGE_SAVING = 1;           % Used to save some chosen plots
+    PAUSE_TIME = 8;             % Used to let the window of the plot get the full resolution size before saving
+    Y_RANGE = 5;                % Newton absolute range for force plotting
     I_KIN_ERROR_EVALUATION = 1; % If 0 the stated error is not evaluated
     
     %% Input data
@@ -111,7 +111,7 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
     R_HtoOF = cell(1,height(cuttedSynchForceDataSet));
 
     if I_KIN_ERROR_EVALUATION
-        NUMBER_OF_SAMPLES = 500;
+        NUMBER_OF_SAMPLES = 1500;
         jointError = zeros(NUMBER_OF_SAMPLES,length([torsoJoints,armJointsA]));
     end
 
@@ -167,18 +167,20 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, initialPosDat
         
         if i == 1
             fprintf("    Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
-            tic
-            fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
         end
 
         if I_KIN_ERROR_EVALUATION
+            if i == 1
+                tic
+                fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
+            end
             if i < NUMBER_OF_SAMPLES
                 jointError(i,:) = iKinErrorEvaluation(robot, cuttedPosDataSet(i,3:5), armJoints, torsoJoints, R_HtoOF, "SX");
             end
-        end
 
-        if i == 1
-            fprintf(" Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+            if i == 1
+                fprintf(" Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+            end
         end
     end
     

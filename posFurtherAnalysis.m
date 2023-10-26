@@ -17,7 +17,8 @@
 function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
             maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
             movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
-            peaksInitialAndFinalVariation, synchroEfficiency] = ...
+            peaksInitialAndFinalVariation, synchroEfficiency, posAPeaksStd, ...
+            posBPeaksStd, posAPeaksmean, posBPeaksmean] = ...
               posFurtherAnalysis(synchPosDataSet,numPerson,personParam,baseline)
 % The main aim of this function is to elaborate position signals in order to extract
 % some interesting data that would be usefull to compare with the overrall
@@ -137,6 +138,32 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     p = polyfit(1:length(minPeaksVal),minPeaksVal,fittingOrder);
     minPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
     
+    if numPerson < 0
+        if strcmp(personParam(5),"SX") == 1
+            posAPeaksStd = std(maxPeaksVal);
+            posBPeaksStd = std(minPeaksVal);
+            posAPeaksmean = mean(maxPeaksVal);
+            posBPeaksmean = mean(minPeaksVal);
+        else
+            posAPeaksStd = std(minPeaksVal);
+            posBPeaksStd = std(maxPeaksVal);
+            posAPeaksmean = mean(minPeaksVal);
+            posBPeaksmean = mean(maxPeaksVal);
+        end
+    else
+        if strcmp(personParam(5),"DX") == 1
+            posAPeaksStd = std(maxPeaksVal);
+            posBPeaksStd = std(minPeaksVal);
+            posAPeaksmean = mean(maxPeaksVal);
+            posBPeaksmean = mean(minPeaksVal);
+        else
+            posAPeaksStd = std(minPeaksVal);
+            posBPeaksStd = std(maxPeaksVal);
+            posAPeaksmean = mean(minPeaksVal);
+            posBPeaksmean = mean(maxPeaksVal);
+        end
+    end
+
     %% Peaks initial and final variation
     peaksInitialAndFinalVariation = abs(maxPeaksVariation(end)-minPeaksVariation(end))-abs(maxPeaksVariation(1)-minPeaksVariation(1));
 
