@@ -18,6 +18,11 @@
 
 % TODO:
 % - analyticalInverseKinematics()
+% - Save into a folder the results of each test and then before
+%   reattempting it, checking for its existance, if already there, skip the
+%   procedure and just load it.
+% - After the inverse, use the direct to reconduct it to the position to
+%   check correctness
 
 function jointError = iKinErrorEvaluation(robot, cuttedPosDataSet, armJoints, torsoJoints, rotMatrix, handInvolved)
 % This function is used to test the generated position from direct

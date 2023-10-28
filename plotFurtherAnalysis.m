@@ -21,7 +21,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader)
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople)
 % This function takes in input the data generated from the position and
 % force further analysis functions and plot usefull scatter and other
 % diagrams in order to visualize trends or similars.
@@ -284,6 +284,46 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
         exportgraphics(fig5b,"..\ProcessedData\Scatters\PeaksPosAverageDeviation.png")
         close(fig5b);
     end
+
+    %% Saving matrices usefull for statistical analysis
+    posADX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    posASX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    posBSX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    posBDX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    devPosADX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    devPosASX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    devPosBSX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+    devPosBDX = zeros(length(posAPeaksStd)-BASELINE_NUMBER,1);
+
+    for i = BASELINE_NUMBER+1:length(posAPeaksStd)
+        if posAPeaksmean(i) > 0
+            posADX(i-BASELINE_NUMBER) = posAPeaksmean(i);
+            posASX(i-BASELINE_NUMBER) = 1000;
+            posBSX(i-BASELINE_NUMBER) = posBPeaksmean(i);
+            posBDX(i-BASELINE_NUMBER) = 1000;
+            devPosADX(i-BASELINE_NUMBER) = deviationPosfromA(i);
+            devPosASX(i-BASELINE_NUMBER) = 1000;
+            devPosBSX(i-BASELINE_NUMBER) = deviationPosfromB(i);
+            devPosBDX(i-BASELINE_NUMBER) = 1000;
+        else
+            posADX(i-BASELINE_NUMBER) = 1000;
+            posASX(i-BASELINE_NUMBER) = posAPeaksmean(i);
+            posBSX(i-BASELINE_NUMBER) = 1000;
+            posBDX(i-BASELINE_NUMBER) = posBPeaksmean(i);
+            devPosADX(i-BASELINE_NUMBER) = 1000;
+            devPosASX(i-BASELINE_NUMBER) = deviationPosfromA(i);
+            devPosBSX(i-BASELINE_NUMBER) = 1000;
+            devPosBDX(i-BASELINE_NUMBER) = deviationPosfromB(i);
+        end
+    end
+
+    matx = table(testedPeople',posBSX,posASX,posADX,posBDX,devPosBSX,devPosASX,devPosADX,devPosBDX,posBPeaksStd(BASELINE_NUMBER+1:end)',posAPeaksStd(BASELINE_NUMBER+1:end)');
+
+    matx = renamevars(matx, 1:width(matx), ["Test number","posB SX","posA SX","posA DX","posB DX", ...
+                                            "Deviation from B SX","Deviation from A SX","Deviation from A DX","Deviation from B DX", ...
+                                            "std(posB)","std(posA)"]);
+
+    writetable(matx, "..\ProcessedData\PeaksPositionData.xlsx");
 
     %% Standard deviation
     fig6 = figure('Name','Standard deviation scatter');

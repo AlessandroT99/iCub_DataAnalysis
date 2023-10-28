@@ -91,6 +91,7 @@ posAPeaksStd = notConsideredValue.*ones(1,numPeople);
 posBPeaksStd = notConsideredValue.*ones(1,numPeople);
 posAPeaksmean = notConsideredValue.*ones(1,numPeople);
 posBPeaksmean = notConsideredValue.*ones(1,numPeople);
+testedPeople = [];
 
 %% Usefull data to be saved
 [nDX, nSX, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(people); 
@@ -151,6 +152,7 @@ for i = 1:numPeople
             end
             fprintf("N. %d...\n",i);
         else
+            testedPeople = [testedPeople,i-BASELINE_NUMBER];
             evaluatedPeople = evaluatedPeople + 1;
             personParam = ["Gender: ", people.Genere(numP), "  -  ", "Human Hand: ", people.Mano(numP), "  -  ", "Age: ", people.Et_(i-BASELINE_NUMBER)];
             fprintf("\n- Elaborating data from person N. %d...\n",numP);
@@ -299,14 +301,14 @@ posBPeaksmean = posBPeaksmean(posBPeaksmean~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
-% save furtherAnalysisData;
-% load furtherAnalysisData;
+% save ..\ProcessedDAta\furtherAnalysisData;
+% load ..\ProcessedData\furtherAnalysisData;
 fprintf("\nPlotting position further analysis results...")
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader);
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople);
 fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
 %% Conclusion of the main
