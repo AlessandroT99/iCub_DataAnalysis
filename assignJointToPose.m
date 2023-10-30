@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [newPose] = assignJointToPose(robot, armJoints, torsoJoints, personArm)
+function [newPose] = assignJointToPose(robot, armJoints, torsoJoints, personArm, numPerson)
 % Function used just to assign the values of the joint into the pose
 % variable
     % Creating the pose variable
@@ -30,21 +30,41 @@ function [newPose] = assignJointToPose(robot, armJoints, torsoJoints, personArm)
     newPose(15).JointPosition = torsoJoints(3);
 
     % Assigning the arm joints values
-    if strcmp(personArm,"DX")
-        newPose(16).JointPosition = armJoints(1);
-        newPose(17).JointPosition = armJoints(2);
-        newPose(18).JointPosition = armJoints(3);
-        newPose(19).JointPosition = armJoints(4);
-        newPose(20).JointPosition = armJoints(5);
-        newPose(21).JointPosition = armJoints(6);
-        newPose(22).JointPosition = armJoints(7);
+    if numPerson < 0
+        if strcmp(personArm,"SX")
+            newPose(16).JointPosition = armJoints(1);
+            newPose(17).JointPosition = armJoints(2);
+            newPose(18).JointPosition = armJoints(3);
+            newPose(19).JointPosition = armJoints(4);
+            newPose(20).JointPosition = armJoints(5);
+            newPose(21).JointPosition = armJoints(6);
+            newPose(22).JointPosition = armJoints(7);
+        else
+            newPose(26).JointPosition = armJoints(1);
+            newPose(27).JointPosition = armJoints(2);
+            newPose(28).JointPosition = armJoints(3);
+            newPose(29).JointPosition = armJoints(4);
+            newPose(30).JointPosition = armJoints(5);
+            newPose(31).JointPosition = armJoints(6);
+            newPose(32).JointPosition = armJoints(7);
+        end
     else
-        newPose(26).JointPosition = armJoints(1);
-        newPose(27).JointPosition = armJoints(2);
-        newPose(28).JointPosition = armJoints(3);
-        newPose(29).JointPosition = armJoints(4);
-        newPose(30).JointPosition = armJoints(5);
-        newPose(31).JointPosition = armJoints(6);
-        newPose(32).JointPosition = armJoints(7);
+        if strcmp(personArm,"DX")
+            newPose(16).JointPosition = armJoints(1);
+            newPose(17).JointPosition = armJoints(2);
+            newPose(18).JointPosition = armJoints(3);
+            newPose(19).JointPosition = armJoints(4);
+            newPose(20).JointPosition = armJoints(5);
+            newPose(21).JointPosition = armJoints(6);
+            newPose(22).JointPosition = armJoints(7);
+        else
+            newPose(26).JointPosition = armJoints(1);
+            newPose(27).JointPosition = armJoints(2);
+            newPose(28).JointPosition = armJoints(3);
+            newPose(29).JointPosition = armJoints(4);
+            newPose(30).JointPosition = armJoints(5);
+            newPose(31).JointPosition = armJoints(6);
+            newPose(32).JointPosition = armJoints(7);
+        end
     end
 end

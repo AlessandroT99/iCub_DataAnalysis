@@ -98,7 +98,7 @@ posBPeaksmean = notConsideredValue.*ones(1,numPeople);
 testedPeople = [];
 
 %% Usefull data to be saved
-fprintf("\n\nStarting the data analysis...\n")
+fprintf("\nStarting the data analysis...\n")
 
 [nDX, nSX, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(people); 
 
@@ -120,12 +120,12 @@ end
 for i = 1:numPeople
     if BaseLineEvaluationDone == 0
         if i == 1
-            posFilePath = "..\InputData\positions\leftHand\P0_L_Hard\data.log";
-            forceFilePath = "..\InputData\forces\leftArm\P0_L_Hard\data.log";
+            posFilePath = "..\InputData\positions\leftHand\P0_L_Base\data.log";
+            forceFilePath = "..\InputData\forces\leftArm\P0_L_Base\data.log";
         else
             if i == 2
-                posFilePath = "..\InputData\positions\rightHand\P0_R_Hard\data.log";
-                forceFilePath = "..\InputData\forces\rightArm\P0_R_Hard\data.log";
+                posFilePath = "..\InputData\positions\rightHand\P0_R_Base\data.log";
+                forceFilePath = "..\InputData\forces\rightArm\P0_R_Base\data.log";
             end
         end
 

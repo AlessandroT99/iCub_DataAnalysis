@@ -42,10 +42,10 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
     tic
     fprintf("\n       .Reading data files...")
     if numPerson == -2
-        jointDataSet = readtable("..\InputData\joints\leftArm\P0_L_Hard\data.log");
+        jointDataSet = readtable("..\InputData\joints\leftArm\P0_L_Base\data.log");
     else 
         if numPerson == -1
-            jointDataSet = readtable("..\InputData\joints\rightArm\P0_R_Hard\data.log");
+            jointDataSet = readtable("..\InputData\joints\rightArm\P0_R_Base\data.log");
         else
             numPerson = numPerson+3;
             if strcmp(personParameters(5),"DX") == 1
@@ -74,6 +74,14 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
 
     fprintf("                                            Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
+    %% Example of setting robot to POS A - WHOLE BODY MODEL
+    posA = assignJointToPose(robot, armJointsA, torsoJoints, personParameters(5), numPerson);
+%     show(robot,posA);
+    
+    %% Example of setting robot to POS B - WHOLE BODY MODEL
+    posB = assignJointToPose(robot, armJointsB, torsoJoints, personParameters(5), numPerson);
+%     show(robot,posB);
+
     %% Synchronizing joints signal with position
     tic
     fprintf("       .Computing joint data synchronization...")
@@ -113,6 +121,10 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
     if I_KIN_ERROR_EVALUATION
         NUMBER_OF_SAMPLES = 1500;
         jointError = zeros(NUMBER_OF_SAMPLES,length([torsoJoints,armJointsA]));
+        aik.KinematicGroup = opts(10).KinematicGroup;
+        generateIKFunction(aik,'iCubIK_SXArm');
+        aik.KinematicGroup = opts(12).KinematicGroup;
+        generateIKFunction(aik,'iCubIK_DXArm');
     end
 
     tic
@@ -124,7 +136,7 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
         
         % 2. Transformation matrix from T/F sensor to Hand
         armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
-        newPos = assignJointToPose(robot, armJoints,torsoJoints,personParameters(5));
+        newPos = assignJointToPose(robot, armJoints,torsoJoints,personParameters(5),numPerson);
         % Evaluating the transformation matrix for each sample
         if numPerson < 0
             if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
@@ -154,9 +166,47 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
             if i == 1
                 tic
                 fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
+                
+                if strcmp(personParameters(5),"SX") && numPerson < 0
+                    tmp = getTransform(robot,homeConfiguration(robot),'root_link','l_shoulder_1');
+                    if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
+                        initialAngles = posB;
+                    else
+                        initialAngles = posA;
+                    end
+                else
+                    if strcmp(personParameters(5),"DX") && numPerson < 0
+                        tmp = getTransform(robot,homeConfiguration(robot),'root_link','r_shoulder_1');
+                        if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
+                            initialAngles = posA;
+                        else
+                            initialAngles = posB;
+                        end
+                    else
+                        if strcmp(personParameters(5),"SX") && numPerson >= 0
+                            tmp = getTransform(robot,homeConfiguration(robot),'root_link','r_shoulder_1');
+                            if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
+                                initialAngles = posA;
+                            else
+                                initialAngles = posB;
+                            end
+                        else
+                            if strcmp(personParameters(5),"DX") && numPerson >= 0
+                                tmp = getTransform(robot,homeConfiguration(robot),'root_link','l_shoulder_1');
+                                if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
+                                    initialAngles = posB;
+                                else
+                                    initialAngles = posA;
+                                end
+                            end
+                        end
+                    end
+                end
             end
+            
             if i < NUMBER_OF_SAMPLES
-                jointError(i,:) = iKinErrorEvaluation(robot, aik, opts, cuttedPosDataSet(i,3:5), armJoints, torsoJoints, R_HtoOF, "SX");
+                OFTranslationToShoulder = tmp(1:3,4);
+                [jointError(i,:), initialAngles] = iKinErrorEvaluation(robot, aik, opts, initialAngles, cuttedPosDataSet(i,3:5), armJoints, torsoJoints, R_HtoOF, "SX", OFTranslationToShoulder); 
             end
 
             if i == 1
@@ -254,13 +304,5 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
     % % end
     % [~,LpB_T] = WaistLeftArmFwdKin(torsoJoints,armJointsB,POS_SHOWING);
     % [~,RpB_T] = WaistRightArmFwdKin(torsoJoints,armJointsB,POS_SHOWING);
-    
-    %% Example of setting robot to POS A - WHOLE BODY MODEL
-    % posA = assignJointToPose(robot, armJointsA, torsoJoints, personParameters(5));
-    % show(robot,posA);
-    
-    %% Example of setting robot to POS B - WHOLE BODY MODEL
-    % posB = assignJointToPose(robot, armJointsB, torsoJoints, personParameters(5));
-    % show(robot,posB);
 
 end
