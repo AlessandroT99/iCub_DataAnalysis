@@ -17,7 +17,6 @@
 clear all, close all,  clc
 
 tStart = tic;
-fprintf("Starting the data analysis...\n")
 
 % Suppress the warning about creating folder that already exist
 warning('OFF','MATLAB:MKDIR:DirectoryExists');
@@ -49,6 +48,8 @@ posBaseline = [];           % Variable where the pos baseline is saved
 baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
 
 %% Input data
+fprintf("Simulation starting up...\n")
+
 numPeople = 32+BASELINE_NUMBER; 
 people = readtable("..\InputData\Dati Personali EXP2.xlsx");
 people = people(1:numPeople-BASELINE_NUMBER,:);
@@ -57,11 +58,14 @@ people = people(1:numPeople-BASELINE_NUMBER,:);
 % The following command is part of the robotic toolbox
 % Whilst the iCub model has been downloaded from
 % "https://github.com/robotology/icub-models"
-
+fprintf("Importing input data and simulation models...\n\n")
 % Has been chosen the Paris01 iCub due to the low number of reference
 % frames included, in fact almost all the other models included also the
 % skin reference frames, which where not usefull for this purpose.
 iCub = importrobot("..\icub-models\iCub\robots\iCubParis01\model.urdf");
+% Modify numDoFTBase number into analyticalInverseKinematics() 
+aik = analyticalInverseKinematics(iCub);
+opts = showdetails(aik);
 % % Code use to identify the unusefull warning
 % [msg,warnID] = lastwarn
 % show(iCub);
@@ -94,6 +98,8 @@ posBPeaksmean = notConsideredValue.*ones(1,numPeople);
 testedPeople = [];
 
 %% Usefull data to be saved
+fprintf("\n\nStarting the data analysis...\n")
+
 [nDX, nSX, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(people); 
 
 % Create figures for subplots
@@ -168,7 +174,7 @@ for i = 1:numPeople
 
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet, baselineBoundaries] = ...
-          synchSignalsData(iCub, posDataSet, forceDataSet, numP, ...
+          synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
             personParam,PAUSE_PEOPLE,baselineBoundaries);   
 
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone

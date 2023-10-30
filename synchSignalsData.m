@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundaries] = ...
-    synchSignalsData(robot, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries)
+    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -38,7 +38,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 1;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
+    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
@@ -548,7 +548,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         forceTransformTime = tic;
         fprintf("   .Computing force transformation...")
         if numPerson < 0 % Up to know this procedure can only be done on the baselines
-            finalCuttedSynchForceDataSet = forceTransformation(robot, posDataSet, cuttedPosDataSet, ...
+            finalCuttedSynchForceDataSet = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
                 cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
         else
             finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
