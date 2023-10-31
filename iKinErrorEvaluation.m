@@ -23,49 +23,66 @@
 % - After the inverse, use the direct to reconduct it to the position to
 %   check correctness
 
-function [jointError, newAngles] = iKinErrorEvaluation(robot, aik, opts, initialAngles, cuttedPosDataSet, armJoints, torsoJoints, rotMatrix, handInvolved, OFTranslationToShoulder)
+function [jointError, newReferenceConfig, newReferencePos] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
 % This function is used to test the generated position from direct
 % kinematics and understand if using inverse kinematics would be possible
 % to get to the desidered joints with a very small error
     
     % To check orthogonormality of the matrix uncomment the following and
     % look for a similar eye(3)
-    if rotMatrix'*rotMatrix ~= 1 || rotMatrix*rotMatrix'~= 1
+    detTollerance = 1e-5;
+    if det(rotMatrix'*rotMatrix) - 1 >= detTollerance || det(rotMatrix*rotMatrix') - 1 >= detTollerance
         error("Rotation matrix for iKin Error Evaluation is not orthonormal.");
     end
 
+    eeBodyName = aik.KinematicGroup.EndEffectorBodyName;
+    baseName = aik.KinematicGroup.BaseName;
+
     % The data are from the hand to the OF
-    pose = [rotMatrix, table2array(cuttedPosDataSet)';zeros(1,3),1];
-    % Adding to the traslation, the traslation from the OF to the shoulder
-    poseTrasl = [eye(3), OFTranslationToShoulder;zeros(1,3),1];
-    % T_hand_to_OF = T_OF_to_Shoulder1 * T_Shoulder1_to_Hand
-    % T_Shoulder1_to_hand = T_hand_to_OF*inv(T_OF_to_Shoulder1)
-    pose = pose/poseTrasl;
-    realJoints = [torsoJoints,armJoints];
+    evaluatedT_HtoOF = [rotMatrix,table2array(cuttedPosDataSet)';zeros(1,3),1];
+    % Calculate the transformation matrix from the shoulder 1 to the root
+    T_S1toOF = getTransform(robot,referencePos,'root_link',baseName);
+    % Evaluating the transformation from the hand to the shoulder 1
+    evaluatedT_HtoS1 = evaluatedT_HtoOF\T_S1toOF;
     
-    if strcmp(handInvolved,"DX") == 1
-        ikConfig = iCubIK_DXArm(pose,true);
-%         jointNumber = [13:15,26:32];
+    expConfig = assignJointToPose(robot,armJoints,[0,0,0],handInvolved,numPerson);
+    T_HtoS1 = getTransform(robot,expConfig,eeBodyName,baseName);
+
+    cfrTrasl = T_HtoS1-evaluatedT_HtoS1;
+    fprintf("\n           .The difference between generated trasnformation from Euler Angles and generated from joint [from hand frame to shoulder1] is: \n")
+    fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\t\t%2.4f\n",cfrTrasl.')
+    if norm(abs(cfrTrasl)) > 1e-3
+        error("The evaluated T matrix from hand frame to shoulder 1 frame has an approximation error too high.")
+    end
+
+    % The variables passed at the IK alghortim are:
+    % - pose = the transformation matrix which describes the transformation
+    %          from the hand to the OF and than the trasposition to the shoulder
+    % - enforceJointLimits = true because the limits of the joints has to
+    %                        be respected
+    % - sortByDistance = true because the output order of the solution is
+    %                    ordered considering the distance from the initial angles
+    % - referenceConfig = Inital angles of the joints, associated to the
+    %                   previous position giving a sort of trajectory memory
+    enforceJointLimits = true;
+    sortByDistance = true;
+    if numPerson < 0
+        if strcmp(handInvolved,"DX") == 1
+            ikConfig = iCubIK_DXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
+        else
+            ikConfig = iCubIK_SXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
+        end
     else
-        ikConfig = iCubIK_SXArm(pose,true);
-%         jointNumber = [13:15,16:22];
+        if strcmp(handInvolved,"SX") == 1
+            ikConfig = iCubIK_DXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
+        else
+            ikConfig = iCubIK_SXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
+        end
     end
 
     if isempty(ikConfig) == 1
         error("The result from inverse kinematics is empty - So the configuration of transformation matrix is not a reachable pose for the kinematic chain.");
     end
-    
-%     expConfig = homeConfiguration(robot);
-%     eeBodyName = aik.KinematicGroup.EndEffectorBodyName;
-%     baseName = aik.KinematicGroup.BaseName;
-%     % Generation of transformation matrix of the end effector pose
-%     expEEPose = getTransform(robot,expConfig,eeBodyName,baseName);
-            
-%     aik.KinematicGroup.BaseName = 'root_link';
-%     customGroup.links = {'chest','l_shoulder_1','l_shoulder_2','l_shoulder_3','l_elbow_1','l_foreharm','l_wrist_1','r_hand'};
-%     customGroup.joints = {'torso_yaw','l_shouldere_pitch', 'l_shoulder_roll', 'l_shoulder_yaw', 'l_elbow','l_wrist_prosup','l_wrist_pitch','l_wrist_yaw','l_hand_dh_frame'};
-    
-%     eeWorldPose = getTransform(robot,expConfig,eeBodyName);
 
     generatedConfig = repmat(homeConfiguration(robot), size(ikConfig,1), 1);
     for i = 1:size(generatedConfig,1)
@@ -83,8 +100,8 @@ function [jointError, newAngles] = iKinErrorEvaluation(robot, aik, opts, initial
     end
     
     for k = 1:size(ikConfig,1)
-        jointSol = ikConfig(k,:);
-        jointError = mod((realJoints-jointSol).*180/pi,360); % IN DEGREES
+        jointSol = ikConfig(k,:).*180/pi;
+        jointError = mod((armJoints(2:end)-jointSol),360); % IN DEGREES
         for i = 1:length(jointError)
             if jointError(i) > 180
                 jointError(i) = jointError(i)-360;

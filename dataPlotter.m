@@ -204,7 +204,7 @@ for i = 1:numPeople
             personParam,BIG_PLOT_ENABLE);
         fprintf("              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
-        %% Usefull data for further analysis
+        % Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
         if numP < 0
             fileName = strjoin(["..\ProcessedData\SimulationData\B",num2str(3+numP)],"");
@@ -213,7 +213,7 @@ for i = 1:numPeople
         end
         save(fileName, "synchPosDataSet", "numP", 'personParam');
 
-        %% Further analysis
+        % Further analysis
         tic
         fprintf("   .Computing further analysis on the position...")
         [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...

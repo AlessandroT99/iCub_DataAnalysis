@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, initialPosDataSet, cuttedPosDataSet, ...
-    cuttedSynchForceDataSet,posStart, posEnd, personParameters, defaultTitleName, numPerson)
+    cuttedSynchForceDataSet, posStart, posEnd, personParameters, defaultTitleName, numPerson)
 % This function is used to evaluate the transformation of the force in order to have the 
 % exact value of the force module in the hand RF and the orientation in the OF.
 % In the following a brief explanation of the procedure computed:
@@ -121,10 +121,23 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
     if I_KIN_ERROR_EVALUATION
         NUMBER_OF_SAMPLES = 1500;
         jointError = zeros(NUMBER_OF_SAMPLES,length([torsoJoints,armJointsA]));
-        aik.KinematicGroup = opts(10).KinematicGroup;
-        generateIKFunction(aik,'iCubIK_SXArm');
-        aik.KinematicGroup = opts(12).KinematicGroup;
-        generateIKFunction(aik,'iCubIK_DXArm');
+        if numPerson < 0
+            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
+                aik.KinematicGroup = opts(10).KinematicGroup;
+                generateIKFunction(aik,'iCubIK_SXArm');
+            else
+               aik.KinematicGroup = opts(12).KinematicGroup;
+               generateIKFunction(aik,'iCubIK_DXArm');
+            end
+        else
+            if strcmp(personParameters(5),"DX") 
+                aik.KinematicGroup = opts(10).KinematicGroup;
+                generateIKFunction(aik,'iCubIK_SXArm');
+            else
+                aik.KinematicGroup = opts(12).KinematicGroup;
+                generateIKFunction(aik,'iCubIK_DXArm');
+            end
+        end
     end
 
     tic
@@ -132,10 +145,67 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
 
     for i = 1:height(cuttedSynchForceDataSet)
         % 1. Rotation matrix from hand to OF
+        armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
         R_HtoOF = axis2dcm(cuttedPosDataSet.ax(i),cuttedPosDataSet.ay(i),cuttedPosDataSet.az(i),cuttedPosDataSet.theta(i));
         
+        if i == 1
+            T_HtoOF = getTransform(robot,assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson),'l_hand_dh_frame','root_link');
+            cfrRot = T_HtoOF(1:3,1:3)-R_HtoOF;
+            fprintf("\n           .The difference between generated rotation from Euler Angles and generated from joint [from hand frame to root link] is: \n")
+            fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\n",cfrRot.')
+            
+%             if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
+%                 referenceConfig = getAnglesFromConfiguration(posB,17:22);
+%                 referencePos = posB;
+%             else
+%                 referenceConfig = getAnglesFromConfiguration(posA,17:22);
+%                 referencePos = posA;
+%             end
+%             eeBodyName = aik.KinematicGroup.EndEffectorBodyName;
+%             baseName = aik.KinematicGroup.BaseName;
+%             expConfig = assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson);
+%             T_HtoS1 = getTransform(robot,expConfig,eeBodyName,baseName);
+%             ikConfig = iCubIK_SXArm(T_HtoS1,true,true,referenceConfig);
+%         
+%             eeWorldPose = getTransform(robot,expConfig,eeBodyName);
+%             generatedConfig = repmat(expConfig, size(ikConfig,1), 1);
+%             for k = 1:size(generatedConfig,1)
+%                 for j = 1:size(ikConfig,2)
+%                     generatedConfig(k,aik.KinematicGroupConfigIdx(j)).JointPosition = ikConfig(k,j);
+%                 end
+%             end
+%             
+%             for j = 1:size(ikConfig,1)
+%                 figure;
+%                 ax = show(robot,generatedConfig(j,:));
+%                 hold all;
+%                 plotTransforms(tform2trvec(eeWorldPose),tform2quat(eeWorldPose),'Parent',ax);
+%                 title(['Solution ' num2str(j)]);
+%             end
+% 
+%             for k = 1:size(ikConfig,1)
+%                 jointSol = ikConfig(k,:).*180/pi;
+%                 jointError = mod((armJoints(2:end)-jointSol),360); % IN DEGREES
+%                 for u = 1:length(jointError)
+%                     if jointError(u) > 180
+%                         jointError(u) = jointError(u)-360;
+%                     end
+%                 end
+%             end
+% 
+%             evaluatedT_HtoOF = [R_HtoOF,table2array(cuttedPosDataSet(i,3:5))';zeros(1,3),1];
+%             T_S1toOF = getTransform(robot,referencePos,'root_link','l_shoulder_1');
+%             evaluatedT_HtoS1 = evaluatedT_HtoOF\T_S1toOF;
+% 
+%             cfrTrasl = T_HtoS1-evaluatedT_HtoS1;
+%             fprintf("\n           .The difference between generated trasnformation from Euler Angles and generated from joint [from hand frame to shoulder1] is: \n")
+%             fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\t\t%2.4f\n",cfrTrasl.')
+%             if norm(abs(cfrTrasl)) > 1e-3
+%                 error("The evaluated T matrix from hand frame to shoulder 1 frame has an approximation error too high.")
+%             end
+        end
+
         % 2. Transformation matrix from T/F sensor to Hand
-        armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
         newPos = assignJointToPose(robot, armJoints,torsoJoints,personParameters(5),numPerson);
         % Evaluating the transformation matrix for each sample
         if numPerson < 0
@@ -168,35 +238,39 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
                 fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
                 
                 if strcmp(personParameters(5),"SX") && numPerson < 0
-                    tmp = getTransform(robot,homeConfiguration(robot),'root_link','l_shoulder_1');
                     if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
-                        initialAngles = posB;
+                        referenceConfig = getAnglesFromConfiguration(posB,17:22);
+                        referencePos = posB;
                     else
-                        initialAngles = posA;
+                        referenceConfig = getAnglesFromConfiguration(posA,17:22);
+                        referencePos = posA;
                     end
                 else
                     if strcmp(personParameters(5),"DX") && numPerson < 0
-                        tmp = getTransform(robot,homeConfiguration(robot),'root_link','r_shoulder_1');
                         if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
-                            initialAngles = posA;
+                            referenceConfig = getAnglesFromConfiguration(posA,27:32);
+                            referencePos = posA;
                         else
-                            initialAngles = posB;
+                            referenceConfig = getAnglesFromConfiguration(posB,27:32);
+                            referencePos = posB;
                         end
                     else
                         if strcmp(personParameters(5),"SX") && numPerson >= 0
-                            tmp = getTransform(robot,homeConfiguration(robot),'root_link','r_shoulder_1');
                             if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
-                                initialAngles = posA;
+                                referenceConfig = getAnglesFromConfiguration(posA,17:22);
+                                referencePos = posA;
                             else
-                                initialAngles = posB;
+                                referenceConfig = getAnglesFromConfiguration(posB,17:22);
+                                referencePos = posB;
                             end
                         else
                             if strcmp(personParameters(5),"DX") && numPerson >= 0
-                                tmp = getTransform(robot,homeConfiguration(robot),'root_link','l_shoulder_1');
                                 if mean(cuttedPosDataSet.yPos) > cuttedPosDataSet.yPos(1)
-                                    initialAngles = posB;
+                                    referenceConfig = getAnglesFromConfiguration(posB,27:32);
+                                    referencePos = posB;
                                 else
-                                    initialAngles = posA;
+                                    referenceConfig = getAnglesFromConfiguration(posA,27:32);
+                                    referencePos = posA;
                                 end
                             end
                         end
@@ -205,8 +279,7 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
             end
             
             if i < NUMBER_OF_SAMPLES
-                OFTranslationToShoulder = tmp(1:3,4);
-                [jointError(i,:), initialAngles] = iKinErrorEvaluation(robot, aik, opts, initialAngles, cuttedPosDataSet(i,3:5), armJoints, torsoJoints, R_HtoOF, "SX", OFTranslationToShoulder); 
+                [jointError(i,:), referenceConfig, referencePos] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson); 
             end
 
             if i == 1
