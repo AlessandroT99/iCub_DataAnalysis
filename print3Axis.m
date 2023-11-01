@@ -17,6 +17,7 @@
 function print3Axis(posDataSet, forceDataSet, numPerson)
 % This function is used to initially plot the 3 axis components of force
 % and position in order to analyze them properly
+    %% Position plotting
     elapsedTimePos = minutesDataPointsConverter(posDataSet);
 
     fig1 = figure('Name','Position X-Y-Z');
@@ -41,6 +42,7 @@ function print3Axis(posDataSet, forceDataSet, numPerson)
     exportgraphics(fig1,path);
     close(fig1);
 
+    %% Force plotting
     elapsedTimeForce = minutesDataPointsConverter(forceDataSet);
 
     fig2 = figure('Name','Force X-Y-Z');

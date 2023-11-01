@@ -23,7 +23,7 @@
 % - After the inverse, use the direct to reconduct it to the position to
 %   check correctness
 
-function [jointError, newReferenceConfig, newReferencePos] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
+function [finalJointError, newReferenceConfig, newReferencePos] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
 % This function is used to test the generated position from direct
 % kinematics and understand if using inverse kinematics would be possible
 % to get to the desidered joints with a very small error
@@ -38,52 +38,83 @@ function [jointError, newReferenceConfig, newReferencePos] = iKinErrorEvaluation
     eeBodyName = aik.KinematicGroup.EndEffectorBodyName;
     baseName = aik.KinematicGroup.BaseName;
 
-    % The data are from the hand to the OF
-    evaluatedT_HtoOF = [rotMatrix,table2array(cuttedPosDataSet)';zeros(1,3),1];
-    % Calculate the transformation matrix from the shoulder 1 to the root
-    T_S1toOF = getTransform(robot,referencePos,'root_link',baseName);
-    % Evaluating the transformation from the hand to the shoulder 1
-    evaluatedT_HtoS1 = evaluatedT_HtoOF\T_S1toOF;
+    shoulderPitchJoint = -pi;
+    % Check the results and keep cycling until a feasible result is found    
+    while (shoulderPitchJoint < pi)
+        % The data are from the hand to the OF
+        evaluatedT_HtoOF = [rotMatrix,table2array(cuttedPosDataSet)';zeros(1,3),1];
+        % Calculate the transformation matrix from the shoulder 1 to the root
+        % Up to know seems that as first iteration using an approximation such
+        % as referencePos = posA or posB leads to infeasibility for the iKin
+        T_S1toOF = getTransform(robot,referencePos,baseName,'root_link');
+        % Evaluating the transformation from the hand to the shoulder 1
+        evaluatedT_HtoS1 = T_S1toOF\evaluatedT_HtoOF;
+        
+        % Check on joints possible only for baselines
+%         if numPerson < 0
+%             expConfig = assignJointToPose(robot,armJoints,[0,0,0],handInvolved,numPerson);
+%             T_HtoS1 = getTransform(robot,expConfig,eeBodyName,baseName);
+%         
+%             cfrTrasl = T_HtoS1-evaluatedT_HtoS1;
+%             fprintf("\n           .The difference between generated trasnformation from Euler Angles and generated from joint [from hand frame to shoulder1] is: \n")
+%             fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\t\t%2.4f\n",cfrTrasl.')
+%             fprintf("              And has norm: %.4f\n",norm(abs(cfrTrasl)))
+%             pause;
+%             % if the norm is higher than this tollerance value is very probable
+%             % that the result of iKin evaluation will be for sure infeasible
+%             if norm(abs(cfrTrasl)) > 0.5
+%                 error("The evaluated T matrix from hand frame to shoulder 1 frame has an approximation error too high.")
+%             end
+%         end
     
-    expConfig = assignJointToPose(robot,armJoints,[0,0,0],handInvolved,numPerson);
-    T_HtoS1 = getTransform(robot,expConfig,eeBodyName,baseName);
-
-    cfrTrasl = T_HtoS1-evaluatedT_HtoS1;
-    fprintf("\n           .The difference between generated trasnformation from Euler Angles and generated from joint [from hand frame to shoulder1] is: \n")
-    fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\t\t%2.4f\n",cfrTrasl.')
-    if norm(abs(cfrTrasl)) > 1e-3
-        error("The evaluated T matrix from hand frame to shoulder 1 frame has an approximation error too high.")
+        % The variables passed at the IK alghortim are:
+        % - pose = the transformation matrix which describes the transformation
+        %          from the hand to the OF and than the trasposition to the shoulder
+        % - enforceJointLimits = true because the limits of the joints has to
+        %                        be respected
+        % - sortByDistance = true because the output order of the solution is
+        %                    ordered considering the distance from the initial angles
+        % - referenceConfig = Inital angles of the joints, associated to the
+        %                   previous position giving a sort of trajectory memory
+        enforceJointLimits = true;
+        sortByDistance = true;
+        if numPerson < 0
+            if strcmp(handInvolved,"DX") == 1
+                ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                % Save the new eventual shoulder pitch position into the configuration struct
+                referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
+            else
+                ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                % Save the new eventual shoulder pitch position into the configuration struct
+                referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
+            end
+        else
+            if strcmp(handInvolved,"SX") == 1
+                ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                % Save the new eventual shoulder pitch position into the configuration struct
+                referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
+            else
+                ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                % Save the new eventual shoulder pitch position into the configuration struct
+                referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
+            end
+        end
+        
+        if isempty(ikConfig) == 1
+            % If result is empty increment the angle and keep cycling
+            shoulderPitchJoint = shoulderPitchJoint + pi/180;
+        else
+            % Stop cycling and used the just found solution
+            break;
+        end
     end
 
-    % The variables passed at the IK alghortim are:
-    % - pose = the transformation matrix which describes the transformation
-    %          from the hand to the OF and than the trasposition to the shoulder
-    % - enforceJointLimits = true because the limits of the joints has to
-    %                        be respected
-    % - sortByDistance = true because the output order of the solution is
-    %                    ordered considering the distance from the initial angles
-    % - referenceConfig = Inital angles of the joints, associated to the
-    %                   previous position giving a sort of trajectory memory
-    enforceJointLimits = true;
-    sortByDistance = true;
-    if numPerson < 0
-        if strcmp(handInvolved,"DX") == 1
-            ikConfig = iCubIK_DXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
-        else
-            ikConfig = iCubIK_SXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
-        end
-    else
-        if strcmp(handInvolved,"SX") == 1
-            ikConfig = iCubIK_DXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
-        else
-            ikConfig = iCubIK_SXArm(pose,enforceJointLimits,sortByDistance,referenceConfig);
-        end
-    end
-
+    % Check if at least one results has been found, if not raise an error
     if isempty(ikConfig) == 1
         error("The result from inverse kinematics is empty - So the configuration of transformation matrix is not a reachable pose for the kinematic chain.");
     end
 
+    % Assign each possible solution to its configuration struct
     generatedConfig = repmat(homeConfiguration(robot), size(ikConfig,1), 1);
     for i = 1:size(generatedConfig,1)
         for j = 1:size(ikConfig,2)
@@ -91,21 +122,30 @@ function [jointError, newReferenceConfig, newReferencePos] = iKinErrorEvaluation
         end
     end
 
-    for i = 1:size(ikConfig,1)
-        figure;
-        ax = show(robot,generatedConfig(i,:));
-        hold all;
-        plotTransforms(tform2trvec(eeWorldPose),tform2quat(eeWorldPose),'Parent',ax);
-        title(['Solution ' num2str(i)]);
-    end
+    % Plot the resultant pose in order of distance between the starting pose
+%     for i = 1:size(ikConfig,1)
+%         figure;
+%         show(robot,generatedConfig(i,:));
+%         title(['Solution ' num2str(i)]);
+%     end
     
+    % Evaluate the error from all the resultant configurations to confirm
+    % that the first one is actually the most correct one
+    jointError = zeros(size(ikConfig,1),size(ikConfig,2));
     for k = 1:size(ikConfig,1)
         jointSol = ikConfig(k,:).*180/pi;
-        jointError = mod((armJoints(2:end)-jointSol),360); % IN DEGREES
-        for i = 1:length(jointError)
-            if jointError(i) > 180
-                jointError(i) = jointError(i)-360;
+        jointError(k,:) = mod((armJoints(2:end)-jointSol),360); % IN DEGREES
+        for i = 1:size(jointError,2)
+            if jointError(k,i) > 180
+                jointError(k,i) = jointError(k,i)-360;
             end
         end
+%         fprintf("                   .The iKin solution %d has an average error of: %.2f\n",k,mean(jointError(k,:)))
     end
+
+   % Save the current configuration in order to use it as new starting
+   % configuration for the next time instant
+   finalJointError = jointError(1,:);
+   newReferenceConfig = ikConfig(1,:);
+   newReferencePos = generatedConfig(1,:);
 end
