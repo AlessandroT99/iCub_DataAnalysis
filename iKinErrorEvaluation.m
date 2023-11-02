@@ -20,10 +20,8 @@
 % - Save into a folder the results of each test and then before
 %   reattempting it, checking for its existance, if already there, skip the
 %   procedure and just load it.
-% - After the inverse, use the direct to reconduct it to the position to
-%   check correctness
 
-function [finalJointError, newReferenceConfig, newReferencePos] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
+function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
 % This function is used to test the generated position from direct
 % kinematics and understand if using inverse kinematics would be possible
 % to get to the desidered joints with a very small error
@@ -83,20 +81,24 @@ function [finalJointError, newReferenceConfig, newReferencePos] = iKinErrorEvalu
                 ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
+                finalShoulderPitch = referencePos(26).JointPosition;
             else
                 ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
+                finalShoulderPitch = referencePos(16).JointPosition;
             end
         else
             if strcmp(handInvolved,"SX") == 1
                 ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
+                finalShoulderPitch = referencePos(26).JointPosition;
             else
                 ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
+                finalShoulderPitch = referencePos(16).JointPosition;
             end
         end
         
@@ -131,20 +133,24 @@ function [finalJointError, newReferenceConfig, newReferencePos] = iKinErrorEvalu
     
     % Evaluate the error from all the resultant configurations to confirm
     % that the first one is actually the most correct one
+    % ONLY DONE FOR BASELINE FOR WHICH THE REAL JOINTS ARE KNOWN
     jointError = zeros(size(ikConfig,1),size(ikConfig,2));
-    for k = 1:size(ikConfig,1)
-        jointSol = ikConfig(k,:).*180/pi;
-        jointError(k,:) = mod((armJoints(2:end)-jointSol),360); % IN DEGREES
-        for i = 1:size(jointError,2)
-            if jointError(k,i) > 180
-                jointError(k,i) = jointError(k,i)-360;
+    if numPerson < 0
+        for k = 1:size(ikConfig,1)
+            jointSol = ikConfig(k,:).*180/pi;
+            jointError(k,:) = mod((armJoints(2:end)-jointSol),360); % IN DEGREES
+            for i = 1:size(jointError,2)
+                if jointError(k,i) > 180
+                    jointError(k,i) = jointError(k,i)-360;
+                end
             end
+%             fprintf("                   .The iKin solution %d has an average error of: %.2f\n",k,mean(jointError(k,:)))
         end
-%         fprintf("                   .The iKin solution %d has an average error of: %.2f\n",k,mean(jointError(k,:)))
     end
 
    % Save the current configuration in order to use it as new starting
    % configuration for the next time instant
+   newJoints = [finalShoulderPitch, ikConfig(1,:)]; % IN RADIANTS
    finalJointError = jointError(1,:);
    newReferenceConfig = ikConfig(1,:);
    newReferencePos = generatedConfig(1,:);

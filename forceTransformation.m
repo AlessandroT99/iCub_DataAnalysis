@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, initialPosDataSet, cuttedPosDataSet, ...
+function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(robot, aik, opts, initialPosDataSet, cuttedPosDataSet, ...
     cuttedSynchForceDataSet, posStart, posEnd, personParameters, defaultTitleName, numPerson)
 % This function is used to evaluate the transformation of the force in order to have the 
 % exact value of the force module in the hand RF and the orientation in the OF.
@@ -32,47 +32,52 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
 % NB: the OF in .urdf model is know as "root link"
 
     %% Simulation parameters
-    IMAGE_SAVING = 1;           % Used to save some chosen plots
-    PAUSE_TIME = 8;             % Used to let the window of the plot get the full resolution size before saving
-    Y_RANGE = 5;                % Newton absolute range for force plotting
-    I_KIN_ERROR_EVALUATION = 1; % If 0 the stated error is not evaluated
+    IMAGE_SAVING = 1;               % Used to save some chosen plots
+    PAUSE_TIME = 8;                 % Used to let the window of the plot get the full resolution size before saving
+    I_KIN_ERROR_EVALUATION = 1;     % If 0 the stated error is not evaluated
+    JOINTS_ONLY_FOR_BASELINE = 0;   % If 0 the joints datahas been collected only for baselines and so portion of the code become exclusive for them
+                                    % to turn this off put a number way higher than the number of tests analyzed
     
     %% Input data
-    tic
-    fprintf("\n       .Reading data files...")
-    if numPerson == -2
-        jointDataSet = readtable("..\InputData\joints\leftArm\P0_L_Base\data.log");
-    else 
-        if numPerson == -1
-            jointDataSet = readtable("..\InputData\joints\rightArm\P0_R_Base\data.log");
-        else
-            numPerson = numPerson+3;
-            if strcmp(personParameters(5),"DX") == 1
-                if numPerson < 10
-                    jointDataSet = join(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
-                else
-                    jointDataSet = join(["..\InputData\joints\leftArm\P_000",num2str(numPerson),"\data.log"],'');
-                end
+    if numPerson < JOINTS_ONLY_FOR_BASELINE
+        tic
+        fprintf("\n       .Reading data files...")
+        if numPerson == -2
+            jointDataSet = readtable("..\InputData\joints\leftArm\P0_L_Base\data.log");
+        else 
+            if numPerson == -1
+                jointDataSet = readtable("..\InputData\joints\rightArm\P0_R_Base\data.log");
             else
-                if personSubSet < 10
-                    jointDataSet = join(["..\InputData\joints\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
-                else
-                    jointDataSet = join(["..\InputData\joints\rightArm\P_000",num2str(numPerson),"\data.log"],'');
+                if numPerson < JOINTS_ONLY_FOR_BASELINE
+                    if strcmp(personParameters(5),"DX") == 1
+                        if numPerson < 10
+                            jointDataSet = join(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
+                        else
+                            jointDataSet = join(["..\InputData\joints\leftArm\P_000",num2str(numPerson),"\data.log"],'');
+                        end
+                    else
+                        if personSubSet < 10
+                            jointDataSet = join(["..\InputData\joints\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
+                        else
+                            jointDataSet = join(["..\InputData\joints\rightArm\P_000",num2str(numPerson),"\data.log"],'');
+                        end
+                    end
                 end
             end
         end
+    
+        jointDataSet = renamevars(jointDataSet,["Var2","Var3","Var4","Var5","Var6","Var7","Var8","Var9"], ...
+                                               ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
+        
+        fprintf("                                            Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+
     end
 
-    jointDataSet = renamevars(jointDataSet,["Var2","Var3","Var4","Var5","Var6","Var7","Var8","Var9"], ...
-                                           ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
-    
     % Known a-priori angle of the joints in degrees
     armJointsA = [-30.0 20.0 8.0 70.0 -3.0 -10.0 -5.0];
     armJointsB = [-30.0 36.0 -18.0 50.0 -3.0 -10.0 -5.0];
     torsoJoints = [0,0,0];
 
-    fprintf("                                            Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
-    
     %% Example of setting robot to POS A - WHOLE BODY MODEL
     posA = assignJointToPose(robot, armJointsA, torsoJoints, personParameters(5), numPerson);
 %     show(robot,posA);
@@ -82,82 +87,85 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
 %     show(robot,posB);
 
     %% Synchronizing joints signal with position
-    tic
-    fprintf("       .Computing joint data synchronization...")
-    % Find the initial delay between the two sampled signals
-    initialTimeDelay = initialPosDataSet.Time(1)-jointDataSet.Time(1);
-    
-    if initialTimeDelay >= 0
-        % If the joints have more samples than position, than it has smaller starting time,
-        % and a positive difference with the position one, so it needs to be back-shifted
-        synchJointDataSet = jointDataSet(jointDataSet.Time>=initialPosDataSet.Time(1),:);
-    else
-        % The opposite situation, so it will be forward-shifted using some zeros
-        zeroMatrix = array2table(zeros(sum(jointDataSet.Time(1)>initialPosDataSet.Time),size(jointDataSet,2)));
-        zeroMatrix = renamevars(zeroMatrix,["Var2","Var3","Var4","Var5","Var6","Var7","Var8","Var9"], ...
-                                           ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
-        synchJointDataSet = [zeroMatrix;jointDataSet];
-    end
-    
-    tmpCuttedSynchJointDataSet = zeros(posEnd-posStart+1,8);
-    for j = 2:9
-        % Now the joints have to be interpolated in the position time stamp in order
-        % to set the same start and stop point
-        tmpSynchJointDataSet = interp1(1:height(synchJointDataSet),table2array(synchJointDataSet(:,j)),1:height(initialPosDataSet));
-        % Remove greetings and closing
-        tmpCuttedSynchJointDataSet(:,j-1) = tmpSynchJointDataSet(posStart:posEnd)';
-    end
-    cuttedSynchJointDataSet = array2table(tmpCuttedSynchJointDataSet);
-    cuttedSynchJointDataSet = renamevars(cuttedSynchJointDataSet,1:width(cuttedSynchJointDataSet),["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
-    cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchForceDataSet)';
-
-    fprintf("                          Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
-    
-    %% Print shoulder pitch joint dependencies with position axis
-    fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
-    fig2DJointTraj.WindowState = 'maximized';
-    subplot(1,3,1), grid on, hold on
-    plot(cuttedPosDataSet.xPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'b-')
-    ylabel("Joint [ degrees ]"), xlabel("X position [ cm ]")
-    title("Shoulder pitch w.r.t. X position")
-
-    subplot(1,3,2), grid on, hold on
-    plot(cuttedPosDataSet.yPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'r-')
-    ylabel("Joint [ degrees ]"), xlabel("Y position [ cm ]")
-    title("Shoulder pitch w.r.t. Y position")
-
-    subplot(1,3,3), grid on, hold on
-    plot(cuttedPosDataSet.zPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'g-')
-    ylabel("Joint [ degrees ]"), xlabel("Z position [ cm ]")
-    title("Shoulder pitch w.r.t. Z position")
-    
-    sgtitle(defaultTitleName)
-    
-    % Plot joint wrt the XZ plane to further evaluated probabilities -> MAY NOT BE THE RIGHT PROCEDURE
-%     fig3DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis XZ');
-%     fig3DJointTraj.WindowState = 'maximized';
-%     grid on, hold on
-%     plot3(cuttedPosDataSet.xPos.*100, cuttedPosDataSet.zPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'k-')
-%     zlabel("Joint [ degrees ]"), xlabel("X position [ cm ]"), ylabel("Z position [ cm ]") 
-%     title("Shoulder pitch w.r.t. XZ plane")
-
-    if IMAGE_SAVING
-        mkdir ..\ProcessedData\ShoulderPitchJointPositionRelation;
-        if numPerson < 0
-            path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\B",num2str(3+numPerson),".png"],"");
+    if numPerson < JOINTS_ONLY_FOR_BASELINE
+        tic
+        fprintf("       .Computing joint data synchronization...")
+        % Find the initial delay between the two sampled signals
+        initialTimeDelay = initialPosDataSet.Time(1)-jointDataSet.Time(1);
+        
+        if initialTimeDelay >= 0
+            % If the joints have more samples than position, than it has smaller starting time,
+            % and a positive difference with the position one, so it needs to be back-shifted
+            synchJointDataSet = jointDataSet(jointDataSet.Time>=initialPosDataSet.Time(1),:);
         else
-            path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
+            % The opposite situation, so it will be forward-shifted using some zeros
+            zeroMatrix = array2table(zeros(sum(jointDataSet.Time(1)>initialPosDataSet.Time),size(jointDataSet,2)));
+            zeroMatrix = renamevars(zeroMatrix,["Var2","Var3","Var4","Var5","Var6","Var7","Var8","Var9"], ...
+                                               ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
+            synchJointDataSet = [zeroMatrix;jointDataSet];
         end
-        pause(PAUSE_TIME);
-        exportgraphics(fig2DJointTraj,path)
-        close(fig2DJointTraj);
+        
+        tmpCuttedSynchJointDataSet = zeros(posEnd-posStart+1,8);
+        for j = 2:9
+            % Now the joints have to be interpolated in the position time stamp in order
+            % to set the same start and stop point
+            tmpSynchJointDataSet = interp1(1:height(synchJointDataSet),table2array(synchJointDataSet(:,j)),1:height(initialPosDataSet));
+            % Remove greetings and closing
+            tmpCuttedSynchJointDataSet(:,j-1) = tmpSynchJointDataSet(posStart:posEnd)';
+        end
+        cuttedSynchJointDataSet = array2table(tmpCuttedSynchJointDataSet);
+        cuttedSynchJointDataSet = renamevars(cuttedSynchJointDataSet,1:width(cuttedSynchJointDataSet),["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
+        cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchForceDataSet)';
+    
+        fprintf("                          Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+        
+        %% Print shoulder pitch joint dependencies with position axis
+        fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
+        fig2DJointTraj.WindowState = 'maximized';
+        subplot(1,3,1), grid on, hold on
+        plot(cuttedPosDataSet.xPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'b-')
+        ylabel("Joint [ degrees ]"), xlabel("X position [ cm ]")
+        title("Shoulder pitch w.r.t. X position")
+    
+        subplot(1,3,2), grid on, hold on
+        plot(cuttedPosDataSet.yPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'r-')
+        ylabel("Joint [ degrees ]"), xlabel("Y position [ cm ]")
+        title("Shoulder pitch w.r.t. Y position")
+    
+        subplot(1,3,3), grid on, hold on
+        plot(cuttedPosDataSet.zPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'g-')
+        ylabel("Joint [ degrees ]"), xlabel("Z position [ cm ]")
+        title("Shoulder pitch w.r.t. Z position")
+        
+        sgtitle(defaultTitleName)
+        
+        % Plot joint wrt the XZ plane to further evaluated probabilities -> MAY NOT BE THE RIGHT PROCEDURE
+%         fig3DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis XZ');
+%         fig3DJointTraj.WindowState = 'maximized';
+%         grid on, hold on
+%         plot3(cuttedPosDataSet.xPos.*100, cuttedPosDataSet.zPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'k-')
+%         zlabel("Joint [ degrees ]"), xlabel("X position [ cm ]"), ylabel("Z position [ cm ]") 
+%         title("Shoulder pitch w.r.t. XZ plane")
+    
+        if IMAGE_SAVING
+            mkdir ..\ProcessedData\ShoulderPitchJointPositionRelation;
+            if numPerson < 0
+                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\B",num2str(3+numPerson),".png"],"");
+            else
+                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
+            end
+            pause(PAUSE_TIME);
+            exportgraphics(fig2DJointTraj,path)
+            close(fig2DJointTraj);
+        end
     end
 
     %% Procedure of force transformation
     newCuttedSynchForceDataSet = cuttedSynchForceDataSet;
 
     if I_KIN_ERROR_EVALUATION
-        NUMBER_OF_SAMPLES = height(newCuttedSynchForceDataSet); %1500;
+        NUMBER_OF_SAMPLES = height(newCuttedSynchForceDataSet); 
+        evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
         jointError = zeros(NUMBER_OF_SAMPLES,length(armJointsA)-1);
         if numPerson < 0
             if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
@@ -182,13 +190,16 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
     fprintf("       .Evaluation of the rotation matrix of the first set of data...")
 
     for i = 1:height(cuttedSynchForceDataSet)
-        % 1. Rotation matrix from hand to OF
-        armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
+        %% 1. Rotation matrix from hand to OF
+        if numPerson < JOINTS_ONLY_FOR_BASELINE
+            armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
+            T_HtoOF = getTransform(robot,assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson),aik.KinematicGroup.EndEffectorBodyName,'root_link');
+        end
+
         R_HtoOF = axis2dcm(cuttedPosDataSet.ax(i),cuttedPosDataSet.ay(i),cuttedPosDataSet.az(i),cuttedPosDataSet.theta(i));
         
         % Check on joints possible only for baselines
-        if i == 1 && numPerson < 0 % Only on the first iteration
-            T_HtoOF = getTransform(robot,assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson),aik.KinematicGroup.EndEffectorBodyName,'root_link');
+        if i == 1 && numPerson < JOINTS_ONLY_FOR_BASELINE % Only on the first iteration
             cfrRot = T_HtoOF(1:3,1:3)-R_HtoOF;
             fprintf("\n           .The difference between generated rotation from Euler Angles and generated from joint [from hand frame to root link] is: \n")
             fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\n",cfrRot.')
@@ -197,36 +208,14 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
                 error("The evaluated T matrix from hand frame to root frame has an approximation error too high.")
             end
         end
-
-        % 2. Transformation matrix from T/F sensor to Hand
-        newPos = assignJointToPose(robot, armJoints,torsoJoints,personParameters(5),numPerson);
-        % Evaluating the transformation matrix for each sample
-        if numPerson < 0
-            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
-                T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
-            else
-                T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
-            end
-        else
-            if strcmp(personParameters(5),"DX") 
-                T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
-            else
-                T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
-            end
-        end
-    
-        % 3 and 4. Evaluating the force resultant for each sample
-        F = [cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]*T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1];
-        newCuttedSynchForceDataSet.Fx(i) = F(1);
-        newCuttedSynchForceDataSet.Fy(i) = F(2);
-        newCuttedSynchForceDataSet.Fz(i) = F(3);
         
-        if i == 1 % Only on the first iteration
+        %% Evaluation of joints to evaluate point 2
+        if i == 1 % Only during the first iteration
             fprintf("    Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         end
 
         if I_KIN_ERROR_EVALUATION
-            if i == 1 % Only on the first iteration
+            if i == 1 % Only during the first iteration
                 tic
                 fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
                 
@@ -269,18 +258,55 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
                         end
                     end
                 end
+            else
+                if i == 2
+                    iKinTime = tic;
+                    fprintf("          .Evaluation of the remaining %d inverse kinematics problems...",NUMBER_OF_SAMPLES-1)
+                end
             end
             
+            % Inverse Kinematic Evaluation
             if i < NUMBER_OF_SAMPLES
-                [jointError(i,:), referenceConfig, referencePos] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson); 
+                [evaluatedJointsDataSet(i,:), referenceConfig, referencePos, jointError(i,:)] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson); 
             end
 
-            if i == 1 % Only on the first iteration
+            if i == 1 % Only after the first iteration
                 fprintf(" Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+            else 
+                if i == NUMBER_OF_SAMPLES % Only after the last iKin iteration
+                    fprintf(" Completed in %s minutes\n",duration(0,0,toc(iKinTime),'Format','mm:ss.SS'))
+                end
             end
         end
+
+        %% 2. Transformation matrix from T/F sensor to Hand
+        % Evaluating the transformation matrix for each sample
+        if numPerson < 0
+            newPos = assignJointToPose(robot, armJoints, torsoJoints, personParameters(5), numPerson);
+            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
+                T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
+            else
+                T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
+            end
+        else
+            newPos = assignJointToPose(robot, evaluatedJointsDataSet(i,:), torsoJoints, personParameters(5), numPerson);
+            if strcmp(personParameters(5),"DX") 
+                T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
+            else
+                T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
+            end
+        end
+    
+        % 3 and 4. Evaluating the force resultant for each sample
+        F = [cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]*T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1];
+        newCuttedSynchForceDataSet.Fx(i) = F(1);
+        newCuttedSynchForceDataSet.Fy(i) = F(2);
+        newCuttedSynchForceDataSet.Fz(i) = F(3);
     end
     
+    %% Plot new force dataset
+%     Y_RANGE = 5;                    % Newton absolute range for force plotting
+
     fig1 = figure('Name','Force transformation');
     fig1.WindowState = 'maximized';
     
@@ -323,41 +349,54 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
     end
 
     %% Joint Error plotting
-    tic
-    fprintf("       .Joint error plotting...")
-    if I_KIN_ERROR_EVALUATION
-        clearBlue = [0,0.6,1];
-        meanError = zeros(size(jointError,2),1);
-        standardError = zeros(size(jointError,2),1);
-        for i = 1:size(jointError,2)
-            meanError(i) = mean(jointError(:,i));
-            standardError(i) = std(jointError(:,i))/sqrt(length(jointError(:,i)));
-        end
-
-        fig2 = figure("Name",'Joint error');
-        fig2.WindowState = 'maximized';
-        hold on, grid on
-        b1 = bar(1:size(jointError,2),meanError,0.7,'k');
-        b1.FaceColor = clearBlue;
-        errorbar(1:length(meanError), meanError, standardError, 'k', 'LineStyle','none','CapSize',15,'LineWidth',1.5)
-        title("Joint Error Trend",defaultTitleName)
-        ylabel('Error [degrees]'), xlabel("Joint number")
-
-        if IMAGE_SAVING
-            mkdir ..\ProcessedData\iKinJointsError;
-            if numPerson < 0
-                path = strjoin(["..\ProcessedData\iKinJointsError\B",num2str(3+numPerson),".png"],"");
-            else
-                path = strjoin(["..\ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
+    if numPerson < JOINTS_ONLY_FOR_BASELINE
+        tic
+        fprintf("       .Joint error plotting...")
+        if I_KIN_ERROR_EVALUATION
+            clearBlue = [0,0.6,1];
+            meanError = zeros(size(jointError,2),1);
+            standardError = zeros(size(jointError,2),1);
+            for i = 1:size(jointError,2)
+                meanError(i) = mean(jointError(:,i));
+                standardError(i) = std(jointError(:,i))/sqrt(length(jointError(:,i)));
             end
-            pause(PAUSE_TIME);
-            exportgraphics(fig2,path)
-        end
-    end    
+    
+            fig2 = figure("Name",'Joint error');
+            fig2.WindowState = 'maximized';
+            hold on, grid on
+            b1 = bar(1:size(jointError,2),meanError,0.7,'k');
+            b1.FaceColor = clearBlue;
+            errorbar(1:length(meanError), meanError, standardError, 'k', 'LineStyle','none','CapSize',15,'LineWidth',1.5)
+            title("Joint Error Trend",defaultTitleName)
+            ylabel('Error [degrees]'), xlabel("Joint number")
+    
+            if IMAGE_SAVING
+                mkdir ..\ProcessedData\iKinJointsError;
+                if numPerson < 0
+                    path = strjoin(["..\ProcessedData\iKinJointsError\B",num2str(3+numPerson),".png"],"");
+                else
+                    path = strjoin(["..\ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
+                end
+                pause(PAUSE_TIME);
+                exportgraphics(fig2,path)
+            end
+        end    
+    
+        fprintf("                        Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+    end
 
-    fprintf("                        Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+    %% Elaboration of the new evaluated joints
+    finalJointsDataSet = array2table([cuttedSynchForceDataSet.Time, evaluatedJointsDataSet]);
+    finalJointsDataSet = renamevars(finalJointsDataSet,1:width(finalJointsDataSet), ...
+                                   ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
+
+    %% Evaluation of the error of the force transformation
+    if numPerson < JOINTS_ONLY_FOR_BASELINE
+        wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName);
+    end
 
     %% DH matrices evaluation for POS A from hand to OF - ONLY HAND REFERENCE SYSTEM - USEFULL FOR GRAPH PLOTTING
+%     % DH matrices evaluation for POS A from hand to OF
 %     POS_SHOWING = 0;            % Used to plot some examples
 %     if POS_SHOWING
 %         figure, title("Definition of POS A")
@@ -366,9 +405,9 @@ function [newCuttedSynchForceDataSet] = forceTransformation(robot, aik, opts, in
 %     [~,RpA_T] = WaistRightArmFwdKin(torsoJoints,armJointsA,POS_SHOWING);
 %     
 %     % DH matrices evaluation for POS B from hand to OF
-% %     if POS_SHOWING
-% %         figure, title("Definition of POS B")
-% %     end
+%     if POS_SHOWING
+%         figure, title("Definition of POS B")
+%     end
 %     [~,LpB_T] = WaistLeftArmFwdKin(torsoJoints,armJointsB,POS_SHOWING);
 %     [~,RpB_T] = WaistRightArmFwdKin(torsoJoints,armJointsB,POS_SHOWING);
 

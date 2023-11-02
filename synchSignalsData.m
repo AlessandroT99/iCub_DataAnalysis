@@ -39,6 +39,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
     FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
+    PLOT_TRAJECTORIES = 0;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
@@ -357,44 +358,46 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     end
 
     %% Robot hand trajectory plotting
-    fig3DTraj = figure('Name', 'Hand trajectory');
-    fig3DTraj.WindowState = 'maximized';
-    grid on, hold on
-    plot3(cuttedPosDataSet.xPos,cuttedPosDataSet.yPos,cuttedPosDataSet.zPos,'k-')
-    title('Hand Trajectory')
-
-    fig2DTraj = figure('Name', 'Hand trajectory');
-    fig2DTraj.WindowState = 'maximized';
-    subplot(1,3,1), grid on, hold on
-    plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.yPos.*100,'k-')
-    ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
-    title('Hand Trajectory - Plane XY')
-
-    subplot(1,3,2), grid on, hold on
-    plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.zPos.*100,'k-')
-    ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
-    title('Hand Trajectory - Plane XZ')
-
-    subplot(1,3,3), grid on, hold on
-    plot(cuttedPosDataSet.yPos.*100,cuttedPosDataSet.zPos.*100,'k-')
-    ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
-    title('Hand Trajectory - Plane YZ')
+    if PLOT_TRAJECTORIES
+        fig3DTraj = figure('Name', 'Hand trajectory');
+        fig3DTraj.WindowState = 'maximized';
+        grid on, hold on
+        plot3(cuttedPosDataSet.xPos,cuttedPosDataSet.yPos,cuttedPosDataSet.zPos,'k-')
+        title('Hand Trajectory')
     
-    sgtitle(defaultTitleName)
-
-    if IMAGE_SAVING
-        mkdir ..\ProcessedData\HandTrajectory;
-        if numPerson < 0
-            path = strjoin(["..\ProcessedData\HandTrajectory\B",num2str(3+numPerson),".png"],"");
-        else
-            path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
+        fig2DTraj = figure('Name', 'Hand trajectory');
+        fig2DTraj.WindowState = 'maximized';
+        subplot(1,3,1), grid on, hold on
+        plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.yPos.*100,'k-')
+        ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
+        title('Hand Trajectory - Plane XY')
+    
+        subplot(1,3,2), grid on, hold on
+        plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.zPos.*100,'k-')
+        ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
+        title('Hand Trajectory - Plane XZ')
+    
+        subplot(1,3,3), grid on, hold on
+        plot(cuttedPosDataSet.yPos.*100,cuttedPosDataSet.zPos.*100,'k-')
+        ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
+        title('Hand Trajectory - Plane YZ')
+        
+        sgtitle(defaultTitleName)
+    
+        if IMAGE_SAVING
+            mkdir ..\ProcessedData\HandTrajectory;
+            if numPerson < 0
+                path = strjoin(["..\ProcessedData\HandTrajectory\B",num2str(3+numPerson),".png"],"");
+            else
+                path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
+            end
+            pause(PAUSE_TIME);
+            exportgraphics(fig2DTraj,path)
+            close(fig2DTraj);
+            close(fig3DTraj);
         end
-        pause(PAUSE_TIME);
-        exportgraphics(fig2DTraj,path)
-        close(fig2DTraj);
-        close(fig3DTraj);
     end
-    
+
     %% Plot results
     figure(fig1)
     subplot(2,1,1)
@@ -587,7 +590,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         forceTransformTime = tic;
         fprintf("   .Computing force transformation...")
         if numPerson < 0 % Up to know this procedure can only be done on the baselines
-            finalCuttedSynchForceDataSet = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
+            [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
                 cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
         else
             finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
