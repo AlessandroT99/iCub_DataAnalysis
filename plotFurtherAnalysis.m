@@ -234,10 +234,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
 %     fig5a.WindowState = 'maximized';
 %     subplot(1,2,1), grid on, hold on
 %     
-%     % Generate y data
-%     deviationPosfromA = zeros(1,length(posAPeaksmean));
-%     deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])) = abs(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0]))-posAPeaksmean(1));
-%     deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])) = abs(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0]))-posAPeaksmean(BASELINE_NUMBER));
+    % Generate y data
+    deviationPosfromA = zeros(1,length(posAPeaksmean));
+    deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])) = abs(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0]))-posAPeaksmean(1));
+    deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])) = abs(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0]))-posAPeaksmean(BASELINE_NUMBER));
 %     
 %     scatter(posAPeaksmean(1),deviationPosfromA(1),MarkerDimension,clearRed,'filled')
 %     scatter(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])),deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])),MarkerDimension,'red','LineWidth',EmptyPointLine)
@@ -263,14 +263,14 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
 %     ylabel("Deviation from baseline [ cm ]")
 %     legend('Baseline iCub-SX','Collected data iCub-SX','Baseline iCub-DX','Collected data iCub-DX', 'Felt Follower', 'Felt Leader','Location','southoutside')
 %     hold off
-% 
-%     %% POS B PLOT
+
+    %% POS B PLOT
 %     subplot(1,2,2), grid on, hold on
 % 
-%     % Generate y data
-%     deviationPosfromB = zeros(1,length(posBPeaksmean));
-%     deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])) = abs(posBPeaksmean(1)-posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])));
-%     deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])) = abs(posBPeaksmean(BASELINE_NUMBER)-posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])));
+    % Generate y data
+    deviationPosfromB = zeros(1,length(posBPeaksmean));
+    deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])) = abs(posBPeaksmean(1)-posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])));
+    deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])) = abs(posBPeaksmean(BASELINE_NUMBER)-posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])));
 %     
 %     scatter(posBPeaksmean(1),deviationPosfromB(1),MarkerDimension,clearBlue,'filled')
 %     scatter(posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])),deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])),MarkerDimension,'red','LineWidth',EmptyPointLine)
@@ -304,16 +304,16 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
 %         exportgraphics(fig5a,"..\ProcessedData\Scatters\PeaksPosBoundariesDeviation.png")
 %         close(fig5a);
 %     end
-% 
-%     %% DISTANCE AVERAGE BETWEEN POS A AND POS B PLOT
+
+    %% DISTANCE AVERAGE BETWEEN POS A AND POS B PLOT
 %     fig5b = figure('Name','Values of average peaks, mean and variance');
 %     fig5b.WindowState = 'maximized';
 %     grid on, hold on
 %     
-%     % Generate y data
-%     deviationPosfromAverage = zeros(1,length(meanPos));
-%     deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0]))-meanPos(1));
-%     deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0]))-meanPos(BASELINE_NUMBER));
+    % Generate y data
+    deviationPosfromAverage = zeros(1,length(meanPos));
+    deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0]))-meanPos(1));
+    deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0]))-meanPos(BASELINE_NUMBER));
 %     
 %     scatter(meanPos(1).*100,deviationPosfromAverage(1).*100,MarkerDimension,clearRed,'filled')
 %     scatter(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])).*100,deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])).*100,MarkerDimension,'black','LineWidth',EmptyPointLine)
@@ -351,12 +351,12 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
 %     end
 
     %% Saving matrices usefull for statistical analysis
-    posAidx = [mean(posAPeaksmean(1:BASELINE_NUMBER)),posAPeaksmean(BASELINE_NUMBER+1:end)];
-    posBidx = [mean(posBPeaksmean(1:BASELINE_NUMBER)),posBPeaksmean(BASELINE_NUMBER+1:end)];
-    devPosAidx = [mean(deviationPosfromA(1:BASELINE_NUMBER)),deviationPosfromA(BASELINE_NUMBER+1:end)];
-    devPosBidx = [mean(deviationPosfromB(1:BASELINE_NUMBER)),deviationPosfromB(BASELINE_NUMBER+1:end)];
+    posAidx = [mean(posAPeaksmean(1:BASELINE_NUMBER)),posAPeaksmean(BASELINE_NUMBER+1:end)]';
+    posBidx = [mean(posBPeaksmean(1:BASELINE_NUMBER)),posBPeaksmean(BASELINE_NUMBER+1:end)]';
+    devPosAidx = [mean(deviationPosfromA(1:BASELINE_NUMBER)),deviationPosfromA(BASELINE_NUMBER+1:end)]';
+    devPosBidx = [mean(deviationPosfromB(1:BASELINE_NUMBER)),deviationPosfromB(BASELINE_NUMBER+1:end)]';
 
-    matx = table([-1,testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, ROM', posBPeaksStd',posAPeaksStd');
+    matx = table([-1;testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, [mean(ROM(1:BASELINE_NUMBER));ROM(BASELINE_NUMBER+1:end)'], [mean(posBPeaksStd(1:BASELINE_NUMBER));posBPeaksStd(BASELINE_NUMBER+1:end)'],[mean(posAPeaksStd(1:BASELINE_NUMBER));posAPeaksStd(BASELINE_NUMBER+1:end)']);
 
     matx = renamevars(matx, 1:width(matx), ["ID","posB","posA", "Deviation from B","Deviation from A", ...
                                             "ROM", "std(posB)","std(posA)"]);

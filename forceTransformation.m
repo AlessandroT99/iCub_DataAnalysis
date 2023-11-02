@@ -164,7 +164,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     newCuttedSynchForceDataSet = cuttedSynchForceDataSet;
 
     if I_KIN_ERROR_EVALUATION
-        NUMBER_OF_SAMPLES = 200; %height(newCuttedSynchForceDataSet); 
+        NUMBER_OF_SAMPLES = height(newCuttedSynchForceDataSet); 
         evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
         jointError = zeros(NUMBER_OF_SAMPLES,length(armJointsA)-1);
         if numPerson < 0
