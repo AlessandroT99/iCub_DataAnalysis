@@ -21,7 +21,7 @@
 %   reattempting it, checking for its existance, if already there, skip the
 %   procedure and just load it.
 
-function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
+function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKinJointEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
 % This function is used to test the generated position from direct
 % kinematics and understand if using inverse kinematics would be possible
 % to get to the desidered joints with a very small error

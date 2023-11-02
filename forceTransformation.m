@@ -164,7 +164,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     newCuttedSynchForceDataSet = cuttedSynchForceDataSet;
 
     if I_KIN_ERROR_EVALUATION
-        NUMBER_OF_SAMPLES = height(newCuttedSynchForceDataSet); 
+        NUMBER_OF_SAMPLES = 200; %height(newCuttedSynchForceDataSet); 
         evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
         jointError = zeros(NUMBER_OF_SAMPLES,length(armJointsA)-1);
         if numPerson < 0
@@ -267,7 +267,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             
             % Inverse Kinematic Evaluation
             if i < NUMBER_OF_SAMPLES
-                [evaluatedJointsDataSet(i,:), referenceConfig, referencePos, jointError(i,:)] = iKinErrorEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson); 
+                [evaluatedJointsDataSet(i,:), referenceConfig, referencePos, jointError(i,:)] = iKinJointEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson); 
             end
 
             if i == 1 % Only after the first iteration
@@ -275,6 +275,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             else 
                 if i == NUMBER_OF_SAMPLES % Only after the last iKin iteration
                     fprintf(" Completed in %s minutes\n",duration(0,0,toc(iKinTime),'Format','mm:ss.SS'))
+                    if NUMBER_OF_SAMPLES < height(newCuttedSynchForceDataSet)
+                        TMatrices = tic;
+                        fprintf("          .Evaluation of the remaining %d transformation matrices...",height(newCuttedSynchForceDataSet)-NUMBER_OF_SAMPLES)
+                    end
                 end
             end
         end
@@ -302,6 +306,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         newCuttedSynchForceDataSet.Fx(i) = F(1);
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);
+    end
+
+    if NUMBER_OF_SAMPLES < height(newCuttedSynchForceDataSet)
+        fprintf("     Completed in %s minutes\n",duration(0,0,toc(TMatrices),'Format','mm:ss.SS'))
     end
     
     %% Plot new force dataset
@@ -386,14 +394,24 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     end
 
     %% Elaboration of the new evaluated joints
-    finalJointsDataSet = array2table([cuttedSynchForceDataSet.Time, evaluatedJointsDataSet]);
+    finalJointsDataSet = array2table([cuttedSynchForceDataSet.Time(1:NUMBER_OF_SAMPLES), evaluatedJointsDataSet]);
     finalJointsDataSet = renamevars(finalJointsDataSet,1:width(finalJointsDataSet), ...
                                    ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
 
     %% Evaluation of the error of the force transformation
-    if numPerson < JOINTS_ONLY_FOR_BASELINE
-        wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName);
+    % To elaborate this results is fundamental that the produced newCuttedSynchForceDataSet is full length
+    if numPerson < JOINTS_ONLY_FOR_BASELINE && height(newCuttedSynchForceDataSet) == height(cuttedSynchForceDataSet)
+        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName);
     end
+    
+    %% Save the data
+    mkdir ..\ProcessedData\ForceTransformationData;
+    if numPerson < 0
+        path = strjoin(["..\ProcessedData\ForceTransformationData\B",num2str(3+numPerson)],"");
+    else
+        path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
+    end
+    save(path,"finalJointsDataSet","newCuttedSynchForceDataSet","jointError", "phaseError", "moduleError", "transformationError");
 
     %% DH matrices evaluation for POS A from hand to OF - ONLY HAND REFERENCE SYSTEM - USEFULL FOR GRAPH PLOTTING
 %     % DH matrices evaluation for POS A from hand to OF

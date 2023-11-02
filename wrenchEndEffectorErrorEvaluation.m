@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, handInvolved, numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName)
+function [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, handInvolved, numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName)
 % This function is used to check the error made from force transformation
 % alghoritm making a comparison with the data dumped from the /wholeBodyDynamics/left_arm/cartesianEndEffectorWrench:o 
 % port, which corresponds to the force correctly rotated into the desidered reference system
@@ -73,10 +73,14 @@ function wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, handInvolv
         tmpCuttedSynchWrenchDataSet(:,j-1) = tmpSynchWrenchDataSet(posStart:posEnd)';
     end
     cuttedSynchWrenchDataSet = array2table(tmpCuttedSynchWrenchDataSet);
-    cuttedSynchWrenchDataSet = renamevars(cuttedSynchWrenchDataSet,1:width(cuttedSynchWrenchDataSet),["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
+    cuttedSynchWrenchDataSet = renamevars(cuttedSynchWrenchDataSet,1:width(cuttedSynchWrenchDataSet),["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
     cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchWrenchDataSet)';
 
     transformationError = cuttedSynchWrenchDataSet.Fy - newCuttedSynchForceDataSet.Fy;
+    fftIdeal = fft(cuttedSynchWrenchDataSet.Fy);
+    fftReal = fft(newCuttedSynchForceDataSet.Fy);
+    phaseError = phase(fftIdeal)-phase(fftReal);
+    moduleError = abs(fftIdeal)-abs(fftReal);
     meanError = mean(transformationError);
 
     % Plot results

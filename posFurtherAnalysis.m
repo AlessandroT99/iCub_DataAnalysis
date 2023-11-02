@@ -18,7 +18,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
             maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
             movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
             peaksInitialAndFinalVariation, synchroEfficiency, posAPeaksStd, ...
-            posBPeaksStd, posAPeaksmean, posBPeaksmean] = ...
+            posBPeaksStd, posAPeaksmean, posBPeaksmean, ROM] = ...
               posFurtherAnalysis(synchPosDataSet,numPerson,personParam,baseline)
 % The main aim of this function is to elaborate position signals in order to extract
 % some interesting data that would be usefull to compare with the overrall
@@ -58,6 +58,41 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
     [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
     minPeaksVal = -minPeaksVal;
+    
+    % Cleaning the peaks from doubles
+    timeThreshold = 0.7*100; % Check that this has to be lower than the average phase duration for baselines
+    for i = 1:length(minLocalization)-1
+        for k = i+1:length(minLocalization) 
+            if k > length(minLocalization) || i > length(minLocalization)-1
+                break;
+            end
+            if abs(minLocalization(i) - minLocalization(k)) <= timeThreshold
+                if minLocalization(i) <= minLocalization(k)
+                    minLocalization(i) = [];
+                    minPeaksVal(i) = [];
+                else
+                    minLocalization(k) = [];
+                    minPeaksVal(k) = [];
+                end
+            end
+        end
+    end
+    for i = 1:length(maxLocalization)-1
+        for k = i+1:length(maxLocalization)
+            if k > length(maxLocalization) || i > length(maxLocalization)-1
+                break;
+            end
+            if abs(maxLocalization(i) - maxLocalization(k)) <= timeThreshold
+                if maxLocalization(i) <= maxLocalization(k)
+                    maxLocalization(i) = [];
+                    maxPeaksVal(i) = [];
+                else
+                    maxLocalization(k) = [];
+                    maxPeaksVal(k) = [];
+                end
+            end
+        end
+    end
 
     for i = 1:length(maxPeaksVal)
         if strcmp(personParam(5),"DX") == 1
@@ -83,8 +118,8 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     fig1 = figure('Name','Phases duration');
     fig1.WindowState = 'maximized';
     hold on, grid on
-    plot(HtoR.*60,'r-','DisplayName','Human to Robot phase')
-    plot(RtoH.*60,'b-','DisplayName','Robot to Human phase')
+    plot(HtoR.*60,'ro','DisplayName','Human to Robot phase')
+    plot(RtoH.*60,'bo','DisplayName','Robot to Human phase')
     yline(meanHtoR.*60,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
     yline(meanRtoH.*60,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
     title("Time length of phases",defaultTitleName)
@@ -130,6 +165,7 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     end
     maxMinAverageDistance = maxMinAverageDistance/i;
     p = polyfit(1:length(movementRange),movementRange,fittingOrder);
+    ROM = mean(movementRange);
     movementRange = polyval(p,linspace(1,length(movementRange)));
 
     %% Peaks variation 

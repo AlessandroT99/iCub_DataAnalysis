@@ -95,6 +95,7 @@ posAPeaksStd = notConsideredValue.*ones(1,numPeople);
 posBPeaksStd = notConsideredValue.*ones(1,numPeople);
 posAPeaksmean = notConsideredValue.*ones(1,numPeople);
 posBPeaksmean = notConsideredValue.*ones(1,numPeople);
+ROM = notConsideredValue.*ones(1,numPeople);
 testedPeople = [];
 
 %% Usefull data to be saved
@@ -220,7 +221,7 @@ for i = 1:numPeople
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), synchroEfficiency(i,:), posAPeaksStd(i), ...
-            posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i)] = ...
+            posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i), ROM(i)] = ...
             posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline);
         fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
@@ -304,6 +305,7 @@ posAPeaksStd = posAPeaksStd(posAPeaksStd~=notConsideredValue).*100;
 posBPeaksStd = posBPeaksStd(posBPeaksStd~=notConsideredValue).*100;
 posAPeaksmean = posAPeaksmean(posAPeaksmean~=notConsideredValue).*100;
 posBPeaksmean = posBPeaksmean(posBPeaksmean~=notConsideredValue).*100;
+ROM = ROM(ROM~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
@@ -314,7 +316,7 @@ plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople);
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM);
 fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
 %% Conclusion of the main

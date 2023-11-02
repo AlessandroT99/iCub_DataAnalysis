@@ -324,6 +324,41 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     upperPeaksBound = mean(maxPeaksVal);
     lowerPeaksBound = mean(minPeaksVal);
 
+    % Cleaning the peaks from doubles
+    timeThreshold = 0.7*100; % Check that this has to be lower than the average phase duration for baselines
+    for i = 1:length(minLocalization)-1
+        for k = i+1:length(minLocalization) 
+            if k > length(minLocalization) || i > length(minLocalization)-1
+                break;
+            end
+            if abs(minLocalization(i) - minLocalization(k)) <= timeThreshold
+                if minLocalization(i) <= minLocalization(k)
+                    minLocalization(i) = [];
+                    minPeaksVal(i) = [];
+                else
+                    minLocalization(k) = [];
+                    minPeaksVal(k) = [];
+                end
+            end
+        end
+    end
+    for i = 1:length(maxLocalization)-1
+        for k = i+1:length(maxLocalization)
+            if k > length(maxLocalization) || i > length(maxLocalization)-1
+                break;
+            end
+            if abs(maxLocalization(i) - maxLocalization(k)) <= timeThreshold
+                if maxLocalization(i) <= maxLocalization(k)
+                    maxLocalization(i) = [];
+                    maxPeaksVal(i) = [];
+                else
+                    maxLocalization(k) = [];
+                    maxPeaksVal(k) = [];
+                end
+            end
+        end
+    end
+
     posStart = min(minLocalization(1),maxLocalization(1));
     posEnd = max(minLocalization(end),maxLocalization(end));
 
@@ -422,7 +457,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
     if numPerson > 0
-        textPosX = cuttedElapsedTime(end)+0.1;
+        textPosX = cuttedElapsedTime(end)+0.2;
         if strcmp(personParameters(5),"DX") == 1
             yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
@@ -585,17 +620,26 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
-        % Has been evaluated that the force RS has to be rotated and translated
-        % into the EF RS with respect to the OF
-        forceTransformTime = tic;
-        fprintf("   .Computing force transformation...")
-        if numPerson < 0 % Up to know this procedure can only be done on the baselines
-            [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
-                cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\ForceTransformationData\B",num2str(3+numPerson),".mat"],"");
         else
-            finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+            path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
         end
-        fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
+        if exist(path,'file')
+            load path;
+        else
+            % Has been evaluated that the force RS has to be rotated and translated
+            % into the EF RS with respect to the OF
+            forceTransformTime = tic;
+            fprintf("   .Computing force transformation...")
+            if numPerson < 0 % Up to know this procedure can only be done on the baselines
+                [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
+                    cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
+            else
+                finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+            end
+            fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
+        end
     else
         finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
     end
