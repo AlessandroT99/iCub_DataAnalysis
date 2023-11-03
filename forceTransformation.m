@@ -34,7 +34,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     %% Simulation parameters
     IMAGE_SAVING = 1;               % Used to save some chosen plots
     PAUSE_TIME = 8;                 % Used to let the window of the plot get the full resolution size before saving
-    I_KIN_ERROR_EVALUATION = 1;     % If 0 the stated error is not evaluated
+    I_KIN_ERROR_EVALUATION = 0;     % If 0 the stated error is not evaluated
     JOINTS_ONLY_FOR_BASELINE = 0;   % If 0 the joints datahas been collected only for baselines and so portion of the code become exclusive for them
                                     % to turn this off put a number way higher than the number of tests analyzed
     
@@ -119,6 +119,11 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
         fprintf("                          Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
+        %% Evaluation of direct kinematics alghoritm error
+        if numPerson < JOINTS_ONLY_FOR_BASELINE
+            [dirKinPhaseError, dirKinModuleError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName);
+        end
+
         %% Print shoulder pitch joint dependencies with position axis
         fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
         fig2DJointTraj.WindowState = 'maximized';
@@ -302,7 +307,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         end
     
         % 3 and 4. Evaluating the force resultant for each sample
-        F = [cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]*T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1];
+        F = T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]';
         newCuttedSynchForceDataSet.Fx(i) = F(1);
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);

@@ -461,13 +461,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         if strcmp(personParameters(5),"DX") == 1
             yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
-            text(textPosX,baselineBoundaries(1,1),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle')
-            text(textPosX,baselineBoundaries(2,1),'Robot Phase','FontSize',10, 'VerticalAlignment', 'middle')
+            text(textPosX,baselineBoundaries(1,1),'Human Phase','FontSize',10, 'VerticalAlignment', 'left')
+            text(textPosX,baselineBoundaries(2,1),'Robot Phase','FontSize',10, 'VerticalAlignment', 'left')
         else
             yline(baselineBoundaries(1,2),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,2),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
-            text(textPosX,baselineBoundaries(1,2),'Robot Phase','FontSize',10, 'VerticalAlignment', 'middle')
-            text(textPosX,baselineBoundaries(2,2),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle')
+            text(textPosX,baselineBoundaries(1,2),'Robot Phase','FontSize',10, 'VerticalAlignment', 'left')
+            text(textPosX,baselineBoundaries(2,2),'Human Phase','FontSize',10, 'VerticalAlignment', 'left')
         end
     end
     title("Cutted signal starting and ending points")
@@ -495,6 +495,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         end
         pause(PAUSE_TIME);
         exportgraphics(fig1,path)
+
         mkdir ..\ProcessedData\PositionProcessing;
         if numPerson < 0
             path = strjoin(["..\ProcessedData\PositionProcessing\B",num2str(3+numPerson),".png"],"");
@@ -508,6 +509,15 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % Reference "tic" at the beginning in the "Parameters for the simulation" section 
     fprintf("                                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS')) 
     
+    %% Saving position data
+    mkdir ..\ProcessedData\SynchedPositionData;
+    if numPerson < 0
+        path = strjoin(["..\ProcessedData\SynchedPositionData\B",num2str(3+numPerson)],"");
+    else
+        path = strjoin(["..\ProcessedData\SynchedPositionData\P",num2str(numPerson)],"");
+    end
+    save(path,"cuttedPosDataSet");
+
     %% FORCE ANALYSIS
     tic
     fprintf("   .Computing force signal cutting and synching...")
@@ -626,7 +636,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
             path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
         end
         if exist(path,'file')
-            load path;
+            load(path);
         else
             % Has been evaluated that the force RS has to be rotated and translated
             % into the EF RS with respect to the OF
