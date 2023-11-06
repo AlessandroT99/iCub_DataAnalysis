@@ -62,7 +62,7 @@ fprintf("Importing input data and simulation models...\n\n")
 % Has been chosen the Paris01 iCub due to the low number of reference
 % frames included, in fact almost all the other models included also the
 % skin reference frames, which where not usefull for this purpose.
-iCub = importrobot("..\icub-models\iCub\robots\iCubParis01\model.urdf");
+iCub = importrobot("..\icub-models\iCub\robots\iCubNancy01\model.urdf");
 % Modify numDoFTBase number into analyticalInverseKinematics() 
 aik = analyticalInverseKinematics(iCub);
 opts = showdetails(aik);
@@ -316,7 +316,7 @@ plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM);
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM, people.Delta_RTs_(testedPeople));
 fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
 %% Conclusion of the main

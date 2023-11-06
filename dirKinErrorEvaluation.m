@@ -33,7 +33,7 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
             if strcmp(involvedHand,"DX") == 1
                 T = getTransform(robot,pose,'root_link','r_hand_dh_frame');
             else
-                T = getTransform(robot,pose,'l_hand_dh_frame','base_link');
+                T = getTransform(robot,pose,'l_hand_dh_frame','root_link');
             end
         else
             if strcmp(involvedHand,"SX") == 1

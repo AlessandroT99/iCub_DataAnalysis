@@ -21,7 +21,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM)
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM, nearEnd)
 % This function takes in input the data generated from the position and
 % force further analysis functions and plot usefull scatter and other
 % diagrams in order to visualize trends or similars.
@@ -72,10 +72,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig2 = figure('Name','Phases duration scatter');
     fig2.WindowState = 'maximized';
     grid on, hold on
-    scatter(meanRtoH(1:BASELINE_NUMBER)*60,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
-    scatter(meanHtoR(1:BASELINE_NUMBER)*60,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
-    scatter(meanRtoH(BASELINE_NUMBER+1:end)*60,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    scatter(meanHtoR(BASELINE_NUMBER+1:end)*60,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(meanRtoH(1:BASELINE_NUMBER)*60./10000,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
+    scatter(meanHtoR(1:BASELINE_NUMBER)*60./10000,1:BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(meanRtoH(BASELINE_NUMBER+1:end)*60./10000,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(meanHtoR(BASELINE_NUMBER+1:end)*60./10000,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
     title("Trend of phases duration")
     xlabel("Elapsed Time [ s ]"), ylabel("# Test")
     desideredPhase = 1.5;
@@ -159,13 +159,96 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5,"..\ProcessedData\Scatters\PeaksValues.png")
+        exportgraphics(fig5,"..\ProcessedData\Scatters\ROM_NoPhoto.png")
         close(fig5);
     end
 
-    % Another alternative
+    %% Another alternative - POSITION PEAKS INTO NEAR END EFFECT
     fig5d = figure('Name','Range of Motion [ROM]');
     fig5d.WindowState = 'maximized';
+    hold on
+    
+    nearEnd = nearEnd.*100;
+    baselineYPos = min(nearEnd)-5;
+    evaluatedTestInterval = zeros(1,length(nearEnd));
+    for j = 1:length(nearEnd)
+        if ~isnan(nearEnd(j))
+            evaluatedTestInterval(j) = j+BASELINE_NUMBER;
+        end
+    end
+    evaluatedTestInterval = evaluatedTestInterval(evaluatedTestInterval~=0);
+
+    % iCub DX hand - max
+    scatter(maxPeaksAverage(BASELINE_NUMBER).*100,baselineYPos,MarkerDimension,clearRed,'filled')
+    scatter(maxPeaksAverage(logical([0,0,maxPeaksAverage(evaluatedTestInterval)>0])).*100,nearEnd(logical(maxPeaksAverage(evaluatedTestInterval)>0)),MarkerDimension,'red','LineWidth',EmptyPointLine)
+
+    % iCub DX hand - max reference line
+    xline(maxPeaksAverage(BASELINE_NUMBER)*100,'r--','LineWidth',0.5)
+
+    % iCub SX hand - max
+    scatter(abs(maxPeaksAverage(1).*100),1,MarkerDimension,clearBlue,'filled')
+    scatter(abs(maxPeaksAverage(logical([0,0,maxPeaksAverage(evaluatedTestInterval)<0])).*100),nearEnd(logical(maxPeaksAverage(evaluatedTestInterval)<0)),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+
+    % iCub SX hand - max reference line
+    xline(abs(maxPeaksAverage(1)*100),'b--','LineWidth',0.5)
+
+    % Plot union lines between points to describe ROM
+    plot(abs([maxPeaksAverage(evaluatedTestInterval).*100;minPeaksAverage(evaluatedTestInterval).*100]),[evaluatedTestInterval;evaluatedTestInterval],':','LineWidth',1,'Color',clearGreen)
+
+    % max reference line
+    %xline(mean(abs([minPeaksAverage(1),maxPeaksAverage(BASELINE_NUMBER)].*100)),'k--','LineWidth',DottedLineWidth)
+    % min reference line
+    %xline(mean(abs([maxPeaksAverage(1),minPeaksAverage(BASELINE_NUMBER)].*100)),'k--','LineWidth',DottedLineWidth)
+
+    % iCub DX hand - min
+    scatter(minPeaksAverage(BASELINE_NUMBER).*100,BASELINE_NUMBER,MarkerDimension,clearRed,'filled')
+    scatter(minPeaksAverage(logical([0,0,minPeaksAverage(evaluatedTestInterval)>0])).*100,nearEnd(logical(minPeaksAverage(evaluatedTestInterval)>0)),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    xline(minPeaksAverage(BASELINE_NUMBER)*100,'r--','LineWidth',0.5)
+
+    % iCub SX hand - min
+    scatter(abs(minPeaksAverage(1).*100),1,MarkerDimension,clearBlue,'filled')
+    scatter(abs(minPeaksAverage(logical([0,0,minPeaksAverage(evaluatedTestInterval)<0])).*100),nearEnd(logical(minPeaksAverage(evaluatedTestInterval)<0)),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    xline(abs(minPeaksAverage(1)*100),'b--','LineWidth',0.5)
+
+    % Error bars
+    minPeaksStandardError = minPeaksAverage(evaluatedTestInterval)./sqrt(length(posAPeaksStd));
+    errorbar(minPeaksAverage, nearEnd, minPeaksStandardError, 'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
+    maxPeaksStandardError = maxPeaksAverage(evaluatedTestInterval)./sqrt(length(posAPeaksStd));
+    errorbar(maxPeaksAverage, nearEnd, maxPeaksStandardError, 'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
+    
+
+    text(abs(minPeaksAverage(1))*100-0.5,1,"Max",'FontSize',8,'HorizontalAlignment','right')
+    text(minPeaksAverage(BASELINE_NUMBER)*100+0.5,1,"Min",'FontSize',8,'HorizontalAlignment','left')
+    title("Range Of Motion [ROM] of iCub hand")
+    legend('DX iCub Baseline','DX iCub interaction','DX Baseline Reference', 'SX iCub Baseline','SX iCub interaction','SX Baseline Reference','Range Of Motion [ROM]','Location','northwest')
+    xlabel("Peaks value [ cm ]"), ylabel("Near End Effect [ ms ]")
+    xShift = -15;
+    xDim = 7;
+    xlim([xShift-xDim,25])
+    set(gca, 'YDir','reverse')
+
+    iCubImg = imread("..\InputData\images\iCub_back.png");
+    iCubImg = flipud(iCubImg);
+    image(iCubImg,'xdata',[-xDim/2,xDim/2],'ydata',[0.5,xDim/0.65])
+
+    personImg = imread("..\InputData\images\guy_back.png");
+    personImg = flipud(personImg);
+    image(personImg,'xdata',[xShift-xDim/2.5,xShift+xDim/2.5],'ydata',[0.8,xDim/0.65])
+    
+    text(0, xDim/0.65+2.5, "Robot Side", "FontSize", 14, "HorizontalAlignment", "center")
+    text(xShift, xDim/0.65+2.5, "Human Side", "FontSize", 14, "HorizontalAlignment", "center")
+    
+    hold off
+    
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        exportgraphics(fig5d,"..\ProcessedData\Scatters\ROM_NearEnd.png")
+        close(fig5d);
+    end
+
+     %% Another alternative - POSITION PEAKS INTO TEST NUMBER
+    fig5e = figure('Name','Range of Motion [ROM]');
+    fig5e.WindowState = 'maximized';
     hold on
     
     % iCub DX hand - max
@@ -224,131 +307,27 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5d,"..\ProcessedData\Scatters\ROM.png")
-        close(fig5d);
+        exportgraphics(fig5e,"..\ProcessedData\Scatters\ROM_TestNumber.png")
+        close(fig5e);
     end
 
-    % Also plotting scatters with mean and variance as axis
-    %% POS A PLOT
-%     fig5a = figure('Name','Values of peaks posA, mean and variance');
-%     fig5a.WindowState = 'maximized';
-%     subplot(1,2,1), grid on, hold on
-%     
+    %% POS A PLOT  
     % Generate y data
     deviationPosfromA = zeros(1,length(posAPeaksmean));
     deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])) = abs(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0]))-posAPeaksmean(1));
     deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])) = abs(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0]))-posAPeaksmean(BASELINE_NUMBER));
-%     
-%     scatter(posAPeaksmean(1),deviationPosfromA(1),MarkerDimension,clearRed,'filled')
-%     scatter(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])),deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])),MarkerDimension,'red','LineWidth',EmptyPointLine)
-%     scatter(posAPeaksmean(BASELINE_NUMBER),deviationPosfromA(BASELINE_NUMBER),MarkerDimension,clearBlue,'filled')
-%     scatter(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])),deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     
-%     scatter(posAPeaksmean(logical([0,0,personWhoFeelsFollowerOrLeader==-1])),deviationPosfromA(logical([0,0,personWhoFeelsFollowerOrLeader==-1])),MarkerDimension/3,clearGreen,'filled')
-%     scatter(posAPeaksmean(logical([0,0,personWhoFeelsFollowerOrLeader==1])),deviationPosfromA(logical([0,0,personWhoFeelsFollowerOrLeader==1])),MarkerDimension/3,clearYellow,'filled')
-%     
-%     xline(posAPeaksmean(1:BASELINE_NUMBER),'k--','LineWidth', DottedLineWidth)
-%     
-%     % Replot something in order to have the correct legend and the dotted line behind all
-%     scatter(posAPeaksmean(1),deviationPosfromA(1),MarkerDimension,clearRed,'filled')
-%     scatter(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])),deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)<0])),MarkerDimension,'red','LineWidth',EmptyPointLine)
-%     scatter(posAPeaksmean(BASELINE_NUMBER),deviationPosfromA(BASELINE_NUMBER),MarkerDimension,clearBlue,'filled')
-%     scatter(posAPeaksmean(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])),deviationPosfromA(logical([0,0,posAPeaksmean(BASELINE_NUMBER+1:end)>0])),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     
-%     posAStandardError = posAPeaksStd./sqrt(length(posAPeaksStd));
-%     errorbar(posAPeaksmean, deviationPosfromA, posAStandardError, 'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-%     
-%     title("Position A peaks values")
-%     xlabel("Mean [ cm ]")
-%     ylabel("Deviation from baseline [ cm ]")
-%     legend('Baseline iCub-SX','Collected data iCub-SX','Baseline iCub-DX','Collected data iCub-DX', 'Felt Follower', 'Felt Leader','Location','southoutside')
-%     hold off
 
     %% POS B PLOT
-%     subplot(1,2,2), grid on, hold on
-% 
     % Generate y data
     deviationPosfromB = zeros(1,length(posBPeaksmean));
     deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])) = abs(posBPeaksmean(1)-posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])));
     deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])) = abs(posBPeaksmean(BASELINE_NUMBER)-posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])));
-%     
-%     scatter(posBPeaksmean(1),deviationPosfromB(1),MarkerDimension,clearBlue,'filled')
-%     scatter(posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])),deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])),MarkerDimension,'red','LineWidth',EmptyPointLine)
-%     scatter(posBPeaksmean(BASELINE_NUMBER),deviationPosfromB(BASELINE_NUMBER),MarkerDimension,clearRed,'filled')
-%     scatter(posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])),deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     
-%     scatter(posBPeaksmean(logical([0,0,personWhoFeelsFollowerOrLeader==-1])),deviationPosfromB(logical([0,0,personWhoFeelsFollowerOrLeader==-1])),MarkerDimension/3,clearGreen,'filled')
-%     scatter(posBPeaksmean(logical([0,0,personWhoFeelsFollowerOrLeader==1])),deviationPosfromB(logical([0,0,personWhoFeelsFollowerOrLeader==1])),MarkerDimension/3,clearYellow,'filled')
-%     
-%     xline(posBPeaksmean(1:BASELINE_NUMBER),'k--','LineWidth', DottedLineWidth)
-%     
-%     % Replot something in order to have the correct legend and the dotted line behind all
-%     scatter(posBPeaksmean(1),deviationPosfromB(1),MarkerDimension,clearBlue,'filled')
-%     scatter(posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])),deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)>0])),MarkerDimension,'red','LineWidth',EmptyPointLine)
-%     scatter(posBPeaksmean(BASELINE_NUMBER),deviationPosfromB(BASELINE_NUMBER),MarkerDimension,clearRed,'filled')
-%     scatter(posBPeaksmean(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])),deviationPosfromB(logical([0,0,posBPeaksmean(BASELINE_NUMBER+1:end)<0])),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     
-%     posBStandardError = posBPeaksStd./sqrt(length(posBPeaksStd));
-%     errorbar(posBPeaksmean, deviationPosfromB, posBStandardError, 'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-% 
-%     title("Position B peaks values")
-%     xlabel("Mean [ cm ]")
-%     ylabel("Deviation from baseline [ cm ]")
-%     legend('Baseline iCub-SX','Collected data iCub-SX','Baseline iCub-DX','Collected data iCub-DX', 'Felt Follower', 'Felt Leader','Location','southoutside')
-%     hold off
-% 
-%     sgtitle("Evaluation of position deviation for boundaries position")
-% 
-%     if IMAGE_SAVING
-%         pause(PAUSE_TIME);
-%         exportgraphics(fig5a,"..\ProcessedData\Scatters\PeaksPosBoundariesDeviation.png")
-%         close(fig5a);
-%     end
 
     %% DISTANCE AVERAGE BETWEEN POS A AND POS B PLOT
-%     fig5b = figure('Name','Values of average peaks, mean and variance');
-%     fig5b.WindowState = 'maximized';
-%     grid on, hold on
-%     
     % Generate y data
     deviationPosfromAverage = zeros(1,length(meanPos));
     deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0]))-meanPos(1));
     deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0]))-meanPos(BASELINE_NUMBER));
-%     
-%     scatter(meanPos(1).*100,deviationPosfromAverage(1).*100,MarkerDimension,clearRed,'filled')
-%     scatter(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])).*100,deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])).*100,MarkerDimension,'black','LineWidth',EmptyPointLine)
-%     
-%     scatter(meanPos(logical([0,0,personWhoFeelsFollowerOrLeader==-1])).*100,deviationPosfromAverage(logical([0,0,personWhoFeelsFollowerOrLeader==-1])).*100,MarkerDimension/3,clearGreen,'filled')
-%     scatter(meanPos(logical([0,0,personWhoFeelsFollowerOrLeader==1])).*100,deviationPosfromAverage(logical([0,0,personWhoFeelsFollowerOrLeader==1])).*100,MarkerDimension/3,clearYellow,'filled')
-% 
-%     scatter(meanPos(BASELINE_NUMBER).*100,deviationPosfromAverage(BASELINE_NUMBER).*100,MarkerDimension,clearRed,'filled')
-%     scatter(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])).*100,deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])).*100,MarkerDimension,'black','LineWidth',EmptyPointLine)
-%     
-%     xline(meanPos(1:BASELINE_NUMBER).*100,'k--','LineWidth', DottedLineWidth)
-%     text((minPeaksAverage(1)+maxPeaksAverage(1))./2.*100+1,1,"iCub SX",'FontSize',12,'HorizontalAlignment','left')
-%     text((maxPeaksAverage(BASELINE_NUMBER)+minPeaksAverage(BASELINE_NUMBER))./2.*100-1,1,"iCub DX",'FontSize',12,'HorizontalAlignment','right')
-%     
-%     % Replot something in order to have the correct legend and the dotted line behind all
-%     scatter(meanPos(1).*100,deviationPosfromAverage(1).*100,MarkerDimension,clearRed,'filled')
-%     scatter(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])).*100,deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)<0])).*100,MarkerDimension,'black','LineWidth',EmptyPointLine)
-%     scatter(meanPos(BASELINE_NUMBER).*100,deviationPosfromAverage(BASELINE_NUMBER).*100,MarkerDimension,clearRed,'filled')
-%     scatter(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])).*100,deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])).*100,MarkerDimension,'black','LineWidth',EmptyPointLine)
-%     
-%     posStandardError = stdPos.*100./sqrt(length(stdPos));
-%     errorbar(meanPos.*100, deviationPosfromAverage.*100, posStandardError, 'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-% 
-%     xlabel("Mean [ cm ]")
-%     ylabel("Deviation from baseline [ cm ]")
-%     legend('Baseline iCub','Collected data', 'Felt Follower', 'Felt Leader','Location','eastoutside')
-%     hold off
-% 
-%     sgtitle("Evaluation of position deviation for average position")
-% 
-%     if IMAGE_SAVING
-%         pause(PAUSE_TIME);
-%         exportgraphics(fig5b,"..\ProcessedData\Scatters\PeaksPosAverageDeviation.png")
-%         close(fig5b);
-%     end
 
     %% Saving matrices usefull for statistical analysis
     posAidx = [mean(posAPeaksmean(1:BASELINE_NUMBER)),posAPeaksmean(BASELINE_NUMBER+1:end)]';
@@ -451,31 +430,26 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, 
     fig10 = figure('Name','Peaks variation plot');
     fig10.WindowState = 'maximized';
     grid on, hold on
-    plot(1:size(maxPeaksVariation,2),maxPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
-    hmax = plot(1:size(maxPeaksVariation,2),maxPeaksVariation(BASELINE_NUMBER+1:end,:).*100,'-','LineWidth',1.5);
-    plot(1:size(minPeaksVariation,2),minPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
-    hmin = plot(1:size(minPeaksVariation,2),minPeaksVariation(BASELINE_NUMBER+1:end,:).*100.,'-','LineWidth',1.5);
-    plot(1:size(maxPeaksVariation,2),maxPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
-    plot(1:size(minPeaksVariation,2),minPeaksVariation(1:BASELINE_NUMBER,:).*100,'k--','LineWidth',2.2)
+    plot(maxPeaksVariation(1,:).*100,1:size(maxPeaksVariation,2),'k-.','LineWidth',2.2)
+    plot(abs(minPeaksVariation(BASELINE_NUMBER,:)).*100,1:size(minPeaksVariation,2),'k--','LineWidth',2.2)
+    hmax = plot(abs(maxPeaksVariation(BASELINE_NUMBER+1:end,:)).*100,1:size(maxPeaksVariation,2),'-','LineWidth',1.5);
+    hmin = plot(abs(minPeaksVariation(BASELINE_NUMBER+1:end,:)).*100.,1:size(minPeaksVariation,2),'-','LineWidth',1.5);
     
-    legendName(1:BASELINE_NUMBER) = "Baseline variation";
+    legendName(1:BASELINE_NUMBER) = ["Baseline SX","Baseline DX"];
     for i = 1:size(maxPeaksVariation,1)-BASELINE_NUMBER
         set(hmax(i),'Color',customColors(i,:));
         set(hmin(i),'Color',customColors(i,:));
         legendName(i+BASELINE_NUMBER) = strjoin(["Test N. ",num2str(i)," variation"],"");
     end
 
-    text(50,-15,"HUMAN DX HAND",'HorizontalAlignment','center','FontSize', textFont)
-    text(50,15,"HUMAN SX HAND",'HorizontalAlignment','center','FontSize', textFont)
-    title("Trend of position movement ranges")
+    title("Range Of Motion [ROM] in time domain")
     legend(legendName,'Location','eastoutside')
-    xlabel("Simulation progress [ % ]")
-    ylabel("Variation [ cm ]")
+    ylabel("Simulation progress [ % ]"), xlabel("Variation [ cm ]")
     hold off
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig10,"..\ProcessedData\Scatters\PeaksVariation.png")
+        exportgraphics(fig10,"..\ProcessedData\Scatters\ROM_TimeDomain.png")
         close(fig10);
     end
     

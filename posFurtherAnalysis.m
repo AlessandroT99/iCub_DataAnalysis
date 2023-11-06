@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
+function [experimentDuration, meanHtoR_time, meanRtoH_time, nMaxPeaks, nMinPeaks, ...
             maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
             movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
             peaksInitialAndFinalVariation, synchroEfficiency, posAPeaksStd, ...
@@ -60,87 +60,182 @@ function [experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
     minPeaksVal = -minPeaksVal;
     
     % Cleaning the peaks from doubles
-    timeThreshold = 0.7*100; % Check that this has to be lower than the average phase duration for baselines
-    for i = 1:length(minLocalization)-1
-        for k = i+1:length(minLocalization) 
-            if k > length(minLocalization) || i > length(minLocalization)-1
-                break;
-            end
-            if abs(minLocalization(i) - minLocalization(k)) <= timeThreshold
-                if minLocalization(i) <= minLocalization(k)
-                    minLocalization(i) = [];
-                    minPeaksVal(i) = [];
-                else
-                    minLocalization(k) = [];
-                    minPeaksVal(k) = [];
-                end
-            end
-        end
-    end
-    for i = 1:length(maxLocalization)-1
-        for k = i+1:length(maxLocalization)
-            if k > length(maxLocalization) || i > length(maxLocalization)-1
-                break;
-            end
-            if abs(maxLocalization(i) - maxLocalization(k)) <= timeThreshold
-                if maxLocalization(i) <= maxLocalization(k)
-                    maxLocalization(i) = [];
-                    maxPeaksVal(i) = [];
-                else
-                    maxLocalization(k) = [];
-                    maxPeaksVal(k) = [];
-                end
-            end
-        end
-    end
+    [minPeaksVal,minLocalization,maxPeaksVal,maxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization);
 
-    for i = 1:length(maxPeaksVal)
-        if strcmp(personParam(5),"DX") == 1
-            if i+1 <= length(minLocalization) && i <= length(maxLocalization)
-                HtoR(i) = minLocalization(i+1)-maxLocalization(i);
-            end
-            if i <= length(minLocalization) && i <= length(maxLocalization)
-                RtoH(i) = maxLocalization(i)-minLocalization(i);
+    if minLocalization(1) < maxLocalization(1)
+        % So start before the min to max phase
+        if numPerson < 0
+            if strcmp(personParam(5),"SX")
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    RtoH_time(i) = maxLocalization(i)-minLocalization(i);
+                    RtoH_space(i) = maxPeaksVal(i)-minPeaksVal(i);
+                    if i+1 <= length(minLocalization)
+                        HtoR_time(i) = minLocalization(i+1)-maxLocalization(i);
+                        HtoR_space(i) = minPeaksVal(i+1)-maxPeaksVal(i);
+                    end
+                end
+            else
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    HtoR_time(i) = maxLocalization(i)-minLocalization(i);
+                    HtoR_space(i) = maxPeaksVal(i)-minPeaksVal(i);
+                    if i+1 <= length(minLocalization)
+                        RtoH_time(i) = minLocalization(i+1)-maxLocalization(i);
+                        RtoH_space(i) = minPeaksVal(i+1)-maxPeaksVal(i);
+                    end
+                end
             end
         else
-            if i <= length(minLocalization) && i <= length(maxLocalization)
-                RtoH(i) = minLocalization(i)-maxLocalization(i);
+            if strcmp(personParam(5),"DX")
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    RtoH_time(i) = maxLocalization(i)-minLocalization(i);
+                    RtoH_space(i) = maxPeaksVal(i)-minPeaksVal(i);
+                    if i+1 <= length(minLocalization)
+                        HtoR_time(i) = minLocalization(i+1)-maxLocalization(i);
+                        HtoR_space(i) = minPeaksVal(i+1)-maxPeaksVal(i);
+                    end
+                end
+            else
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    HtoR_time(i) = maxLocalization(i)-minLocalization(i);
+                    HtoR_space(i) = maxPeaksVal(i)-minPeaksVal(i);
+                    if i+1 <= length(minLocalization)
+                        RtoH_time(i) = minLocalization(i+1)-maxLocalization(i);
+                        RtoH_space(i) =  minPeaksVal(i+1)-maxPeaksVal(i);
+                    end
+                end
             end
-            if i <= length(minLocalization) && i+1 <= length(maxLocalization)
-                HtoR(i) = maxLocalization(i+1)-minLocalization(i);
+        end
+    else
+        if numPerson < 0
+            if strcmp(personParam(5),"SX")
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    RtoH_time(i) = minLocalization(i)-maxLocalization(i);
+                    RtoH_space(i) = minPeaksVal(i)-maxPeaksVal(i);
+                    if i+1 <= length(maxLocalization)
+                        HtoR_time(i) = maxLocalization(i+1)-minLocalization(i);
+                        HtoR_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                    end
+                end
+            else
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    HtoR_time(i) = minLocalization(i)-maxLocalization(i);
+                    HtoR_space(i) = minPeaksVal(i)-maxPeaksVal(i); 
+                    if i+1 <= length(maxLocalization)
+                        RtoH_time(i) = maxLocalization(i+1)-minLocalization(i);
+                        RtoH_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                    end
+                end
+            end
+        else
+            if strcmp(personParam(5),"DX")
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    RtoH_time(i) = minLocalization(i)-maxLocalization(i);
+                    RtoH_space(i) = minPeaksVal(i)-maxPeaksVal(i);
+                    if i+1 <= length(maxLocalization)
+                        HtoR_time(i) = maxLocalization(i+1)-minLocalization(i);
+                        HtoR_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                    end
+                end
+            else
+                for i = 1:min(length(minLocalization),length(maxLocalization))
+                    HtoR_time(i) = minLocalization(i)-maxLocalization(i);
+                    HtoR_space(i) = minPeaksVal(i)-maxPeaksVal(i);
+                    if i+1 <= length(maxLocalization)
+                        RtoH_time(i) = maxLocalization(i+1)-minLocalization(i);
+                        RtoH_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                    end
+                end
             end
         end
     end
-
-    meanHtoR = mean(HtoR);
-    meanRtoH = mean(RtoH);
+    
+    %% Plot results for phase time duration
+    meanHtoR_time = mean(HtoR_time);
+    meanRtoH_time = mean(RtoH_time);
 
     fig1 = figure('Name','Phases duration');
     fig1.WindowState = 'maximized';
     hold on, grid on
-    plot(HtoR.*60,'ro','DisplayName','Human to Robot phase')
-    plot(RtoH.*60,'bo','DisplayName','Robot to Human phase')
-    yline(meanHtoR.*60,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
-    yline(meanRtoH.*60,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
+    plot(HtoR_time.*60./10000,'ro','DisplayName','Human to Robot phase')
+    plot(RtoH_time.*60./10000,'bo','DisplayName','Robot to Human phase')
+    yline(meanHtoR_time.*60./10000,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
+    yline(meanRtoH_time.*60./10000,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
     title("Time length of phases",defaultTitleName)
     xlabel("Phase number")
     ylabel("Time [ s ]")
     legend('show')
     hold off
 
-    % Figure saving for phase duration
+    % Figure saving for phase time duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        mkdir ..\ProcessedData\PhaseDuration;
+        mkdir ..\ProcessedData\PhaseTimeDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseDuration\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PhaseTimeDuration\B",num2str(3+numPerson),".png"],"");
         else    
-            path = strjoin(["..\ProcessedData\PhaseDuration\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PhaseTimeDuration\P",num2str(numPerson),".png"],"");
         end
-        exportgraphics(gcf,path)
+        exportgraphics(fig1,path)
     end
 
-    close(gcf);
+    %% Plot results for phase space duration
+    meanHtoR_space = mean(HtoR_space);
+    meanRtoH_space = mean(RtoH_space);
+
+    fig2 = figure('Name','Phases duration');
+    fig2.WindowState = 'maximized';
+    hold on, grid on
+    plot(HtoR_space.*100,'ro','DisplayName','Human to Robot phase')
+    plot(RtoH_space.*100,'bo','DisplayName','Robot to Human phase')
+    yline(meanHtoR_space.*100,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
+    yline(meanRtoH_space.*100,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
+    title("Range Of Motion of phases",defaultTitleName)
+    xlabel("Phase number")
+    ylabel("Phase Range Of Motion [ROM] [ cm ]")
+    legend('show')
+    hold off
+
+    % Figure saving for phase space duration
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        mkdir ..\ProcessedData\PhaseSpaceDuration;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\B",num2str(3+numPerson),".png"],"");
+        else    
+            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
+        end
+        exportgraphics(fig2,path)
+    end
+
+    % Alternative versione with absolute values
+    fig3 = figure('Name','Phases duration');
+    fig3.WindowState = 'maximized';
+    hold on, grid on
+    plot(abs(HtoR_space).*100,'ro','DisplayName','Human to Robot phase')
+    plot(abs(RtoH_space).*100,'bo','DisplayName','Robot to Human phase')
+    yline(abs(meanHtoR_space).*100,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
+    yline(abs(meanRtoH_space).*100,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
+    title("Range Of Motion of phases",defaultTitleName)
+    xlabel("Phase number")
+    ylabel("Phase Range Of Motion [ROM] [ cm ]")
+    legend('show')
+    hold off
+
+    % Figure saving for phase space duration
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        mkdir ..\ProcessedData\PhaseSpaceDuration;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\B",num2str(3+numPerson),".png"],"");
+        else    
+            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
+        end
+        exportgraphics(fig3,path)
+    end
+
+    close(fig1);
+    close(fig2);
+    close(fig3);
 
     %% Peaks values
     nMaxPeaks = length(maxPeaksVal);

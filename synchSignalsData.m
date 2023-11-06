@@ -38,8 +38,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
-    PLOT_TRAJECTORIES = 0;                  % If equal to 0 does not plot hand trajectories
+    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
+    PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
@@ -325,39 +325,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     lowerPeaksBound = mean(minPeaksVal);
 
     % Cleaning the peaks from doubles
-    timeThreshold = 0.7*100; % Check that this has to be lower than the average phase duration for baselines
-    for i = 1:length(minLocalization)-1
-        for k = i+1:length(minLocalization) 
-            if k > length(minLocalization) || i > length(minLocalization)-1
-                break;
-            end
-            if abs(minLocalization(i) - minLocalization(k)) <= timeThreshold
-                if minLocalization(i) <= minLocalization(k)
-                    minLocalization(i) = [];
-                    minPeaksVal(i) = [];
-                else
-                    minLocalization(k) = [];
-                    minPeaksVal(k) = [];
-                end
-            end
-        end
-    end
-    for i = 1:length(maxLocalization)-1
-        for k = i+1:length(maxLocalization)
-            if k > length(maxLocalization) || i > length(maxLocalization)-1
-                break;
-            end
-            if abs(maxLocalization(i) - maxLocalization(k)) <= timeThreshold
-                if maxLocalization(i) <= maxLocalization(k)
-                    maxLocalization(i) = [];
-                    maxPeaksVal(i) = [];
-                else
-                    maxLocalization(k) = [];
-                    maxPeaksVal(k) = [];
-                end
-            end
-        end
-    end
+    [minPeaksVal,minLocalization,maxPeaksVal,maxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization);
 
     posStart = min(minLocalization(1),maxLocalization(1));
     posEnd = max(minLocalization(end),maxLocalization(end));
@@ -452,22 +420,24 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     subplot(2,1,2), hold on, grid on
     plot(cuttedElapsedTime,cuttedPosDataSet.yPos,'k-','DisplayName', 'y position_{cutted}')
     plot(cuttedElapsedTime,cuttedAverageBehavior,'b--','DisplayName','Average behavior')
-    plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
-    plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
+    legendName = strjoin([num2str(posUpperPhase),"maximums"]);
+    plot(maxLocalization,maxPeaksVal,'ro','DisplayName',legendName)
+    legendName = strjoin([num2str(posLowerPhase),"minimums"]);
+    plot(minLocalization,minPeaksVal,'go','DisplayName',legendName)
     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
     if numPerson > 0
-        textPosX = cuttedElapsedTime(end)+0.2;
+        textPosX = cuttedElapsedTime(end)+0.1;
         if strcmp(personParameters(5),"DX") == 1
             yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
-            text(textPosX,baselineBoundaries(1,1),'Human Phase','FontSize',10, 'VerticalAlignment', 'left')
-            text(textPosX,baselineBoundaries(2,1),'Robot Phase','FontSize',10, 'VerticalAlignment', 'left')
+            text(textPosX,baselineBoundaries(1,1),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle','HorizontalAlignment','left')
+            text(textPosX,baselineBoundaries(2,1),'Robot Phase','FontSize',10, 'VerticalAlignment', 'middle','HorizontalAlignment','left')
         else
             yline(baselineBoundaries(1,2),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,2),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
-            text(textPosX,baselineBoundaries(1,2),'Robot Phase','FontSize',10, 'VerticalAlignment', 'left')
-            text(textPosX,baselineBoundaries(2,2),'Human Phase','FontSize',10, 'VerticalAlignment', 'left')
+            text(textPosX,baselineBoundaries(1,2),'Robot Phase','FontSize',10, 'VerticalAlignment', 'middle','HorizontalAlignment','left')
+            text(textPosX,baselineBoundaries(2,2),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle','HorizontalAlignment','left')
         end
     end
     title("Cutted signal starting and ending points")
@@ -516,7 +486,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     else
         path = strjoin(["..\ProcessedData\SynchedPositionData\P",num2str(numPerson)],"");
     end
-    save(path,"cuttedPosDataSet");
+    save(path,"cuttedPosDataSet","minLocalization","minPeaksVal","maxLocalization","maxPeaksVal","cuttedElapsedTime");
 
     %% FORCE ANALYSIS
     tic
