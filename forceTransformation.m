@@ -168,6 +168,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     %% Procedure of force transformation
     newCuttedSynchForceDataSet = cuttedSynchForceDataSet;
 
+    NUMBER_OF_SAMPLES = 0;
     if I_KIN_ERROR_EVALUATION
         NUMBER_OF_SAMPLES = height(newCuttedSynchForceDataSet); 
         evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
@@ -198,13 +199,15 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         %% 1. Rotation matrix from hand to OF
         if numPerson < JOINTS_ONLY_FOR_BASELINE
             armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
-            T_HtoOF = getTransform(robot,assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson),aik.KinematicGroup.EndEffectorBodyName,'root_link');
+            if I_KIN_ERROR_EVALUATION
+                T_HtoOF = getTransform(robot,assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson),aik.KinematicGroup.EndEffectorBodyName,'root_link');
+            end
         end
 
         R_HtoOF = axis2dcm(cuttedPosDataSet.ax(i),cuttedPosDataSet.ay(i),cuttedPosDataSet.az(i),cuttedPosDataSet.theta(i));
         
         % Check on joints possible only for baselines
-        if i == 1 && numPerson < JOINTS_ONLY_FOR_BASELINE % Only on the first iteration
+        if i == 1 && numPerson < JOINTS_ONLY_FOR_BASELINE && I_KIN_ERROR_EVALUATION %% Only on the first iteration
             cfrRot = T_HtoOF(1:3,1:3)-R_HtoOF;
             fprintf("\n           .The difference between generated rotation from Euler Angles and generated from joint [from hand frame to root link] is: \n")
             fprintf("                   %2.4f\t\t%2.4f\t\t%2.4f\n",cfrRot.')
@@ -313,7 +316,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         newCuttedSynchForceDataSet.Fz(i) = F(3);
     end
 
-    if NUMBER_OF_SAMPLES < height(newCuttedSynchForceDataSet)
+    if NUMBER_OF_SAMPLES < height(newCuttedSynchForceDataSet) && I_KIN_ERROR_EVALUATION
         fprintf("     Completed in %s minutes\n",duration(0,0,toc(TMatrices),'Format','mm:ss.SS'))
     end
     
@@ -398,25 +401,28 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         fprintf("                        Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     end
 
-    %% Elaboration of the new evaluated joints
-    finalJointsDataSet = array2table([cuttedSynchForceDataSet.Time(1:NUMBER_OF_SAMPLES), evaluatedJointsDataSet]);
-    finalJointsDataSet = renamevars(finalJointsDataSet,1:width(finalJointsDataSet), ...
-                                   ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
-
-    %% Evaluation of the error of the force transformation
-    % To elaborate this results is fundamental that the produced newCuttedSynchForceDataSet is full length
-    if numPerson < JOINTS_ONLY_FOR_BASELINE && height(newCuttedSynchForceDataSet) == height(cuttedSynchForceDataSet)
-        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName);
-    end
+    if numPerson < JOINTS_ONLY_FOR_BASELINE && height(newCuttedSynchForceDataSet) == height(cuttedSynchForceDataSet) && I_KIN_ERROR_EVALUATION
+        %% Elaboration of the new evaluated joints
+        finalJointsDataSet = array2table([cuttedSynchForceDataSet.Time(1:NUMBER_OF_SAMPLES), evaluatedJointsDataSet]);
+        finalJointsDataSet = renamevars(finalJointsDataSet,1:width(finalJointsDataSet), ...
+                                       ["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
     
-    %% Save the data
-    mkdir ..\ProcessedData\ForceTransformationData;
-    if numPerson < 0
-        path = strjoin(["..\ProcessedData\ForceTransformationData\B",num2str(3+numPerson)],"");
+        %% Evaluation of the error of the force transformation
+        % To elaborate this results is fundamental that the produced newCuttedSynchForceDataSet is full length
+        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName);
+    
+    
+        %% Save the data
+        mkdir ..\ProcessedData\ForceTransformationData;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\ForceTransformationData\B",num2str(3+numPerson)],"");
+        else
+            path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
+        end
+        save(path,"finalJointsDataSet","newCuttedSynchForceDataSet","jointError", "phaseError", "moduleError", "transformationError");
     else
-        path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
+        finalJointsDataSet = 0;
     end
-    save(path,"finalJointsDataSet","newCuttedSynchForceDataSet","jointError", "phaseError", "moduleError", "transformationError");
 
     %% DH matrices evaluation for POS A from hand to OF - ONLY HAND REFERENCE SYSTEM - USEFULL FOR GRAPH PLOTTING
 %     % DH matrices evaluation for POS A from hand to OF

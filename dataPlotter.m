@@ -309,7 +309,7 @@ ROM = ROM(ROM~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
-% save ..\ProcessedDAta\furtherAnalysisData;
+save ..\ProcessedData\furtherAnalysisData;
 % load ..\ProcessedData\furtherAnalysisData;
 fprintf("\nPlotting position further analysis results...")
 plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...

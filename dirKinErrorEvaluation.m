@@ -31,20 +31,24 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
         pose = assignJointToPose(robot, table2array(jointSynchDataSet(i,2:end)), [0,0,0], involvedHand, numPerson);
         if numPerson < 0
             if strcmp(involvedHand,"DX") == 1
-                T = getTransform(robot,pose,'root_link','r_hand_dh_frame');
+                T = getTransform(robot,pose,'r_hand_dh_frame','root_link');
             else
                 T = getTransform(robot,pose,'l_hand_dh_frame','root_link');
             end
         else
             if strcmp(involvedHand,"SX") == 1
-                T = getTransform(robot,pose,'root_link','r_hand_dh_frame');
+                T = getTransform(robot,pose,'r_hand_dh_frame','root_link');
             else
-                T = getTransform(robot,pose,'root_link','l_hand_dh_frame');
+                T = getTransform(robot,pose,'l_hand_dh_frame','root_link');
             end
         end
         tmpPos = T*[0,0,0,1]';
         evaluatedPosition(i,:) = tmpPos(1:3);
     end
+
+%     for k = 1:3
+%         evaluatedPosition(:,k) = evaluatedPosition(:,k)-mean(evaluatedPosition(:,k));
+%     end
 
     dirKinError = table2array(cuttedPosDataSet(:,3:5)) - evaluatedPosition;
     fftIdeal = zeros(height(jointSynchDataSet),3);
@@ -59,6 +63,8 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
         moduleError(:,k) = abs(fftIdeal(:,k))-abs(fftReal(:,k));
         meanError(k) = mean(dirKinError(:,k));
     end
+    
+    
 
     % Plot results
     fig1 = figure('Name','Positions comparison');
@@ -121,5 +127,5 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
         close(fig1);
     end
 
-    fprintf("                                            Completed in %s minutes with a mean error of %.2f\n",duration(0,0,toc,'Format','mm:ss.SS'),meanError)
+    fprintf("                                Completed in %s minutes with a mean error of [%.2f,%.2f,%.2f] cm\n",duration(0,0,toc,'Format','mm:ss.SS'),meanError(1)*100,meanError(2)*100,meanError(3)*100)
 end

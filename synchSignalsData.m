@@ -38,7 +38,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
+    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
     PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
@@ -366,24 +366,36 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         fig3DTraj.WindowState = 'maximized';
         grid on, hold on
         plot3(cuttedPosDataSet.xPos,cuttedPosDataSet.yPos,cuttedPosDataSet.zPos,'k-')
-        title('Hand Trajectory')
+        plot3(cuttedPosDataSet.xPos(1),cuttedPosDataSet.yPos(1),cuttedPosDataSet.zPos(1),'go')
+        plot3(cuttedPosDataSet.xPos(end),cuttedPosDataSet.yPos(end),cuttedPosDataSet.zPos(end),'ro')
+        title('Hand Trajectory',defaultTitleName)
+        legend("Signal","Start point","End point",'Location','eastoutside')
     
         fig2DTraj = figure('Name', 'Hand trajectory');
         fig2DTraj.WindowState = 'maximized';
         subplot(1,3,1), grid on, hold on
         plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.yPos.*100,'k-')
+        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.yPos(1).*100,'go')
+        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.yPos(end).*100,'ro')
         ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
         title('Hand Trajectory - Plane XY')
+        legend("Signal","Start point","End point",'Location','southoutside')
     
         subplot(1,3,2), grid on, hold on
         plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.zPos.*100,'k-')
+        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.zPos(1).*100,'ro')
+        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.zPos(end).*100,'go')
         ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
         title('Hand Trajectory - Plane XZ')
+        legend("Signal","Start point","End point",'Location','southoutside')
     
         subplot(1,3,3), grid on, hold on
         plot(cuttedPosDataSet.yPos.*100,cuttedPosDataSet.zPos.*100,'k-')
+        plot(cuttedPosDataSet.yPos(1).*100,cuttedPosDataSet.zPos(1).*100,'ro')
+        plot(cuttedPosDataSet.yPos(end).*100,cuttedPosDataSet.zPos(end).*100,'go')
         ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
         title('Hand Trajectory - Plane YZ')
+        legend("Signal","Start point","End point",'Location','southoutside')
         
         sgtitle(defaultTitleName)
     
@@ -391,10 +403,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
             mkdir ..\ProcessedData\HandTrajectory;
             if numPerson < 0
                 path = strjoin(["..\ProcessedData\HandTrajectory\B",num2str(3+numPerson),".png"],"");
+                path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_B",num2str(3+numPerson),".fig"],"");
             else
                 path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
+                path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
             end
             pause(PAUSE_TIME);
+            savefig(fig3DTraj,path2);
             exportgraphics(fig2DTraj,path)
             close(fig2DTraj);
             close(fig3DTraj);
