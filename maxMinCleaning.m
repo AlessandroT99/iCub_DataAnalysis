@@ -16,43 +16,46 @@
 
 function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization)
 % Function used to remove double peaks which can alterate results
+    numberOfBackIndx= 2;
     timeThreshold = 1.4*100; % Check that this has to be lower than the average phase duration for baselines
-    for i = 1:length(minLocalization) - 1
-        if i > length(minLocalization) - 1
-            break;
-        end
-        if minLocalization(i+1) - minLocalization(i) < timeThreshold
-            if minPeaksVal(i+1) < minPeaksVal(i)
-                minLocalization(i) = [];
-                minPeaksVal(i) = [];
-            else
-                minLocalization(i+1) = [];
-                minPeaksVal(i+1) = [];
+    while abs(length(minLocalization)-length(maxLocalization)) > 1
+        for i = 1:length(minLocalization) - 1
+            if i > length(minLocalization) - 1
+                break;
             end
-            
-            if i - 3 < 1
-                i = 1;
-            else
-                i = i - 3;
+            if minLocalization(i+1) - minLocalization(i) < timeThreshold
+                if minPeaksVal(i+1) < minPeaksVal(i)
+                    minLocalization(i) = [];
+                    minPeaksVal(i) = [];
+                else
+                    minLocalization(i+1) = [];
+                    minPeaksVal(i+1) = [];
+                end
+                
+                if i - numberOfBackIndx < 1
+                    i = 1;
+                else
+                    i = i - numberOfBackIndx;
+                end
             end
         end
-    end
-    for i = 1:length(maxLocalization) - 1
-        if i > length(maxLocalization) - 1
-            break;
-        end
-        if maxLocalization(i+1) - maxLocalization(i) < timeThreshold
-            if maxPeaksVal(i+1) > maxPeaksVal(i)
-                maxLocalization(i) = [];
-                maxPeaksVal(i) = [];
-            else
-                maxLocalization(i+1) = [];
-                maxPeaksVal(i+1) = [];
+        for i = 1:length(maxLocalization) - 1
+            if i > length(maxLocalization) - 1
+                break;
             end
-            if i - 3 < 1
-                i = 1;
-            else
-                i = i - 3;
+            if maxLocalization(i+1) - maxLocalization(i) < timeThreshold
+                if maxPeaksVal(i+1) > maxPeaksVal(i)
+                    maxLocalization(i) = [];
+                    maxPeaksVal(i) = [];
+                else
+                    maxLocalization(i+1) = [];
+                    maxPeaksVal(i+1) = [];
+                end
+                if i - numberOfBackIndx < 1
+                    i = 1;
+                else
+                    i = i - numberOfBackIndx;
+                end
             end
         end
     end

@@ -38,7 +38,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
+    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
     PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
@@ -366,8 +366,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         fig3DTraj.WindowState = 'maximized';
         grid on, hold on
         plot3(cuttedPosDataSet.xPos,cuttedPosDataSet.yPos,cuttedPosDataSet.zPos,'k-')
-        plot3(cuttedPosDataSet.xPos(1),cuttedPosDataSet.yPos(1),cuttedPosDataSet.zPos(1),'go')
-        plot3(cuttedPosDataSet.xPos(end),cuttedPosDataSet.yPos(end),cuttedPosDataSet.zPos(end),'ro')
+        plot3(cuttedPosDataSet.xPos(1),cuttedPosDataSet.yPos(1),cuttedPosDataSet.zPos(1),'go','MarkerFaceColor','g')
+        plot3(cuttedPosDataSet.xPos(end),cuttedPosDataSet.yPos(end),cuttedPosDataSet.zPos(end),'ro','MarkerFaceColor','r')
         title('Hand Trajectory',defaultTitleName)
         legend("Signal","Start point","End point",'Location','eastoutside')
     
@@ -375,24 +375,24 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         fig2DTraj.WindowState = 'maximized';
         subplot(1,3,1), grid on, hold on
         plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.yPos.*100,'k-')
-        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.yPos(1).*100,'go')
-        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.yPos(end).*100,'ro')
+        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.yPos(1).*100,'go','MarkerFaceColor','g')
+        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.yPos(end).*100,'ro','MarkerFaceColor','r')
         ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
         title('Hand Trajectory - Plane XY')
         legend("Signal","Start point","End point",'Location','southoutside')
     
         subplot(1,3,2), grid on, hold on
         plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.zPos.*100,'k-')
-        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.zPos(1).*100,'ro')
-        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.zPos(end).*100,'go')
+        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.zPos(1).*100,'go','MarkerFaceColor','g')
+        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.zPos(end).*100,'ro','MarkerFaceColor','r')
         ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
         title('Hand Trajectory - Plane XZ')
         legend("Signal","Start point","End point",'Location','southoutside')
     
         subplot(1,3,3), grid on, hold on
         plot(cuttedPosDataSet.yPos.*100,cuttedPosDataSet.zPos.*100,'k-')
-        plot(cuttedPosDataSet.yPos(1).*100,cuttedPosDataSet.zPos(1).*100,'ro')
-        plot(cuttedPosDataSet.yPos(end).*100,cuttedPosDataSet.zPos(end).*100,'go')
+        plot(cuttedPosDataSet.yPos(1).*100,cuttedPosDataSet.zPos(1).*100,'go','MarkerFaceColor','g')
+        plot(cuttedPosDataSet.yPos(end).*100,cuttedPosDataSet.zPos(end).*100,'ro','MarkerFaceColor','r')
         ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
         title('Hand Trajectory - Plane YZ')
         legend("Signal","Start point","End point",'Location','southoutside')
@@ -636,7 +636,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
             fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
         end
     else
-        finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+        if numPerson < 0
+            finalCuttedSynchForceDataSet = wrenchForceReader(numPerson, posDataSet, forceStart, forceEnd, personParameters(5));
+        else
+            finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+        end
     end
 
     %% Finding min e MAX peaks of the force

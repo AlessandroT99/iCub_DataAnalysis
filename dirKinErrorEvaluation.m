@@ -46,10 +46,6 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
         evaluatedPosition(i,:) = tmpPos(1:3);
     end
 
-%     for k = 1:3
-%         evaluatedPosition(:,k) = evaluatedPosition(:,k)-mean(evaluatedPosition(:,k));
-%     end
-
     dirKinError = table2array(cuttedPosDataSet(:,3:5)) - evaluatedPosition;
     fftIdeal = zeros(height(jointSynchDataSet),3);
     fftReal = zeros(height(jointSynchDataSet),3);
@@ -64,8 +60,6 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
         meanError(k) = mean(dirKinError(:,k));
     end
     
-    
-
     % Plot results
     fig1 = figure('Name','Positions comparison');
     fig1.WindowState = 'maximized';
