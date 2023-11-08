@@ -15,6 +15,7 @@
 % Public License for more details
 
 clear all, close all,  clc
+format compact
 
 tStart = tic;
 
@@ -32,10 +33,6 @@ warning('OFF','robotics:robotmanip:joint:ResettingHomePosition');
 % TODO: 
 % - find a way to save the two scrollable plots as image.
 % - start the further analysis on the force
-% - plot scatter plots as further analysis output
-% - Define the force using Denavit-Hartenberg
-% - Solve the name of the file and the plot title during baseline, has to
-%   be always negative
 
 %% Simulation parameter
 BIG_PLOT_ENABLE = 0;        % Allows to the plotting of the two big gender plot 
@@ -77,8 +74,10 @@ evaluatedPeople = 0;
 
 notConsideredValue = 1e3; % Value at which a variable is initialized, and used to known is it has been written
 experimentDuration = notConsideredValue.*ones(1,numPeople);
-meanHtoR = notConsideredValue.*ones(1,numPeople);
-meanRtoH = notConsideredValue.*ones(1,numPeople);
+meanHtoR_time = notConsideredValue.*ones(1,numPeople);
+meanRtoH_time = notConsideredValue.*ones(1,numPeople);
+meanHtoR_space = notConsideredValue.*ones(1,numPeople);
+meanRtoH_space = notConsideredValue.*ones(1,numPeople);
 nMaxPeaks = notConsideredValue.*ones(1,numPeople);
 nMinPeaks = notConsideredValue.*ones(1,numPeople);
 maxPeaksAverage = notConsideredValue.*ones(1,numPeople);
@@ -217,7 +216,7 @@ for i = 1:numPeople
         % Further analysis
         tic
         fprintf("   .Computing further analysis on the position...")
-        [experimentDuration(i), meanHtoR(i), meanRtoH(i), nMaxPeaks(i), nMinPeaks(i), ...
+        [experimentDuration(i), meanHtoR_time(i), meanRtoH_time(i), meanHtoR_space(i), meanRtoH_space(i), nMaxPeaks(i), nMinPeaks(i), ...
             maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), synchroEfficiency(i,:), posAPeaksStd(i), ...
@@ -232,8 +231,8 @@ for i = 1:numPeople
 
         % Output parameters collection
         if BaseLineEvaluationDone
-            totalMeanHtoR = totalMeanHtoR + meanHtoR(i);  
-            totalMeanRtoH = totalMeanRtoH + meanRtoH(i);
+            totalMeanHtoR = totalMeanHtoR + meanHtoR_time(i);  
+            totalMeanRtoH = totalMeanRtoH + meanRtoH_time(i);
         else 
             if BASELINE_NUMBER == i
                 BaseLineEvaluationDone = 1;
@@ -286,8 +285,10 @@ totalMeanRtoH = totalMeanRtoH/evaluatedPeople;
 % In case of not evaluated test, remove the indices not used in the
 % output variables
 experimentDuration = experimentDuration(experimentDuration~=notConsideredValue);
-meanHtoR = meanHtoR(meanHtoR~=notConsideredValue);
-meanRtoH = meanRtoH(meanRtoH~=notConsideredValue);
+meanHtoR_time = meanHtoR_time(meanHtoR_time~=notConsideredValue);
+meanRtoH_time = meanRtoH_time(meanRtoH_time~=notConsideredValue);
+meanHtoR_space = meanHtoR_space(meanHtoR_space~=notConsideredValue);
+meanRtoH_space = meanRtoH_space(meanRtoH_space~=notConsideredValue);
 nMaxPeaks = nMaxPeaks(nMaxPeaks~=notConsideredValue);
 nMinPeaks = nMinPeaks(nMinPeaks~=notConsideredValue);
 maxPeaksAverage = maxPeaksAverage(maxPeaksAverage~=notConsideredValue);
@@ -309,10 +310,10 @@ ROM = ROM(ROM~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
-% save ..\ProcessedData\furtherAnalysisData;
+save ..\ProcessedData\furtherAnalysisData;
 % load ..\ProcessedData\furtherAnalysisData;
 fprintf("\nPlotting position further analysis results...")
-plotFurtherAnalysis(experimentDuration, meanHtoR, meanRtoH, nMaxPeaks, nMinPeaks, ...
+plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, nMaxPeaks, nMinPeaks, ...
                                 maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
