@@ -59,7 +59,7 @@ fprintf("Importing input data and simulation models...\n\n")
 % Has been chosen the Paris01 iCub due to the low number of reference
 % frames included, in fact almost all the other models included also the
 % skin reference frames, which where not usefull for this purpose.
-iCub = importrobot("..\icub-models\iCub\robots\iCubNancy01\model.urdf");
+iCub = importrobot("..\icub-models\iCub\robots\iCubGazeboV2_6\model.urdf");
 % Modify numDoFTBase number into analyticalInverseKinematics() 
 aik = analyticalInverseKinematics(iCub);
 opts = showdetails(aik);
@@ -78,6 +78,7 @@ meanHtoR_time = notConsideredValue.*ones(1,numPeople);
 meanRtoH_time = notConsideredValue.*ones(1,numPeople);
 meanHtoR_space = notConsideredValue.*ones(1,numPeople);
 meanRtoH_space = notConsideredValue.*ones(1,numPeople);
+phaseTimeDifference = notConsideredValue.*ones(1,numPeople);
 nMaxPeaks = notConsideredValue.*ones(1,numPeople);
 nMinPeaks = notConsideredValue.*ones(1,numPeople);
 maxPeaksAverage = notConsideredValue.*ones(1,numPeople);
@@ -216,8 +217,8 @@ for i = 1:numPeople
         % Further analysis
         tic
         fprintf("   .Computing further analysis on the position...")
-        [experimentDuration(i), meanHtoR_time(i), meanRtoH_time(i), meanHtoR_space(i), meanRtoH_space(i), nMaxPeaks(i), nMinPeaks(i), ...
-            maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
+        [experimentDuration(i), meanHtoR_time(i), meanRtoH_time(i), meanHtoR_space(i), meanRtoH_space(i), phaseTimeDifference(i), ...
+            nMaxPeaks(i), nMinPeaks(i), maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), synchroEfficiency(i,:), posAPeaksStd(i), ...
             posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i), ROM(i)] = ...
@@ -289,6 +290,7 @@ meanHtoR_time = meanHtoR_time(meanHtoR_time~=notConsideredValue);
 meanRtoH_time = meanRtoH_time(meanRtoH_time~=notConsideredValue);
 meanHtoR_space = meanHtoR_space(meanHtoR_space~=notConsideredValue);
 meanRtoH_space = meanRtoH_space(meanRtoH_space~=notConsideredValue);
+phaseTimeDifference = phaseTimeDifference(phaseTimeDifference~=notConsideredValue);
 nMaxPeaks = nMaxPeaks(nMaxPeaks~=notConsideredValue);
 nMinPeaks = nMinPeaks(nMinPeaks~=notConsideredValue);
 maxPeaksAverage = maxPeaksAverage(maxPeaksAverage~=notConsideredValue);
@@ -310,11 +312,11 @@ ROM = ROM(ROM~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
-save ..\ProcessedData\furtherAnalysisData;
-% load ..\ProcessedData\furtherAnalysisData;
+% save ..\ProcessedData\furtherAnalysisData;
+load ..\ProcessedData\furtherAnalysisData;
 fprintf("\nPlotting position further analysis results...")
-plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, nMaxPeaks, nMinPeaks, ...
-                                maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
+plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
+                                nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
                                 posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM, people.Delta_RTs_(testedPeople));

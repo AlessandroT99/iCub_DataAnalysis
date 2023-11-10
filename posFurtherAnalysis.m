@@ -14,8 +14,8 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, nMaxPeaks, nMinPeaks, ...
-            maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
+function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
+            nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
             movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
             peaksInitialAndFinalVariation, synchroEfficiency, posAPeaksStd, ...
             posBPeaksStd, posAPeaksmean, posBPeaksmean, ROM] = ...
@@ -26,8 +26,11 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
 
 %% OUTPUT PARAMETERS EXPLANATION
 % experimentDuration = Duration of the experiments in minutes
-% meanHtoR = Average time for the Human to Robot phase in minutes
-% meanRtoH = Average time for the Robot to Human phase in minutes
+% meanHtoR_time = Average time for the Human to Robot phase in minutes
+% meanRtoH_time = Average time for the Robot to Human phase in minutes
+% meanHtoR_space = Average space for the Human to Robot phase in minutes
+% meanRtoH_space = Average space for the Robot to Human phase in minutes
+% phaseTimeDifference = mean of the differences between human phase time and robot phase time
 % nMaxPeaks = Max peaks number
 % nMinPeaks = min peaks number
 % maxPeaksAverage = Max peaks value average in meters
@@ -42,6 +45,11 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
 %                                 the last one in meters, this could be helpfull 
 %                                 to evaluate the coordination
 % synchroEfficiency = efficiency of the synchronism of the movement 
+% posAPeaksStd = pos A peaks standard deviation
+% posBPeaksStd = pos B peaks standard deviation
+% posAPeaksmean = pos A peaks average in meters
+% posBPeaksmean =  pos B peaks average in meters
+% ROM = Range Of Motion, difference in meters between posA and posB
 
     %% Parameters for the simulation     
     frequency = 100;
@@ -149,6 +157,36 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         end
     end
     
+    %% Evaluation of phase time difference
+    timePhasesNumber = min(length(HtoR_time),length(RtoH_time));
+%     fprintf("Difference of number of phases: %d",length(HtoR_time)-length(RtoH_time))
+    phaseTimeDifference = mean(RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber));
+    
+    fig1a = figure('Name','Phases duration');
+    fig1a.WindowState = 'maximized';
+    hold on, grid on
+    plot(phaseTimeDifference.*60./10000,'ro','DisplayName','Time difference')
+    yline((RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber)).*60./10000,'b--','DisplayName',"Mean",'LineWidth',2)
+    title("Simmetry index - Difference in time between H and R phases",defaultTitleName)
+    xlabel("Phase number")
+    ylabel("Time [ s ]")
+    legend('show')
+    hold off
+
+    % Figure saving for phase time duration
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        mkdir ..\ProcessedData\PhaseTimeDifference;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\PhaseTimeDifference\B",num2str(3+numPerson),".png"],"");
+        else    
+            path = strjoin(["..\ProcessedData\PhaseTimeDifference\P",num2str(numPerson),".png"],"");
+        end
+        exportgraphics(fig1a,path)
+        close(fig1a);
+    end
+
+
     %% Plot results for phase time duration
     meanHtoR_time = mean(HtoR_time);
     meanRtoH_time = mean(RtoH_time);
@@ -179,8 +217,8 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     end
 
     %% Plot results for phase space duration
-    meanHtoR_space = mean(HtoR_space);
-    meanRtoH_space = mean(RtoH_space);
+    meanHtoR_space = mean(abs(HtoR_space));
+    meanRtoH_space = mean(abs(RtoH_space));
 
     fig2 = figure('Name','Phases duration');
     fig2.WindowState = 'maximized';
