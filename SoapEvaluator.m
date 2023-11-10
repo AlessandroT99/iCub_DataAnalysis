@@ -51,70 +51,94 @@ b = sqrt(a.^2 + c.^2);
 angle = acos(c./b).*180./pi; % DEGREES
 
 %% Evaluation of the distance from the cut to the top of the soap
-RigthDistanceFromSoapTop = zeros(1,numPeople);
-LeftDistanceFromSoapTop = zeros(1,numPeople);
+xSoapWidth = zeros(numPeople,1000);
+ySoapWidth = zeros(numPeople,1000);
 for i = 1:numPeople
-    x1 = [0,(soapWidth(i)/2-flatWidth)/2];
-    x2 = [soapWidth(i)-flatWidth/2,soapWidth(i)];
+    % Evaluation of the soap form
+    x1 = [0,soapWidth(i)/2-flatWidth/2];
+    x2 = [soapWidth(i)/2+flatWidth/2,soapWidth(i)];
     y1 = [lateralHeight,soapHeight];
     y2 = [soapHeight,lateralHeight];
-    topPointsX = [x1,soapWidth(i)/2,x2];
-    topPointsY = [y1,soapHeight,y2];
-    xSoapWidth = linspace(0,soapWidth(i),1000);
-    ySoapWidth = polyval(p,xSoapWidth);
-    figure, plot(xSoapWidth,ySoapWidth)
-    if strcmp(people.Mano(i),"DX") == 1
-        RigthDistanceFromSoapTop(i) = ySoapWidth(round((soapWidth(i)/2-people.CutWidth(i)/2)*10));%-people.HumanSide(i);
-        LeftDistanceFromSoapTop(i) = ySoapWidth(round((soapWidth(i)/2+people.CutWidth(i)/2)*10));%-people.RobotSide(i);
-    else
-        RigthDistanceFromSoapTop(i) = ySoapWidth(round((soapWidth(i)/2-people.CutWidth(i)/2)*10));%-people.RobotSide(i);
-        LeftDistanceFromSoapTop(i) = ySoapWidth(round((soapWidth(i)/2+people.CutWidth(i)/2)*10));%-people.HumanSide(i);
-    end
-end
+    r1 = sqrt((x1(2) - x1(1)).^2 + (y1(2) - y1(1)).^2);
+    r2 = sqrt((x2(2) - x2(1)).^2 + (y2(2) - y2(1)).^2);
 
-%% Evaluation of the removed area
-removedArea = zeros(1,numPeople);
-for i = 1:numPeople
-    cutWidth = [soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2];
-    if strcmp(people.Mano(i),"DX") == 1
-        removedArea(i) = trapz(xSoapWidth,ySoapWidth-interp1(cutWidth,[people.RobotSide(i), people.HumanSide(i)],linspace(cutWidth(1),cutWidth(2),1000)));
-    else
-        removedArea(i) = trapz(xSoapWidth,ySoapWidth-interp1(cutWidth,[people.HumanSide(i), people.RobotSide(i)],linspace(cutWidth(1),cutWidth(2),1000)));
-    end
+    % Evaluate lateral arcs coordinates
+    x_arc = [linspace(x1(1),x1(2), 100); linspace(x2(1),x2(2), 100)];
+    y_arc = [y1(2) .* cos(linspace(-pi/2, 0, 100)); y2(1) .* cos(linspace(0, pi/2, 100))];
+    topPointsX = [x_arc(1,:),soapWidth(i)/2,x_arc(2,:)];
+    topPointsY = [y_arc(1,:),soapHeight,y_arc(2,:)];
+%     figure, plot(topPointsX,topPointsY)
+    xSoapWidth(i,:) = linspace(0,soapWidth(i),1000);
+    ySoapWidth(i,:) = interp1(topPointsX,topPointsY,xSoapWidth(i,:));
+%     figure, plot(xSoapWidth,ySoapWidth)
 end
 
 %% Plot results
 fig1 = figure('Name','Right hand soap indentation');
-fig1.WindowState = 'maximized';
 sgtitle('Soap Indentation - Right Hand tests'), hold on
 fig2 = figure('Name','Left hand soap indentation');
-fig2.WindowState = 'maximized';
 sgtitle('Soap Indentation - Left Hand tests'), hold on
 rPeople = 0;
 lPeople = 0;
+removedArea = zeros(1,numPeople);
+totalArea = zeros(1,numPeople);
 for i = 1:numPeople
     if strcmp(people.Mano(i),"DX") == 1
         rPeople = rPeople + 1;
         figure(fig1)
         subplot(numPeople/8,numPeople/8,rPeople), hold on
-        plot([soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2], [people.RobotSide(i), people.HumanSide(i)],'r-')
-        plot([soapWidth(i)/2+people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2], [people.HumanSide(i), RigthDistanceFromSoapTop(i)],'k--')
-        plot([soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2-people.CutWidth(i)/2], [people.RobotSide(i), LeftDistanceFromSoapTop(i)],'k--')
+        p = polyfit([soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2], [people.RobotSide(i), people.HumanSide(i)],1);
+        xTmp = linspace(0,soapWidth(i),1000);
+        yPlot = interp1(xTmp, polyval(p,xTmp), xSoapWidth(i,:));
+        plot(xSoapWidth(i,:), yPlot, 'r-')
+        text(xSoapWidth(i,200),5,"R")
+        text(xSoapWidth(i,end-200),5,"H",'HorizontalAlignment','right')
     else
         lPeople = lPeople + 1;
         figure(fig2)
         subplot(numPeople/8,numPeople/8,lPeople), hold on
-        plot([soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2], [people.HumanSide(i), people.RobotSide(i)],'b-')
-        plot([soapWidth(i)/2+people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2], [people.RobotSide(i), RigthDistanceFromSoapTop(i)],'k--')
-        plot([soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2-people.CutWidth(i)/2], [people.HumanSide(i), LeftDistanceFromSoapTop(i)],'k--')
+        p = polyfit([soapWidth(i)/2-people.CutWidth(i)/2, soapWidth(i)/2+people.CutWidth(i)/2], [people.HumanSide(i), people.RobotSide(i)],1);
+        xTmp = linspace(0,soapWidth(i),1000);
+        yPlot = interp1(xTmp, polyval(p,xTmp), xSoapWidth(i,:));
+        plot(xSoapWidth(i,:), yPlot, 'b-')
+        text(xSoapWidth(i,200),5,"H")
+        text(xSoapWidth(i,end-200),5,"R",'HorizontalAlignment','right')
     end
-    plot(xSoapWidth,ySoapWidth,'k')
     xlim([0, soapWidth(i)])
     ylim([0, soapHeight+1])
-    titleName = strjoin(["Test N. ", num2str(i), " - Indentation angle: ", num2str(angle(i)), " [deg]"],"");
+    titleName = strjoin(["Test N. ", num2str(i), " - Indentation angle: ", sprintf("%.2f", angle(i)), " [deg]"],"");
     title(titleName)
+    
+    %% Evaluation of the removed area
+    mins = zeros(1,2);
+    [~,mins(1)] = min(abs(yPlot(1:end/2)-ySoapWidth(i,1:end/2)));
+    [~,mins(2)] = min(abs(yPlot(end/2:end)-ySoapWidth(i,end/2:end)));
+    mins(2) = mins(2)+length(ySoapWidth)/2;
+    removedArea(i) = trapz(xSoapWidth(i,mins(1):mins(2)),ySoapWidth(i,mins(1):mins(2))-yPlot(mins(1):mins(2)));
+    totalArea(i) = trapz(xSoapWidth(i,:),ySoapWidth(i,:));
+    if strcmp(people.Mano(i),"DX") == 1
+        yline(max(ySoapWidth(i,mins)),'k--','LineWidth',0.8);
+    else
+        yline(max(ySoapWidth(i,mins)),'k--','LineWidth',0.8);
+    end
+    plot(xSoapWidth(i,:),ySoapWidth(i,:),'k')
     hold off
 end
 
 figure(fig1), hold off
+fig1.Position(3) = fig1.Position(3) + 300;
+Lgnd = legend("Cutted Line", "Reference Plane");
+Lgnd.Position(1) = 0;
+Lgnd.Position(2) = 0.5;
+fig1.WindowState = 'maximized';
+
 figure(fig2), hold off
+fig2.Position(3) = fig2.Position(3) + 300;
+Lgnd = legend("Cutted Line", "Reference Plane");
+Lgnd.Position(1) = 0;
+Lgnd.Position(2) = 0.5;
+fig2.WindowState = 'maximized';
+
+mkdir ..\ProcessedData\Scatters
+exportgraphics(fig1,"..\ProcessedData\Scatters\RightHandSoapIndentation.png")
+exportgraphics(fig2,"..\ProcessedData\Scatters\LeftHandSoapIndentation.png")
