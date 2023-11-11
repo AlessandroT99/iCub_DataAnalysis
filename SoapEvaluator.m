@@ -82,6 +82,7 @@ rPeople = 0;
 lPeople = 0;
 removedArea = zeros(1,numPeople);
 totalArea = zeros(1,numPeople);
+standardError = zeros(1,numPeople);
 for i = 1:numPeople
     if strcmp(people.Mano(i),"DX") == 1
         rPeople = rPeople + 1;
@@ -123,6 +124,7 @@ for i = 1:numPeople
     end
     plot(xSoapWidth(i,:),ySoapWidth(i,:),'k')
     hold off
+    standardError(i) = std(ySoapWidth(i,mins(1):mins(2))-yPlot(mins(1):mins(2)))/sqrt(length(ySoapWidth));
 end
 
 figure(fig1), hold off
@@ -139,6 +141,46 @@ Lgnd.Position(1) = 0;
 Lgnd.Position(2) = 0.5;
 fig2.WindowState = 'maximized';
 
+fig3 = figure('Name','Trend of removed material');
+fig3.WindowState = 'maximized';
+hold on, grid on
+scatter(removedArea,1:numPeople,'red','filled','DisplayName','Removed material')
+xline(mean(removedArea),'r--','LineWidth',0.8,'DisplayName','Removed material in average')
+xline(mean(totalArea),'k--','LineWidth',2.2,'DisplayName','Available material in average')
+% errorbar(removedArea,1:numPeople,standardError,'Horizontal', 'k', 'LineStyle','none','CapSize',12,'LineWidth',0.8,'DisplayName','Standard Error')
+legend('show','Location','eastoutside')
+xlabel("Removed material [ mm^2 ]"), ylabel("# Test")
+title("Trend of removed material after the cutting")
+
+fig4 = figure('Name','Trend of angle of soap indentation');
+fig4.WindowState = 'maximized';
+hold on, grid on
+scatter(angle,1:numPeople,'red','filled','DisplayName','Indentation angle')
+xline(mean(angle),'r--','LineWidth',0.8,'DisplayName','Average indentation angle')
+legend('show','Location','eastoutside')
+xlabel("Angle [ deg ]"), ylabel("# Test")
+title("Trend of angle indentation in the soap")
+
+fig5 = figure('Name','Soap Indentation parameters');
+fig5.WindowState = 'maximized';
+hold on, grid on
+scatter(angle,removedArea,50,'red','LineWidth',1.5)
+scatter(mean(angle),mean(removedArea), 150,'red','filled')
+errorbar(mean(angle),mean(removedArea),std(removedArea)/sqrt(numPeople), 'k', 'LineStyle','none','LineWidth',0.8)
+errorbar(mean(angle),mean(removedArea),std(angle)/sqrt(numPeople), 'Horizontal', 'k', 'LineStyle','none','LineWidth',0.8)
+limX = [0,max(angle)];
+limY = [0,max(removedArea)];
+xlim(limX), ylim(limY)
+plot(limX,limY,'k-')
+legend("Test samples","Mean of the samples","Standard Error",'Location','northwest')
+xlabel("Angle [ deg ]"), ylabel("Removed material [ mm^2 ]")
+title("Comparison between indentation angle and removed material from soap bars")
+
 mkdir ..\ProcessedData\Scatters
 exportgraphics(fig1,"..\ProcessedData\Scatters\RightHandSoapIndentation.png")
 exportgraphics(fig2,"..\ProcessedData\Scatters\LeftHandSoapIndentation.png")
+exportgraphics(fig3,"..\ProcessedData\Scatters\SoapRemovedMaterial.png")
+exportgraphics(fig4,"..\ProcessedData\Scatters\MeanAngleSoapIndentation.png")
+exportgraphics(fig5,"..\ProcessedData\Scatters\SoapIndentationParameters.png")
+
+% close all

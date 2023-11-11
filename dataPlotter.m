@@ -43,6 +43,9 @@ BASELINE_NUMBER = 2;        % Number of baseline in the simulation
 BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
 posBaseline = [];           % Variable where the pos baseline is saved
 baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
+SXbaseLinePath = 
+DXbaseLinePath = 
+BaseLineOutputName = "B";
 
 %% Input data
 fprintf("Simulation starting up...\n")
