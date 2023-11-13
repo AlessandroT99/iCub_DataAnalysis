@@ -118,7 +118,7 @@ for i = 1:numPeople
     mins(2) = mins(2)+length(ySoapWidth)/2;
     removedArea(i) = trapz(xSoapWidth(i,mins(1):mins(2)),ySoapWidth(i,mins(1):mins(2))-yPlot(mins(1):mins(2)));
     totalArea(i) = trapz(xSoapWidth(i,:),ySoapWidth(i,:));
-    halfIdxs = [find(xSoapWidth==soapWidth(i)/2-flatWidth/2,'first'),find(xSoapWidth==soapWidth(i)/2+flatWidth/2,'first')];
+    halfIndxs = [find(abs(xSoapWidth(i,:)-(soapWidth(i)/2-flatWidth/2))<1e-1,1),find(abs(xSoapWidth(i,:)-(soapWidth(i)/2+flatWidth/2))<1e-1,1)];
     maxCutArea(i) = trapz(xSoapWidth(i,halfIndxs(1):halfIndxs(2)),ySoapWidth(i,halfIndxs(1):halfIndxs(2)));
     if strcmp(people.Mano(i),"DX") == 1
         yline(max(ySoapWidth(i,mins)),'k--','LineWidth',0.8);
@@ -171,10 +171,10 @@ scatter(angle,removedArea,50,'red','LineWidth',1.5)
 scatter(mean(angle),mean(removedArea), 150,'red','filled')
 errorbar(mean(angle),mean(removedArea),std(removedArea)/sqrt(numPeople), 'k', 'LineStyle','none','LineWidth',0.8)
 errorbar(mean(angle),mean(removedArea),std(angle)/sqrt(numPeople), 'Horizontal', 'k', 'LineStyle','none','LineWidth',0.8)
-limX = [0,max(angle)];
-limY = [0,max(removedArea)];
-xlim(limX), ylim(limY)
-plot(limX,limY,'k-')
+limX = [min(angle),max(angle)];
+limY = [min(removedArea),max(removedArea)];
+xlim([limX(1)-1,limX(2)+1]), ylim([limY(1)-25,limY(2)+25])
+plot(bisector([limX(1),limY(1)],[limX(2),limY(2)]),'k--')
 legend("Test samples","Mean of the samples","Standard Error",'Location','northwest')
 xlabel("Angle [ deg ]"), ylabel("Removed material [ mm^2 ]")
 title("Comparison between indentation angle and removed material from soap bars")
@@ -195,6 +195,7 @@ title("Soap cutting efficience")
 
 %% Save and close all the plots
 mkdir ..\ProcessedData\Scatters
+pause(2);
 exportgraphics(fig1,"..\ProcessedData\Scatters\RightHandSoapIndentation.png")
 exportgraphics(fig2,"..\ProcessedData\Scatters\LeftHandSoapIndentation.png")
 exportgraphics(fig3,"..\ProcessedData\Scatters\SoapRemovedMaterial.png")

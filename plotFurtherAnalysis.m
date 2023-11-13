@@ -319,8 +319,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     % iCub DX hand - max
     scatter(maxPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(maxPeaksAverage(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])).*100, ...
-            nearEnd(logical(maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks)), ...
+    scatter(maxPeaksAverage(logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks])).*100, ...
+            nearEnd(logical((maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks)), ...
             MarkerDimension,'red','LineWidth',EmptyPointLine)
 
     % iCub DX hand - max reference line
@@ -328,8 +328,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     % iCub SX hand - max
     scatter(maxPeaksAverage(1).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
-    scatter(maxPeaksAverage(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])).*100, ...
-            nearEnd(logical(maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks)), ...
+    scatter(maxPeaksAverage(logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks])).*100, ...
+            nearEnd(logical((maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks)), ...
             MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
     % iCub SX hand - max reference line
@@ -351,15 +351,15 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     % iCub DX hand - min
     scatter(minPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(minPeaksAverage(logical([0,0,minPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])).*100, ...
-            nearEnd(logical(minPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks)),MarkerDimension, ...
+    scatter(minPeaksAverage(logical([0,0,(minPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks])).*100, ...
+            nearEnd(logical((minPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks)),MarkerDimension, ...
             'red','LineWidth',EmptyPointLine)
 %     xline(minPeaksAverage(BASELINE_NUMBER)*100,'r--','LineWidth',0.5)
 
     % iCub SX hand - min
     scatter(minPeaksAverage(1).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
-    scatter(minPeaksAverage(logical([0,0,minPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])).*100, ...
-            nearEnd(logical(minPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks)), ...
+    scatter(minPeaksAverage(logical([0,0,(minPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks])).*100, ...
+            nearEnd(logical((minPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks)), ...
             MarkerDimension,'blue','LineWidth',EmptyPointLine)
 %     xline(abs(minPeaksAverage(1)*100),'b--','LineWidth',0.5)
 
@@ -387,7 +387,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     xSize = 1;
     ySize = xSize/0.75*10;
     yDim = baselineYPos + ySize + 4;
-    xlim([min(min(maxPeaksAverage),min(minPeaksAverage))-2,max(max(maxPeaksAverage),max(minPeaksAverage))+2])
+    xlim([min(min(maxPeaksAverage),min(minPeaksAverage))*100-2,max(max(maxPeaksAverage),max(minPeaksAverage))*100+2])
     ylim([min(nearEnd)-1,yDim+5])
     set(gca, 'YDir','reverse')
 
@@ -424,22 +424,22 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     deviationPosfromAverage(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0])) = abs(meanPos(logical([0,0,meanPos(BASELINE_NUMBER+1:end)>0]))-meanPos(BASELINE_NUMBER));
 
     %% Saving matrices usefull for statistical analysis
-    posAidx = [mean(posAPeaksmean(1:BASELINE_NUMBER)),posAPeaksmean(BASELINE_NUMBER+1:end)]';
-    posBidx = [mean(posBPeaksmean(1:BASELINE_NUMBER)),posBPeaksmean(BASELINE_NUMBER+1:end)]';
+    posAidx = [mean(abs(posAPeaksmean(1:BASELINE_NUMBER))),abs(posAPeaksmean(BASELINE_NUMBER+1:end))]';
+    posBidx = [mean(abs(posBPeaksmean(1:BASELINE_NUMBER))),abs(posBPeaksmean(BASELINE_NUMBER+1:end))]';
     devPosAidx = [mean(deviationPosfromA(1:BASELINE_NUMBER)),deviationPosfromA(BASELINE_NUMBER+1:end)]';
     devPosBidx = [mean(deviationPosfromB(1:BASELINE_NUMBER)),deviationPosfromB(BASELINE_NUMBER+1:end)]';
     ROMdeviationCenterFromBaseline = (posAidx+posBidx)./2-(posAidx(1)+posBidx(1))/2;
 
     matx = table([-1;testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, [mean(ROM(1:BASELINE_NUMBER));ROM(BASELINE_NUMBER+1:end)'], ROMdeviationCenterFromBaseline, ...
-                 [mean(phaseTimeDifference(1:BASELINE_NUMBER));phaseTimeDifference(BASELINE_NUMBER+1:end)'], ...
-                 [mean(meanRtoH_time(1:BASELINE_NUMBER));meanRtoH_time(BASELINE_NUMBER+1:end)'],[mean(meanHtoR_time(1:BASELINE_NUMBER));meanHtoR_time(BASELINE_NUMBER+1:end)'], ...
-                 [mean(meanRtoH_space(1:BASELINE_NUMBER));meanRtoH_space(BASELINE_NUMBER+1:end)'],[mean(meanHtoR_space(1:BASELINE_NUMBER));meanHtoR_space(BASELINE_NUMBER+1:end)'], ...
+                 [mean(phaseTimeDifference(1:BASELINE_NUMBER).*60./10000);phaseTimeDifference(BASELINE_NUMBER+1:end)'.*60./10000], ...
+                 [mean(meanRtoH_time(1:BASELINE_NUMBER).*60./10000);meanRtoH_time(BASELINE_NUMBER+1:end)'.*60./10000],[mean(meanHtoR_time(1:BASELINE_NUMBER).*60./10000);meanHtoR_time(BASELINE_NUMBER+1:end)'.*60./10000], ...
+                 [mean(meanRtoH_space(1:BASELINE_NUMBER).*100);meanRtoH_space(BASELINE_NUMBER+1:end)'.*100],[mean(meanHtoR_space(1:BASELINE_NUMBER).*100);meanHtoR_space(BASELINE_NUMBER+1:end)'.*100], ...
                  [mean(posBPeaksStd(1:BASELINE_NUMBER));posBPeaksStd(BASELINE_NUMBER+1:end)'], [mean(posAPeaksStd(1:BASELINE_NUMBER));posAPeaksStd(BASELINE_NUMBER+1:end)']);
 
-    matx = renamevars(matx, 1:width(matx), ["ID","posB","posA", "Deviation from B","Deviation from A", ...
-                                            "ROM", "Simmetry", "Phase Delay", ...
-                                            "Human-Phase TimeDomain", "Robot-Phase TimeDomain", "Human-Phase SpaceDomain", "Robot-Phase SpaceDomain", ...
-                                            "std(posB)","std(posA)"]);
+    matx = renamevars(matx, 1:width(matx), ["ID","posB [cm]","posA [cm]", "Deviation from B [cm]","Deviation from A [cm]", ...
+                                            "ROM [cm]", "Simmetry [s]", "Phase Delay [s]", ...
+                                            "Human-Phase TimeDomain [s]", "Robot-Phase TimeDomain [s]", "Human-Phase SpaceDomain [cm]", "Robot-Phase SpaceDomain [cm]", ...
+                                            "std(posB) [cm]","std(posA) [cm]"]);
 
     writetable(matx, "..\ProcessedData\PeaksPositionData.xlsx");
 
@@ -449,20 +449,28 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
 
     % DX Hand
-    averageToPrint = (posBPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])) + ...
-                      posAPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])))./2; 
-    scatter((posBPeaksmean(BASELINE_NUMBER)+posAPeaksmean(BASELINE_NUMBER))./2.*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    plot(averageToPrint, nearEnd(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])), ...
+    averageToPrintDX = abs((posBPeaksmean(logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks])) + ...
+                      posAPeaksmean(logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks]))))./2; 
+    scatter(abs(posBPeaksmean(BASELINE_NUMBER)+posAPeaksmean(BASELINE_NUMBER))./2,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
+    scatter(averageToPrintDX, nearEnd(logical((maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks)), ...
          MarkerDimension,'red','LineWidth',EmptyPointLine)
     % SX Hand
-    averageToPrint = (posBPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])) + ...
-                      posAPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])))./2; 
-    scatter((posBPeaksmean(1)+posAPeaksmean(1))./2.*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearBlue,'filled')
-    plot(averageToPrint, nearEnd(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])), ...
+    averageToPrintSX = abs((posBPeaksmean(logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks])) + ...
+                      posAPeaksmean(logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks]))))./2; 
+    scatter(abs(posBPeaksmean(1)+posAPeaksmean(1))./2,baselineYPos-baselineYPosAdded,MarkerDimension,clearBlue,'filled')
+    scatter(averageToPrintSX, nearEnd(logical((maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks)), ...
          MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
+    scatter(mean([averageToPrintDX,averageToPrintSX]),mean(nearEnd(logicalIntervalPeaks)),150,'black','filled')
+    limX = [min([averageToPrintDX,averageToPrintSX])-2,max([averageToPrintDX,averageToPrintSX])+2];
+    limY = [min(nearEnd)-2,max(nearEnd)+2];
+    plot(bisector([limX(1),limY(1)],[limX(2),limY(2)]),'k--')
+    
+    xlim(limX)
+    ylim(limY)
+    set(gca, 'YDir','reverse')
     title("Range Of Motion Center [ROM Center] of iCub hand")
-    legend('DX iCub Baseline','DX iCub interaction', 'SX iCub Baseline','SX iCub interaction','Location','eastoutside')
+    legend('DX iCub Baseline','DX iCub interaction', 'SX iCub Baseline','SX iCub interaction','Mean [only tests]','Bisector [only tests]','Location','northeast')
     xlabel("ROM Center [ cm ]"), ylabel("Near End Effect [ ms ]")
     hold off
     
@@ -632,18 +640,20 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     fig13.WindowState = 'maximized';
     grid on, hold on
 
-    %% COULD IT BE WRONG TO EVALUATE THIS RESULT USING THE AVERAGE BEWTWEEN THE BASELINE?
-    yValue = (ROM(2:end)-ROM(1))./ROM(1).*100;
-    scatter(ROMdeviationCenterFromBaseline(2:end),yValue,50,'black','LineWidth',1.5);
+    % COULD IT BE WRONG TO EVALUATE THIS RESULT USING THE AVERAGE BEWTWEEN THE BASELINE?
+    yValue = (ROM(3:end)-mean(ROM(1:2)))./mean(ROM(1:2)).*100;
+    scatter(ROMdeviationCenterFromBaseline(2:end),yValue',50,'black','LineWidth',1.5);
     scatter(mean(ROMdeviationCenterFromBaseline(2:end)),mean(yValue), 150,'red','filled')
     errorbar(mean(ROMdeviationCenterFromBaseline(2:end)),mean(yValue),std(yValue)/sqrt(length(testedPeople)), 'k', 'LineStyle','none','LineWidth',0.8)
     errorbar(mean(ROMdeviationCenterFromBaseline(2:end)),mean(yValue),std(ROMdeviationCenterFromBaseline(2:end))/sqrt(length(testedPeople)), 'Horizontal', 'k', 'LineStyle','none','LineWidth',0.8)
-    plot([min(ROMdeviationCenterFromBaseline(2:end)),max(ROMdeviationCenterFromBaseline(2:end))],[min(yValue),max(yValue)],'r-')
+    limX = [min(ROMdeviationCenterFromBaseline(2:end)),max(ROMdeviationCenterFromBaseline(2:end))];
+    limY = [min(yValue),max(yValue)];
+    plot(bisector([limX(1),limY(1)],[limX(2),limY(2)]),'k--')
     
+    xlim([limX(1)-1,limX(2)+1])
+    ylim([0,100])
     title("Simmetry efficience")
-    legend("Test samples","Mean of the samples","Standard Error",'Location','northwest')
-    ylim([-100,100])
-    xlim([0,100])
+    legend("Test samples","Mean of the samples","Standard Error", "Standard Error","Bisector",'Location','northwest')
     xlabel("Difference from baseline ROM center [ cm ]")
     ylabel("Similarity to baseline ROM size [ % ]")
     hold off

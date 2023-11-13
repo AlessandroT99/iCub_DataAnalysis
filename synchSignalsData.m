@@ -38,7 +38,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
+    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
     PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
@@ -637,7 +637,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         end
     else
         if numPerson < 0
-            finalCuttedSynchForceDataSet = wrenchForceReader(numPerson, posDataSet, forceStart, forceEnd, personParameters(5));
+            finalCuttedSynchForceDataSet = wrenchForceReader(numPerson, posDataSet, forceStart, forceEnd, personParameters(5),BaselineFilesParameters);
         else
             finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
         end

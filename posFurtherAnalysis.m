@@ -165,8 +165,8 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     fig1a = figure('Name','Phases duration');
     fig1a.WindowState = 'maximized';
     hold on, grid on
-    plot(phaseTimeDifference.*60./10000,'ro','DisplayName','Time difference')
-    yline((RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber)).*60./10000,'b--','DisplayName',"Mean",'LineWidth',2)
+    plot((RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber)).*60./10000,'ro','DisplayName','Time difference')
+    yline(phaseTimeDifference.*60./10000,'b--','DisplayName',"Mean",'LineWidth',2)
     title("Simmetry index - Difference in time between H and R phases",defaultTitleName)
     xlabel("Phase number")
     ylabel("Time [ s ]")

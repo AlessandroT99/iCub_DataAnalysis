@@ -63,7 +63,7 @@ fprintf("Importing input data and simulation models...\n\n")
 % Has been chosen the Paris01 iCub due to the low number of reference
 % frames included, in fact almost all the other models included also the
 % skin reference frames, which where not usefull for this purpose.
-iCub = importrobot("..\icub-models\iCub\robots\iCubGazeboV2_6\model.urdf");
+iCub = importrobot("..\icub-models\iCub\robots\iCubNancy01\model.urdf");
 % Modify numDoFTBase number into analyticalInverseKinematics() 
 aik = analyticalInverseKinematics(iCub);
 opts = showdetails(aik);
@@ -125,7 +125,7 @@ end
 for i = 1:numPeople
     if BaseLineEvaluationDone == 0
         if i == 1
-            posFilePath = stroin(["..\InputData\positions\leftHand\",SXbaseLinePath,"\data.log"],"");
+            posFilePath = strjoin(["..\InputData\positions\leftHand\",SXbaseLinePath,"\data.log"],"");
             forceFilePath = strjoin(["..\InputData\forces\leftArm\",SXbaseLinePath,"\data.log"],"");
         else
             if i == 2
@@ -316,8 +316,8 @@ ROM = ROM(ROM~=notConsideredValue).*100;
 
 %% Further analysis plotting
 tic
-% save ..\ProcessedData\furtherAnalysisData;
-load ..\ProcessedData\furtherAnalysisData;
+save ..\ProcessedData\furtherAnalysisData;
+% load ..\ProcessedData\furtherAnalysisData;
 fprintf("\nPlotting position further analysis results...")
 plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
                                 nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
