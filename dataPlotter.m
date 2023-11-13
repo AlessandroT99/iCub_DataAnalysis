@@ -43,9 +43,10 @@ BASELINE_NUMBER = 2;        % Number of baseline in the simulation
 BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
 posBaseline = [];           % Variable where the pos baseline is saved
 baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
-SXbaseLinePath = 
-DXbaseLinePath = 
-BaseLineOutputName = "B";
+SXbaseLinePath = "P0_L_Base\";  % Name of the folder containing the file of the L baseline
+DXbaseLinePath = "P0_R_Base\";  % Name of the folder containing the file of the R baseline
+BaseLineOutputName = "B";       % The initial part of the name of the baseline output
+BaselineFilesParameters = [SXbaseLinePath,DXbaseLinePath,BaseLineOutputName]; % just the union of the three up for faster use and function passing 
 
 %% Input data
 fprintf("Simulation starting up...\n")
@@ -124,12 +125,12 @@ end
 for i = 1:numPeople
     if BaseLineEvaluationDone == 0
         if i == 1
-            posFilePath = "..\InputData\positions\leftHand\P0_L_Base\data.log";
-            forceFilePath = "..\InputData\forces\leftArm\P0_L_Base\data.log";
+            posFilePath = stroin(["..\InputData\positions\leftHand\",SXbaseLinePath,"\data.log"],"");
+            forceFilePath = strjoin(["..\InputData\forces\leftArm\",SXbaseLinePath,"\data.log"],"");
         else
             if i == 2
-                posFilePath = "..\InputData\positions\rightHand\P0_R_Base\data.log";
-                forceFilePath = "..\InputData\forces\rightArm\P0_R_Base\data.log";
+                posFilePath = strjoin(["..\InputData\positions\rightHand\",DXbaseLinePath,"\data.log"],"");
+                forceFilePath = strjoin(["..\InputData\forces\rightArm\",DXbaseLinePath,"\data.log"],"");
             end
         end
 
@@ -179,7 +180,7 @@ for i = 1:numPeople
         % Synchronizing the two dataset to show them in a single plot
         [synchPosDataSet, synchForceDataSet, baselineBoundaries] = ...
           synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
-            personParam,PAUSE_PEOPLE,baselineBoundaries);   
+            personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters);   
 
         if BIG_PLOT_ENABLE && BaseLineEvaluationDone
             if strcmp(people.Genere(i),"M") == 1
@@ -205,13 +206,13 @@ for i = 1:numPeople
         tic
         fprintf("   .Plotting the combination of force and position...")
         combinePosForcePlots(synchPosDataSet, synchForceDataSet, numP, ...
-            personParam,BIG_PLOT_ENABLE);
+            personParam,BIG_PLOT_ENABLE, BaselineFilesParameters);
         fprintf("              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
         % Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
         if numP < 0
-            fileName = strjoin(["..\ProcessedData\SimulationData\B",num2str(3+numP)],"");
+            fileName = strjoin(["..\ProcessedData\SimulationData\",BaseLineOutputName,num2str(3+numP)],"");
         else
             fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(numP)],"");
         end
@@ -225,7 +226,7 @@ for i = 1:numPeople
             movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
             peaksInitialAndFinalVariation(i), synchroEfficiency(i,:), posAPeaksStd(i), ...
             posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i), ROM(i)] = ...
-            posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline);
+            posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline, BaselineFilesParameters);
         fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
 %         tic

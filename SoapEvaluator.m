@@ -81,6 +81,7 @@ sgtitle('Soap Indentation - Left Hand tests'), hold on
 rPeople = 0;
 lPeople = 0;
 removedArea = zeros(1,numPeople);
+maxCutArea = zeros(1,numPeople);
 totalArea = zeros(1,numPeople);
 standardError = zeros(1,numPeople);
 for i = 1:numPeople
@@ -117,6 +118,8 @@ for i = 1:numPeople
     mins(2) = mins(2)+length(ySoapWidth)/2;
     removedArea(i) = trapz(xSoapWidth(i,mins(1):mins(2)),ySoapWidth(i,mins(1):mins(2))-yPlot(mins(1):mins(2)));
     totalArea(i) = trapz(xSoapWidth(i,:),ySoapWidth(i,:));
+    halfIdxs = [find(xSoapWidth==soapWidth(i)/2-flatWidth/2,'first'),find(xSoapWidth==soapWidth(i)/2+flatWidth/2,'first')];
+    maxCutArea(i) = trapz(xSoapWidth(i,halfIndxs(1):halfIndxs(2)),ySoapWidth(i,halfIndxs(1):halfIndxs(2)));
     if strcmp(people.Mano(i),"DX") == 1
         yline(max(ySoapWidth(i,mins)),'k--','LineWidth',0.8);
     else
@@ -176,11 +179,27 @@ legend("Test samples","Mean of the samples","Standard Error",'Location','northwe
 xlabel("Angle [ deg ]"), ylabel("Removed material [ mm^2 ]")
 title("Comparison between indentation angle and removed material from soap bars")
 
+%% Efficiency of the cut 
+% Is evaluated taking in consideration the maximum cuttable area the one
+% over the half soap bar line.
+cutEfficiency = 100-(maxCutArea-removedArea)./maxCutArea.*100;
+
+fig6 = figure('Name','Soap cutting efficience');
+fig6.WindowState = 'maximized';
+hold on, grid on
+scatter(cutEfficiency,1:numPeople, 80, 'red', 'filled')
+xline(mean(cutEfficiency),'k--')
+xlim([0,100])
+xlabel("Efficiency [ % ]"), ylabel("# Test")
+title("Soap cutting efficience")
+
+%% Save and close all the plots
 mkdir ..\ProcessedData\Scatters
 exportgraphics(fig1,"..\ProcessedData\Scatters\RightHandSoapIndentation.png")
 exportgraphics(fig2,"..\ProcessedData\Scatters\LeftHandSoapIndentation.png")
 exportgraphics(fig3,"..\ProcessedData\Scatters\SoapRemovedMaterial.png")
 exportgraphics(fig4,"..\ProcessedData\Scatters\MeanAngleSoapIndentation.png")
 exportgraphics(fig5,"..\ProcessedData\Scatters\SoapIndentationParameters.png")
+exportgraphics(fig6,"..\ProcessedData\Scatters\SoapCuttingEfficience.png")
 
-% close all
+close all

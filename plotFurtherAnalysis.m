@@ -153,6 +153,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
         close(fig2c);
     end
     
+
     %% ROM
     fig3 = figure('Name','Number of peaks scatter');
     fig3.WindowState = 'maximized';
@@ -442,6 +443,35 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     writetable(matx, "..\ProcessedData\PeaksPositionData.xlsx");
 
+    %% Difference between ROM centers
+    fig5n = figure('Name','Difference betweeen ROM centers');
+    fig5n.WindowState = 'maximized';
+    grid on, hold on
+
+    % DX Hand
+    averageToPrint = (posBPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])) + ...
+                      posAPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])))./2; 
+    scatter((posBPeaksmean(BASELINE_NUMBER)+posAPeaksmean(BASELINE_NUMBER))./2.*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
+    plot(averageToPrint, nearEnd(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])), ...
+         MarkerDimension,'red','LineWidth',EmptyPointLine)
+    % SX Hand
+    averageToPrint = (posBPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])) + ...
+                      posAPeaksmean(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])))./2; 
+    scatter((posBPeaksmean(1)+posAPeaksmean(1))./2.*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearBlue,'filled')
+    plot(averageToPrint, nearEnd(logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end).*logicalIntervalPeaks])), ...
+         MarkerDimension,'blue','LineWidth',EmptyPointLine)
+
+    title("Range Of Motion Center [ROM Center] of iCub hand")
+    legend('DX iCub Baseline','DX iCub interaction', 'SX iCub Baseline','SX iCub interaction','Location','eastoutside')
+    xlabel("ROM Center [ cm ]"), ylabel("Near End Effect [ ms ]")
+    hold off
+    
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        exportgraphics(fig5n,"..\ProcessedData\Scatters\ROM_Center.png")
+        close(fig5n);
+    end
+
     %% Standard deviation
     fig6 = figure('Name','Standard deviation scatter');
     fig6.WindowState = 'maximized';
@@ -595,6 +625,33 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
         pause(PAUSE_TIME);
         exportgraphics(fig12,"..\ProcessedData\Scatters\SynchroEfficience.png")
         close(fig12);
+    end
+
+    %% Simmetry efficience
+    fig13 = figure('Name','Synchronism efficience plot');
+    fig13.WindowState = 'maximized';
+    grid on, hold on
+
+    %% COULD IT BE WRONG TO EVALUATE THIS RESULT USING THE AVERAGE BEWTWEEN THE BASELINE?
+    yValue = (ROM(2:end)-ROM(1))./ROM(1).*100;
+    scatter(ROMdeviationCenterFromBaseline(2:end),yValue,50,'black','LineWidth',1.5);
+    scatter(mean(ROMdeviationCenterFromBaseline(2:end)),mean(yValue), 150,'red','filled')
+    errorbar(mean(ROMdeviationCenterFromBaseline(2:end)),mean(yValue),std(yValue)/sqrt(length(testedPeople)), 'k', 'LineStyle','none','LineWidth',0.8)
+    errorbar(mean(ROMdeviationCenterFromBaseline(2:end)),mean(yValue),std(ROMdeviationCenterFromBaseline(2:end))/sqrt(length(testedPeople)), 'Horizontal', 'k', 'LineStyle','none','LineWidth',0.8)
+    plot([min(ROMdeviationCenterFromBaseline(2:end)),max(ROMdeviationCenterFromBaseline(2:end))],[min(yValue),max(yValue)],'r-')
+    
+    title("Simmetry efficience")
+    legend("Test samples","Mean of the samples","Standard Error",'Location','northwest')
+    ylim([-100,100])
+    xlim([0,100])
+    xlabel("Difference from baseline ROM center [ cm ]")
+    ylabel("Similarity to baseline ROM size [ % ]")
+    hold off
+
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        exportgraphics(fig13,"..\ProcessedData\Scatters\SimmetryEfficience.png")
+        close(fig13);
     end
 
 end

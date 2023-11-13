@@ -18,7 +18,7 @@
 % - Add the boundaries of position in order to recognise human side and
 %   robot side
 
-function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personParameters,BIG_PLOT_ENABLE)
+function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personParameters,BIG_PLOT_ENABLE,BaselineFilesParameters)
 % The following function is used in order to plot togheter the force and
 % the position signal, firstly in the gender subplot, then in a single
 % figure that will be than saved in memory
@@ -119,7 +119,7 @@ function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personP
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForcePositionComparison;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForcePositionComparison\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForcePositionComparison\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForcePositionComparison\P",num2str(numPerson),".png"],"");
         end

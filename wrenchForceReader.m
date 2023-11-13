@@ -14,15 +14,15 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataSet, posStart, posEnd, handInvolved)
+function cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataSet, posStart, posEnd, handInvolved, BaselineFilesParameters)
 % Function used to read and sinch the data from the /wholeBodyDynamics/involved_arm/cartesianEndEffectorWrench:o
     tic
     fprintf("\n         .Force transformation error evaluation...")
     if numPerson == -2
-        wrenchDataSet = readtable("..\InputData\wrench\leftArm\P0_L_Base\data.log");
+        wrenchDataSet = readtable(strjoin(["..\InputData\wrench\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
     else 
         if numPerson == -1
-            wrenchDataSet = readtable("..\InputData\wrench\rightArm\P0_R_Base\data.log");
+            wrenchDataSet = readtable(strjoin(["..\InputData\wrench\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
         else
             if strcmp(handInvolved,"DX") == 1
                 if numPerson < 10

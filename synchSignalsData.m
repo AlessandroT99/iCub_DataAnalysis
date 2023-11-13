@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundaries] = ...
-    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries)
+    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -402,8 +402,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         if IMAGE_SAVING
             mkdir ..\ProcessedData\HandTrajectory;
             if numPerson < 0
-                path = strjoin(["..\ProcessedData\HandTrajectory\B",num2str(3+numPerson),".png"],"");
-                path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_B",num2str(3+numPerson),".fig"],"");
+                path = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+                path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_",BaselineFilesParameters(3),num2str(3+numPerson),".fig"],"");
             else
                 path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
                 path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
@@ -474,7 +474,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     if IMAGE_SAVING
         mkdir ..\ProcessedData\PositionVisualizing;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PositionVisualizing\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PositionVisualizing\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
         else
             path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
         end
@@ -483,7 +483,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
 
         mkdir ..\ProcessedData\PositionProcessing;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PositionProcessing\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PositionProcessing\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
         else
             path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
         end
@@ -497,7 +497,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Saving position data
     mkdir ..\ProcessedData\SynchedPositionData;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\SynchedPositionData\B",num2str(3+numPerson)],"");
+        path = strjoin(["..\ProcessedData\SynchedPositionData\",BaselineFilesParameters(3),num2str(3+numPerson)],"");
     else
         path = strjoin(["..\ProcessedData\SynchedPositionData\P",num2str(numPerson)],"");
     end
@@ -616,7 +616,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\B",num2str(3+numPerson),".mat"],"");
+            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),num2str(3+numPerson),".mat"],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
         end
@@ -629,7 +629,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
             fprintf("   .Computing force transformation...")
             if numPerson < 0 % Up to know this procedure can only be done on the baselines
                 [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
-                    cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson);
+                    cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters);
             else
                 finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
             end
@@ -736,7 +736,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForceSynchronization;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceSynchronization\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
         end

@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, involvedHand, defaultTitleName)
+function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, involvedHand, defaultTitleName, BaselineFilesParameters)
 % This function is used to check the error made from the direct kinematic
 % alghoritm making a comparison between the position read from the state:o
 % port of iCub and the one evaluated from joint values for baselines
@@ -112,7 +112,7 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
     if IMAGE_SAVING
         mkdir ..\ProcessedData\DirectKinematicsError;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\DirectKinematicsError\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\DirectKinematicsError\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
         else
             path = strjoin(["..\ProcessedData\DirectKinematicsError\P",num2str(numPerson),".png"],"");
         end

@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(robot, aik, opts, initialPosDataSet, cuttedPosDataSet, ...
-    cuttedSynchForceDataSet, posStart, posEnd, personParameters, defaultTitleName, numPerson)
+    cuttedSynchForceDataSet, posStart, posEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters)
 % This function is used to evaluate the transformation of the force in order to have the 
 % exact value of the force module in the hand RF and the orientation in the OF.
 % In the following a brief explanation of the procedure computed:
@@ -43,10 +43,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         tic
         fprintf("\n       .Reading data files...")
         if numPerson == -2
-            jointDataSet = readtable("..\InputData\joints\leftArm\P0_L_Base\data.log");
+            jointDataSet = readtable(strjoin(["..\InputData\joints\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
         else 
             if numPerson == -1
-                jointDataSet = readtable("..\InputData\joints\rightArm\P0_R_Base\data.log");
+                jointDataSet = readtable("..\InputData\joints\rightArm\",BaselineFilesParameters(2),"\data.log");
             else
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
                     if strcmp(personParameters(5),"DX") == 1
@@ -121,7 +121,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         
         %% Evaluation of direct kinematics alghoritm error
         if numPerson < JOINTS_ONLY_FOR_BASELINE
-            [dirKinPhaseError, dirKinModuleError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName);
+            [dirKinPhaseError, dirKinModuleError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName, BaselineFilesParameters);
         end
 
         %% Print shoulder pitch joint dependencies with position axis
@@ -155,7 +155,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         if IMAGE_SAVING
             mkdir ..\ProcessedData\ShoulderPitchJointPositionRelation;
             if numPerson < 0
-                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\B",num2str(3+numPerson),".png"],"");
+                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
             else
                 path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
             end
@@ -355,7 +355,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForceTransformation;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformation\B",num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForceTransformation\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformation\P",num2str(numPerson),".png"],"");
         end
@@ -389,7 +389,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             if IMAGE_SAVING
                 mkdir ..\ProcessedData\iKinJointsError;
                 if numPerson < 0
-                    path = strjoin(["..\ProcessedData\iKinJointsError\B",num2str(3+numPerson),".png"],"");
+                    path = strjoin(["..\ProcessedData\iKinJointsError\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
                 else
                     path = strjoin(["..\ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
                 end
@@ -409,13 +409,13 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
         %% Evaluation of the error of the force transformation
         % To elaborate this results is fundamental that the produced newCuttedSynchForceDataSet is full length
-        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName);
+        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName,BaselineFilesParameters);
     
     
         %% Save the data
         mkdir ..\ProcessedData\ForceTransformationData;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\B",num2str(3+numPerson)],"");
+            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),num2str(3+numPerson)],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
         end
