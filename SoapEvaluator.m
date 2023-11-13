@@ -203,4 +203,9 @@ exportgraphics(fig4,"..\ProcessedData\Scatters\MeanAngleSoapIndentation.png")
 exportgraphics(fig5,"..\ProcessedData\Scatters\SoapIndentationParameters.png")
 exportgraphics(fig6,"..\ProcessedData\Scatters\SoapCuttingEfficience.png")
 
+matx = table((1:32)',angle,removedArea');
+matx = renamevars(matx, 1:width(matx), ["ID","Angle [deg]","Removed Surface [mm^2]"]);
+
+writetable(matx, "..\ProcessedData\SoapData.xlsx");
+
 close all
