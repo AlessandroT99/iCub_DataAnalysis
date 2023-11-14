@@ -38,7 +38,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
+    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
     PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
@@ -165,6 +165,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % but knowing that the conclusion include a rotation of the chest during
     % the last robot phase, we need to esclude that last part of the signal.
     initialPosEnd = derivativePosStart+experimentDuration;
+    if initialPosEnd > length(filteredPosDerivative)
+        initialPosEnd = length(filteredPosDerivative);
+    end
     cuttedFilteredPosDerivative = filteredPosDerivative(derivativePosStart:initialPosEnd);
     
     % So the peaks of the experiment time derivative are evaluated and the
@@ -403,7 +406,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
             mkdir ..\ProcessedData\HandTrajectory;
             if numPerson < 0
                 path = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
-                path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_",BaselineFilesParameters(3),num2str(3+numPerson),".fig"],"");
+                path2 = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),num2str(3+numPerson),"_3D.fig"],"");
             else
                 path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
                 path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
@@ -493,6 +496,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
 
     % Reference "tic" at the beginning in the "Parameters for the simulation" section 
     fprintf("                                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS')) 
+
+    %% Evaluation of velocity and acceleration
+    positionDerivatives(cuttedPosDataSet, numPerson, defaultTitleName, BaselineFilesParameters);
     
     %% Saving position data
     mkdir ..\ProcessedData\SynchedPositionData;

@@ -19,10 +19,10 @@ function cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataS
     tic
     fprintf("\n         .Force transformation error evaluation...")
     if numPerson == -2
-        wrenchDataSet = readtable(strjoin(["..\InputData\wrench\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
+        wrenchDataSet = readtable(strjoin([BaselineFilesParameters(4),"\wrench\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
     else 
         if numPerson == -1
-            wrenchDataSet = readtable(strjoin(["..\InputData\wrench\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
+            wrenchDataSet = readtable(strjoin([BaselineFilesParameters(4),"\wrench\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
         else
             if strcmp(handInvolved,"DX") == 1
                 if numPerson < 10

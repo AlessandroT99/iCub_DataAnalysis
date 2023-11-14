@@ -17,6 +17,7 @@
 function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization)
 % Function used to remove double peaks which can alterate results
     numberOfBackIndx= 2;
+    iterations = 0;
     timeThreshold = 1.4*100; % Check that this has to be lower than the average phase duration for baselines
     while abs(length(minLocalization)-length(maxLocalization)) > 1
         for i = 1:length(minLocalization) - 1
@@ -56,6 +57,14 @@ function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] =
                 else
                     i = i - numberOfBackIndx;
                 end
+            end
+        end
+        iterations = iterations + 1;
+        if iterations > 10 && abs(length(minLocalization)-length(maxLocalization)) < 3
+            break;
+        else 
+            if iterations > 20
+                error("Error in maxMinCleaning.m - Peaks cleaning has not been successfull.");
             end
         end
     end

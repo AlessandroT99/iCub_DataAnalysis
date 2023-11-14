@@ -34,7 +34,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     %% Simulation parameters
     IMAGE_SAVING = 1;               % Used to save some chosen plots
     PAUSE_TIME = 8;                 % Used to let the window of the plot get the full resolution size before saving
-    I_KIN_ERROR_EVALUATION = 1;     % If 0 the stated error is not evaluated
+    I_KIN_ERROR_EVALUATION = 0;     % If 0 the stated error is not evaluated
     JOINTS_ONLY_FOR_BASELINE = 0;   % If 0 the joints datahas been collected only for baselines and so portion of the code become exclusive for them
                                     % to turn this off put a number way higher than the number of tests analyzed
     
@@ -43,10 +43,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         tic
         fprintf("\n       .Reading data files...")
         if numPerson == -2
-            jointDataSet = readtable(strjoin(["..\InputData\joints\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
+            jointDataSet = readtable(strjoin([BaselineFilesParameters(4),"\joints\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
         else 
             if numPerson == -1
-                jointDataSet = readtable("..\InputData\joints\rightArm\",BaselineFilesParameters(2),"\data.log");
+                jointDataSet = readtable(BaselineFilesParameters(4),"\joints\rightArm\",BaselineFilesParameters(2),"\data.log");
             else
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
                     if strcmp(personParameters(5),"DX") == 1

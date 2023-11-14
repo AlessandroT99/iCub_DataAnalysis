@@ -43,10 +43,11 @@ BASELINE_NUMBER = 2;        % Number of baseline in the simulation
 BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
 posBaseline = [];           % Variable where the pos baseline is saved
 baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
-SXbaseLinePath = "P0_L_Base\";  % Name of the folder containing the file of the L baseline
-DXbaseLinePath = "P0_R_Base\";  % Name of the folder containing the file of the R baseline
-BaseLineOutputName = "B";       % The initial part of the name of the baseline output
-BaselineFilesParameters = [SXbaseLinePath,DXbaseLinePath,BaseLineOutputName]; % just the union of the three up for faster use and function passing 
+BaselineMainDataFolder = "..\InputData\NewBaselines_141123"; % Name of the main folder containing all baselines data
+SXbaseLinePath = "B_SX_None";  % Name of the folder containing the file of the L baseline
+DXbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the R baseline
+BaseLineOutputName_SX = "\NewBaselines\B_SX_None";   % The initial part of the name of the SX baseline output
+BaseLineOutputName_DX = "B";   % The initial part of the name of the DX baseline output
 
 %% Input data
 fprintf("Simulation starting up...\n")
@@ -63,13 +64,13 @@ fprintf("Importing input data and simulation models...\n\n")
 % Has been chosen the Paris01 iCub due to the low number of reference
 % frames included, in fact almost all the other models included also the
 % skin reference frames, which where not usefull for this purpose.
-iCub = importrobot("..\icub-models\iCub\robots\iCubNancy01\model.urdf");
+iCub = importrobot("..\icub-models\iCub\robots\iCubLisboa01\model.urdf");
 % Modify numDoFTBase number into analyticalInverseKinematics() 
 aik = analyticalInverseKinematics(iCub);
 opts = showdetails(aik);
 % % Code use to identify the unusefull warning
 % [msg,warnID] = lastwarn
-% show(iCub);
+% show(iCub);BaselineMainDataFolder
 
 %% Output initialization
 totalMeanHtoR = 0;
@@ -125,14 +126,17 @@ end
 for i = 1:numPeople
     if BaseLineEvaluationDone == 0
         if i == 1
-            posFilePath = strjoin(["..\InputData\positions\leftHand\",SXbaseLinePath,"\data.log"],"");
-            forceFilePath = strjoin(["..\InputData\forces\leftArm\",SXbaseLinePath,"\data.log"],"");
+            posFilePath = strjoin([BaselineMainDataFolder,"\positions\leftHand\",SXbaseLinePath,"\data.log"],"");
+            forceFilePath = strjoin([BaselineMainDataFolder,"\forces\leftArm\",SXbaseLinePath,"\data.log"],"");
+            BaseLineOutputName = BaseLineOutputName_SX;
         else
             if i == 2
-                posFilePath = strjoin(["..\InputData\positions\rightHand\",DXbaseLinePath,"\data.log"],"");
-                forceFilePath = strjoin(["..\InputData\forces\rightArm\",DXbaseLinePath,"\data.log"],"");
+                posFilePath = strjoin([BaselineMainDataFolder,"\positions\rightHand\",DXbaseLinePath,"\data.log"],"");
+                forceFilePath = strjoin([BaselineMainDataFolder,"\forces\rightArm\",DXbaseLinePath,"\data.log"],"");
+                BaseLineOutputName = BaseLineOutputName_DX;
             end
         end
+        BaselineFilesParameters = [SXbaseLinePath,DXbaseLinePath,BaseLineOutputName,BaselineMainDataFolder]; % just the union of the four up for faster use and function passing 
 
         posDataSet = readtable(posFilePath);
         forceDataSet = readtable(forceFilePath);
@@ -173,7 +177,7 @@ for i = 1:numPeople
         if AXIS_3PLOT
             tic
             fprintf("   .Plotting all components of position and force...")
-            print3Axis(posDataSet, forceDataSet,numP);
+            print3Axis(posDataSet, forceDataSet,numP, BaselineFilesParameters);
             fprintf("               Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         end
 

@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function print3Axis(posDataSet, forceDataSet, numPerson)
+function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters)
 % This function is used to initially plot the 3 axis components of force
 % and position in order to analyze them properly
     %% Position plotting
@@ -26,16 +26,19 @@ function print3Axis(posDataSet, forceDataSet, numPerson)
     plot(elapsedTimePos,posDataSet.xPos,'b-','DisplayName','x position')
     plot(elapsedTimePos,posDataSet.yPos,'r-','DisplayName','y position')
     plot(elapsedTimePos,posDataSet.zPos,'g-','DisplayName','z position')
+    yline(mean(posDataSet.xPos),'k--','LineWidth',2.2)
+    yline(mean(posDataSet.yPos),'k--','LineWidth',2.2)
+    yline(mean(posDataSet.zPos),'k--','LineWidth',2.2)
     titleName = strjoin(["Position X-Y-Z - Test N. ",num2str(numPerson)],"");
     title(titleName)
     xlabel("Elapsed Time [ min ]")
     ylabel("Position [ m ]")
-    legend('show','Location','eastoutside')
+    legend("x position","y position","z position",'Location','eastoutside')
 
     mkdir ..\ProcessedData;
     mkdir ..\ProcessedData\3AxisPosition;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\3AxisPosition\B",num2str(3+numPerson),".png"],"");
+        path = strjoin(["..\ProcessedData\3AxisPosition\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
     else
         path = strjoin(["..\ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
     end
@@ -51,15 +54,18 @@ function print3Axis(posDataSet, forceDataSet, numPerson)
     plot(elapsedTimeForce,forceDataSet.Fx,'b-','DisplayName','x force')
     plot(elapsedTimeForce,forceDataSet.Fy,'r-','DisplayName','y force')
     plot(elapsedTimeForce,forceDataSet.Fz,'g-','DisplayName','z force')
+    yline(mean(forceDataSet.Fx),'k--','LineWidth',2.2)
+    yline(mean(forceDataSet.Fy),'k--','LineWidth',2.2)
+    yline(mean(forceDataSet.Fz),'k--','LineWidth',2.2)
     titleName = strjoin(["Force X-Y-Z - Test N. ",num2str(numPerson)],"");
     title(titleName)
     xlabel("Elapsed Time [ min ]")
     ylabel("Force [ N ]")
-    legend('show','Location','eastoutside')
+    legend("x force","y force","z force",'Location','eastoutside')
 
     mkdir ..\ProcessedData\3AxisForce;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\3AxisForce\B",num2str(3+numPerson),".png"],"");
+        path = strjoin(["..\ProcessedData\3AxisForce\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
     else
         path = strjoin(["..\ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
     end
