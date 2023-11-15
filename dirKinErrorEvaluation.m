@@ -63,21 +63,21 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
     % Plot results
     fig1 = figure('Name','Positions comparison');
     fig1.WindowState = 'maximized';
-    subplot(2,3,1), grid on, hold on
+    subplot(3,3,1), grid on, hold on
     plot(cuttedElapsedTime, cuttedPosDataSet.xPos.*100, 'b-', 'DisplayName','Dumped position')
     plot(cuttedElapsedTime, evaluatedPosition(:,1).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
     title('Comparison between X positions')
     xlabel("Time [ min ]"), ylabel("position [ cm ]")
     legend('show')
     hold off
-    subplot(2,3,2), grid on, hold on
+    subplot(3,3,2), grid on, hold on
     plot(cuttedElapsedTime, cuttedPosDataSet.yPos.*100, 'b-', 'DisplayName','Dumped position')
     plot(cuttedElapsedTime, evaluatedPosition(:,2).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
     title('Comparison between Y positions')
     xlabel("Time [ min ]"), ylabel("position [ cm ]")
     legend('show')
     hold off
-    subplot(2,3,3), grid on, hold on
+    subplot(3,3,3), grid on, hold on
     plot(cuttedElapsedTime, cuttedPosDataSet.zPos.*100, 'b-', 'DisplayName','Dumped position')
     plot(cuttedElapsedTime, evaluatedPosition(:,3).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
     title('Comparison between Z positions')
@@ -85,25 +85,47 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
     legend('show')
     hold off
 
-    subplot(2,3,4), grid on, hold on
+    subplot(3,3,4), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,1).*100, 'b-','DisplayName','Error evaluated')
     yline(meanError(1).*100,'k--','LineWidth',2.2,'DisplayName','Mean Error')
     title('Error of the X position calculation')
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
     legend('show')
     hold off
-    subplot(2,3,5), grid on, hold on
+    subplot(3,3,5), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,2).*100, 'b-','DisplayName','Error evaluated')
     yline(meanError(2).*100,'k--','LineWidth',2.2,'DisplayName','Mean Error')
     title('Error of the Y position calculation')
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
     legend('show')
     hold off
-    subplot(2,3,6), grid on, hold on
+    subplot(3,3,6), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,3).*100, 'b-','DisplayName','Error evaluated')
     yline(meanError(3).*100,'k--','LineWidth',2.2,'DisplayName','Mean Error')
     title('Error of the Z position calculation')
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    legend('show')
+    hold off
+    
+    subplot(3,3,7), grid on, hold on
+    plot(cuttedElapsedTime, phaseError(:,1).*100, 'b-','DisplayName','Phase error evaluated')
+    yline(mean(phaseError(:,1)),'k--','LineWidth',2.2,'DisplayName','Mean phase Error')
+    title('Phase error of the X position')
+    xlabel("Time [ min ]"), ylabel("error [ rad ]")
+    legend('show')
+    hold off
+    subplot(3,3,8), grid on, hold on
+    plot(cuttedElapsedTime, phaseError(:,2).*100, 'b-','DisplayName','Phase error evaluated')
+    yline(mean(phaseError(:,2)),'k--','LineWidth',2.2,'DisplayName','Mean phase error')
+    title('Phase error of the Y position')
+    xlabel("Time [ min ]"), ylabel("error [ rad ]")
+    legend('show')
+    hold off
+    subplot(3,3,9), grid on, hold on
+    plot(cuttedElapsedTime, phaseError(:,3).*100, 'b-','DisplayName','Phase error evaluated')
+    yline(mean(phaseError(:,3)),'k--','LineWidth',2.2,'DisplayName','Mean phase Error')
+    title('Phase error of the Z position')
+    xlabel("Time [ min ]"), ylabel("error [ rad ]")
     legend('show')
     hold off
 

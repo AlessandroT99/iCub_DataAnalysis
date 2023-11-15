@@ -14,8 +14,11 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization)
+function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization,ITERATE)
 % Function used to remove double peaks which can alterate results
+    if nargin == 4
+        ITERATE = 1;
+    end
     numberOfBackIndx= 2;
     iterations = 0;
     timeThreshold = 1.4*100; % Check that this has to be lower than the average phase duration for baselines
@@ -63,8 +66,11 @@ function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] =
         if iterations > 10 && abs(length(minLocalization)-length(maxLocalization)) < 3
             break;
         else 
-            if iterations > 20
+            if iterations > 20 && ITERATE
                 error("Error in maxMinCleaning.m - Peaks cleaning has not been successfull.");
+            else
+                % If iterate is = 0 we do not care of the error
+                break;
             end
         end
     end

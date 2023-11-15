@@ -43,11 +43,22 @@ BASELINE_NUMBER = 2;        % Number of baseline in the simulation
 BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
 posBaseline = [];           % Variable where the pos baseline is saved
 baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
-BaselineMainDataFolder = "..\InputData\NewBaselines_141123"; % Name of the main folder containing all baselines data
-SXbaseLinePath = "B_SX_None";  % Name of the folder containing the file of the L baseline
-DXbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the R baseline
-BaseLineOutputName_SX = "\NewBaselines\B_SX_None";   % The initial part of the name of the SX baseline output
-BaseLineOutputName_DX = "B";   % The initial part of the name of the DX baseline output
+
+%% Baselines input data
+NEW_BASELINES = 0;          % Change the input of the default baselines if 1
+if NEW_BASELINES
+    BaselineMainDataFolder = "..\InputData\NewBaselines_141123"; % Name of the main folder containing all baselines data
+    SXbaseLinePath = "B_SX_None";  % Name of the folder containing the file of the L baseline
+    DXbaseLinePath = "B_DX_None";  % Name of the folder containing the file of the R baseline
+    BaseLineOutputName_SX = "\NewBaselines\B_SX_None";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "\NewBaselines\B_DX_None";   % The initial part of the name of the DX baseline output
+else
+    BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
+    SXbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
+    DXbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
+    BaseLineOutputName_SX = "B";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "B";   % The initial part of the name of the DX baseline output
+end
 
 %% Input data
 fprintf("Simulation starting up...\n")
@@ -55,7 +66,6 @@ fprintf("Simulation starting up...\n")
 numPeople = 32+BASELINE_NUMBER; 
 people = readtable("..\InputData\Dati Personali EXP2.xlsx");
 people = people(1:numPeople-BASELINE_NUMBER,:);
-
 
 % The following command is part of the robotic toolbox
 % Whilst the iCub model has been downloaded from

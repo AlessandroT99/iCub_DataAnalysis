@@ -77,7 +77,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % The signal derivative is evaluated
     posDerivative = zeros(1,length(firstAverageEnv)-1);
     for i = 2:length(firstAverageEnv)
-        posDerivative(i) = (firstAverageEnv(i)-firstAverageEnv(i-1))/10e-5;
+        posDerivative(i) = (firstAverageEnv(i)-firstAverageEnv(i-1))/(0.01/60);
     end
     
     % Plot results
@@ -498,7 +498,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     fprintf("                                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS')) 
 
     %% Evaluation of velocity and acceleration
-    positionDerivatives(cuttedPosDataSet, numPerson, defaultTitleName, BaselineFilesParameters);
+    tic
+    fprintf("   .Computing velocity and acceleration...")
+    positionDerivatives(cuttedPosDataSet, maxLocalization, maxPeaksVal, minLocalization, minPeaksVal, cuttedElapsedTime, numPerson, defaultTitleName, BaselineFilesParameters);
+    fprintf("                         Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Saving position data
     mkdir ..\ProcessedData\SynchedPositionData;

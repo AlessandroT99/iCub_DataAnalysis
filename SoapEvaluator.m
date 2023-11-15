@@ -174,7 +174,7 @@ errorbar(mean(angle),mean(removedArea),std(angle)/sqrt(numPeople), 'Horizontal',
 limX = [min(angle),max(angle)];
 limY = [min(removedArea),max(removedArea)];
 xlim([limX(1)-1,limX(2)+1]), ylim([limY(1)-25,limY(2)+25])
-plot(bisector([limX(1),limY(1)],[limX(2),limY(2)]),'k--')
+% plot(bisector([limX(1),limY(1)],[limX(2),limY(2)]),'k--')
 legend("Test samples","Mean of the samples","Standard Error",'Location','northwest')
 xlabel("Angle [ deg ]"), ylabel("Removed material [ mm^2 ]")
 title("Comparison between indentation angle and removed material from soap bars")

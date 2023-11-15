@@ -46,20 +46,20 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             jointDataSet = readtable(strjoin([BaselineFilesParameters(4),"\joints\leftArm\",BaselineFilesParameters(1),"\data.log"],""));
         else 
             if numPerson == -1
-                jointDataSet = readtable(BaselineFilesParameters(4),"\joints\rightArm\",BaselineFilesParameters(2),"\data.log");
+                jointDataSet = readtable(strjoin([BaselineFilesParameters(4),"\joints\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
             else
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
                     if strcmp(personParameters(5),"DX") == 1
                         if numPerson < 10
-                            jointDataSet = join(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
-                            jointDataSet = join(["..\InputData\joints\leftArm\P_000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\InputData\joints\leftArm\P_000",num2str(numPerson),"\data.log"],'');
                         end
                     else
                         if personSubSet < 10
-                            jointDataSet = join(["..\InputData\joints\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\InputData\joints\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
-                            jointDataSet = join(["..\InputData\joints\rightArm\P_000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\InputData\joints\rightArm\P_000",num2str(numPerson),"\data.log"],'');
                         end
                     end
                 end

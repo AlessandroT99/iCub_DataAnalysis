@@ -26,15 +26,15 @@ function cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataS
         else
             if strcmp(handInvolved,"DX") == 1
                 if numPerson < 10
-                    wrenchDataSet = join(["..\InputData\wrench\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
+                    wrenchDataSet = strjoin(["..\InputData\wrench\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                 else
-                    wrenchDataSet = join(["..\InputData\wrench\leftArm\P_000",num2str(numPerson),"\data.log"],'');
+                    wrenchDataSet = strjoin(["..\InputData\wrench\leftArm\P_000",num2str(numPerson),"\data.log"],'');
                 end
             else
                 if numPerson < 10
-                    wrenchDataSet = join(["..\InputData\wrench\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
+                    wrenchDataSet = strjoin(["..\InputData\wrench\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
                 else
-                    wrenchDataSet = join(["..\InputData\wrench\rightArm\P_000",num2str(numPerson),"\data.log"],'');
+                    wrenchDataSet = strjoin(["..\InputData\wrench\rightArm\P_000",num2str(numPerson),"\data.log"],'');
                 end
             end
         end
