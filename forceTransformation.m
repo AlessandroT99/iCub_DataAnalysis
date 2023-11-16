@@ -121,7 +121,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         
         %% Evaluation of direct kinematics alghoritm error
         if numPerson < JOINTS_ONLY_FOR_BASELINE
-            [dirKinPhaseError, dirKinModuleError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName, BaselineFilesParameters);
+            [dirKinPhaseError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName, BaselineFilesParameters);
         end
 
         %% Print shoulder pitch joint dependencies with position axis
@@ -155,7 +155,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         if IMAGE_SAVING
             mkdir ..\ProcessedData\ShoulderPitchJointPositionRelation;
             if numPerson < 0
-                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\",BaselineFilesParameters(3),".png"],"");
             else
                 path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
             end
@@ -355,7 +355,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForceTransformation;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformation\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForceTransformation\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformation\P",num2str(numPerson),".png"],"");
         end
@@ -389,7 +389,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             if IMAGE_SAVING
                 mkdir ..\ProcessedData\iKinJointsError;
                 if numPerson < 0
-                    path = strjoin(["..\ProcessedData\iKinJointsError\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+                    path = strjoin(["..\ProcessedData\iKinJointsError\",BaselineFilesParameters(3),".png"],"");
                 else
                     path = strjoin(["..\ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
                 end
@@ -415,7 +415,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         %% Save the data
         mkdir ..\ProcessedData\ForceTransformationData;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),num2str(3+numPerson)],"");
+            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3)],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
         end

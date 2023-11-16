@@ -116,7 +116,6 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     
     %% Identification of starting
     % Average slope of the position signal in the first robot phase
-%     slopeRequired = 1e3;
     stdRequired = 0.9; % Estimated graphycally looking at the plots into \ProcessedData\PositionDerivativeSTD
     subSetDimension = 25;
 
@@ -125,40 +124,12 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     % evaluating the slope for the whole signal
     
     for i = subSetDimension+1:subSetDimension:length(firstAverageEnv)
-%         % The following method has been removed due to lower preceision
-%         % Trying to catch an high slope and save the point
-%         slope(i) = (abs(filteredPosDerivative(i)-filteredPosDerivative(i-subSetDimension)))/10e-5;
-%         if (slope(i) > slopeRequired && findedFlag == 0)
-%             posStart = i-25;
-%             findedFlag = 1;
-%         end
-
         posStd(i) = std(filteredPosDerivative(i-subSetDimension:i));
         if (posStd(i) > stdRequired && findedFlag == 0)
             derivativePosStart = i-25;
             findedFlag = 1;
         end
     end
-
-    if DEBUG
-%         figure, hold on, grid on, plot(slope), hold off
-%         mkdir ..\ProcessedData\PositionDerivativeSlope;
-%         path = strjoin(["..\ProcessedData\PositionDerivativeSlope\P",num2str(numPerson),".png"],"");
-%         pause(PAUSE_TIME);
-%         exportgraphics(gcf,path)
-%         close(gcf);
-
-        figure, hold on, grid on, plot(posStd), hold off
-%         mkdir ..\ProcessedData\PositionDerivativeSTD;
-%         path = strjoin(["..\ProcessedData\PositionDerivativeSTD\P",num2str(numPerson),".png"],"");
-%         pause(PAUSE_TIME);
-%         exportgraphics(gcf,path)
-%         close(gcf);
-
-        % Define any derivativePosStart just to run the code for image savings
-        derivativePosStart = 300;
-    end
-    
 
     %% Identification of ending point
     % Finally the ending point is firstly found only adding the experiment time
@@ -405,8 +376,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
         if IMAGE_SAVING
             mkdir ..\ProcessedData\HandTrajectory;
             if numPerson < 0
-                path = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
-                path2 = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),num2str(3+numPerson),"_3D.fig"],"");
+                path = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),".png"],"");
+                path2 = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),"_3D.fig"],"");
             else
                 path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
                 path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
@@ -477,7 +448,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     if IMAGE_SAVING
         mkdir ..\ProcessedData\PositionVisualizing;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PositionVisualizing\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PositionVisualizing\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
         end
@@ -486,7 +457,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
 
         mkdir ..\ProcessedData\PositionProcessing;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PositionProcessing\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PositionProcessing\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
         end
@@ -506,7 +477,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Saving position data
     mkdir ..\ProcessedData\SynchedPositionData;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\SynchedPositionData\",BaselineFilesParameters(3),num2str(3+numPerson)],"");
+        path = strjoin(["..\ProcessedData\SynchedPositionData\",BaselineFilesParameters(3)],"");
     else
         path = strjoin(["..\ProcessedData\SynchedPositionData\P",num2str(numPerson)],"");
     end
@@ -625,7 +596,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),num2str(3+numPerson),".mat"],"");
+            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
         end
@@ -745,7 +716,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForceSynchronization;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
         end

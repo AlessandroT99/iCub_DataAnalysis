@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, involvedHand, defaultTitleName, BaselineFilesParameters)
+function [phaseError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, involvedHand, defaultTitleName, BaselineFilesParameters)
 % This function is used to check the error made from the direct kinematic
 % alghoritm making a comparison between the position read from the state:o
 % port of iCub and the one evaluated from joint values for baselines
@@ -50,13 +50,11 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
     fftIdeal = zeros(height(jointSynchDataSet),3);
     fftReal = zeros(height(jointSynchDataSet),3);
     phaseError = zeros(height(jointSynchDataSet),3); 
-    moduleError = zeros(height(jointSynchDataSet),3); 
     meanError = zeros(1,3); 
     for k = 1:3
-        fftIdeal(:,k) = fft(table2array(cuttedPosDataSet(:,k+2)));
-        fftReal(:,k) = fft(evaluatedPosition(:,k));
-        phaseError(:,k) = phase(fftIdeal(:,k))-phase(fftReal(:,k));
-        moduleError(:,k) = abs(fftIdeal(:,k))-abs(fftReal(:,k));
+        fftIdeal(:,k) = fft(table2array(cuttedPosDataSet(:,k+2))-mean(table2array(cuttedPosDataSet(:,k+2))));
+        fftReal(:,k) = fft(evaluatedPosition(:,k)-mean(evaluatedPosition(:,k)));
+        phaseError(:,k) = rad2deg(angle(fftIdeal(:,k))-angle(fftReal(:,k)));
         meanError(k) = mean(dirKinError(:,k));
     end
     
@@ -87,45 +85,57 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
 
     subplot(3,3,4), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,1).*100, 'b-','DisplayName','Error evaluated')
-    yline(meanError(1).*100,'k--','LineWidth',2.2,'DisplayName','Mean Error')
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(:,1)*100)],"");
+    yline(meanError(1).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
     title('Error of the X position calculation')
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    ylim([-3,1])
     legend('show')
     hold off
     subplot(3,3,5), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,2).*100, 'b-','DisplayName','Error evaluated')
-    yline(meanError(2).*100,'k--','LineWidth',2.2,'DisplayName','Mean Error')
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(:,2)*100)],"");
+    yline(meanError(2).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
     title('Error of the Y position calculation')
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    ylim([-7,10])
     legend('show')
     hold off
     subplot(3,3,6), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,3).*100, 'b-','DisplayName','Error evaluated')
-    yline(meanError(3).*100,'k--','LineWidth',2.2,'DisplayName','Mean Error')
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(:,3)*100)],"");
+    yline(meanError(3).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
     title('Error of the Z position calculation')
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    ylim([-2,2])
     legend('show')
     hold off
     
     subplot(3,3,7), grid on, hold on
-    plot(cuttedElapsedTime, phaseError(:,1).*100, 'b-','DisplayName','Phase error evaluated')
-    yline(mean(phaseError(:,1)),'k--','LineWidth',2.2,'DisplayName','Mean phase Error')
+    plot(cuttedElapsedTime, phaseError(:,1), 'b-','DisplayName','Phase error evaluated')
+    meanLegend = strjoin(["Mean phase error: ",num2str(mean(phaseError(:,1)))],"");
+    yline(mean(phaseError(:,1)),'k--','LineWidth',2.2,'DisplayName',meanLegend)
     title('Phase error of the X position')
-    xlabel("Time [ min ]"), ylabel("error [ rad ]")
+    xlabel("Time [ min ]"), ylabel("error [ deg ]")
+    ylim([-360,360])
     legend('show')
     hold off
     subplot(3,3,8), grid on, hold on
-    plot(cuttedElapsedTime, phaseError(:,2).*100, 'b-','DisplayName','Phase error evaluated')
-    yline(mean(phaseError(:,2)),'k--','LineWidth',2.2,'DisplayName','Mean phase error')
+    plot(cuttedElapsedTime, phaseError(:,2), 'b-','DisplayName','Phase error evaluated')
+    meanLegend = strjoin(["Mean phase error: ",num2str(mean(phaseError(:,2)))],"");
+    yline(mean(phaseError(:,2)),'k--','LineWidth',2.2,'DisplayName',meanLegend)
     title('Phase error of the Y position')
-    xlabel("Time [ min ]"), ylabel("error [ rad ]")
+    xlabel("Time [ min ]"), ylabel("error [ deg ]")
+    ylim([-360,360])
     legend('show')
     hold off
     subplot(3,3,9), grid on, hold on
-    plot(cuttedElapsedTime, phaseError(:,3).*100, 'b-','DisplayName','Phase error evaluated')
-    yline(mean(phaseError(:,3)),'k--','LineWidth',2.2,'DisplayName','Mean phase Error')
+    plot(cuttedElapsedTime, phaseError(:,3), 'b-','DisplayName','Phase error evaluated')
+    meanLegend = strjoin(["Mean phase error: ",num2str(mean(phaseError(:,3)))],"");
+    yline(mean(phaseError(:,3)),'k--','LineWidth',2.2,'DisplayName',meanLegend)
     title('Phase error of the Z position')
-    xlabel("Time [ min ]"), ylabel("error [ rad ]")
+    xlabel("Time [ min ]"), ylabel("error [ deg ]")
+    ylim([-360,360])
     legend('show')
     hold off
 
@@ -134,7 +144,7 @@ function [phaseError, moduleError, dirKinError] = dirKinErrorEvaluation(robot, j
     if IMAGE_SAVING
         mkdir ..\ProcessedData\DirectKinematicsError;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\DirectKinematicsError\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\DirectKinematicsError\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\DirectKinematicsError\P",num2str(numPerson),".png"],"");
         end

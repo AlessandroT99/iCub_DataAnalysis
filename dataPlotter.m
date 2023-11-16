@@ -48,16 +48,16 @@ baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of 
 NEW_BASELINES = 0;          % Change the input of the default baselines if 1
 if NEW_BASELINES
     BaselineMainDataFolder = "..\InputData\NewBaselines_141123"; % Name of the main folder containing all baselines data
-    SXbaseLinePath = "B_SX_None";  % Name of the folder containing the file of the L baseline
+    SXbaseLinePath = "P_SX_None";  % Name of the folder containing the file of the L baseline
     DXbaseLinePath = "B_DX_None";  % Name of the folder containing the file of the R baseline
-    BaseLineOutputName_SX = "\NewBaselines\B_SX_None";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_SX = "\NewBaselines\P_SX_None";   % The initial part of the name of the SX baseline output
     BaseLineOutputName_DX = "\NewBaselines\B_DX_None";   % The initial part of the name of the DX baseline output
 else
     BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
     SXbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
     DXbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
-    BaseLineOutputName_SX = "B";   % The initial part of the name of the SX baseline output
-    BaseLineOutputName_DX = "B";   % The initial part of the name of the DX baseline output
+    BaseLineOutputName_SX = "B_SX_Base";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "B_DX_Base";   % The initial part of the name of the DX baseline output
 end
 
 %% Input data
@@ -226,7 +226,7 @@ for i = 1:numPeople
         % Usefull data for further analysis
         mkdir ..\ProcessedData\SimulationData;
         if numP < 0
-            fileName = strjoin(["..\ProcessedData\SimulationData\",BaseLineOutputName,num2str(3+numP)],"");
+            fileName = strjoin(["..\ProcessedData\SimulationData\",BaseLineOutputName],"");
         else
             fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(numP)],"");
         end

@@ -54,7 +54,7 @@ function [phaseError, moduleError, transformationError] = wrenchEndEffectorError
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForceTranformationError;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTranformationError\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForceTranformationError\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForceTranformationError\P",num2str(numPerson),".png"],"");
         end

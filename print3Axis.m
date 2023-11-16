@@ -38,7 +38,7 @@ function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters
     mkdir ..\ProcessedData;
     mkdir ..\ProcessedData\3AxisPosition;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\3AxisPosition\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+        path = strjoin(["..\ProcessedData\3AxisPosition\",BaselineFilesParameters(3),".png"],"");
     else
         path = strjoin(["..\ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
     end
@@ -65,7 +65,7 @@ function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters
 
     mkdir ..\ProcessedData\3AxisForce;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\3AxisForce\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+        path = strjoin(["..\ProcessedData\3AxisForce\",BaselineFilesParameters(3),".png"],"");
     else
         path = strjoin(["..\ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
     end

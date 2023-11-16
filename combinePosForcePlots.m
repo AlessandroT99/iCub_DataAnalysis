@@ -119,7 +119,7 @@ function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personP
     if IMAGE_SAVING
         mkdir ..\ProcessedData\ForcePositionComparison;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForcePositionComparison\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\ForcePositionComparison\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\ProcessedData\ForcePositionComparison\P",num2str(numPerson),".png"],"");
         end

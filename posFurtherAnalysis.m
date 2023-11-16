@@ -178,7 +178,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\ProcessedData\PhaseTimeDifference;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseTimeDifference\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PhaseTimeDifference\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\ProcessedData\PhaseTimeDifference\P",num2str(numPerson),".png"],"");
         end
@@ -209,7 +209,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\ProcessedData\PhaseTimeDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseTimeDuration\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PhaseTimeDuration\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\ProcessedData\PhaseTimeDuration\P",num2str(numPerson),".png"],"");
         end
@@ -238,7 +238,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\ProcessedData\PhaseSpaceDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
         end
@@ -264,7 +264,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\ProcessedData\PhaseSpaceDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
         end

@@ -64,9 +64,9 @@ function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVa
     % Plot results
     subplot(3,1,2), grid on, hold on
     plot(cuttedElapsedTime,filteredVelocity,'k-')
-    plot(velMaxLocalization,velMaxPeaksVal,'ro')
-    plot(velMinLocalization,velMinPeaksVal,'go')
-    legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
+%     plot(velMaxLocalization,velMaxPeaksVal,'ro')
+%     plot(velMinLocalization,velMinPeaksVal,'go')
+%     legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
     title("Velocity Signal")
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Velocity [ $\frac{m}{s}$ ]",'Interpreter','latex')
     hold off
@@ -101,9 +101,9 @@ function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVa
     % Plot results
     subplot(3,1,3), grid on, hold on
     plot(cuttedElapsedTime,filteredAcceleration,'k-')
-    plot(accMaxLocalization,accMaxPeaksVal,'ro')
-    plot(accMinLocalization,accMinPeaksVal,'go')
-    legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
+%     plot(accMaxLocalization,accMaxPeaksVal,'ro')
+%     plot(accMinLocalization,accMinPeaksVal,'go')
+%     legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
     title("Acceleration Signal")
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Acceleration [ $\frac{m}{s^2}$ ]",'Interpreter','latex')
     hold off
@@ -111,7 +111,7 @@ function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVa
     %% Figure saving
     mkdir ..\ProcessedData\PositionDerivatives;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\PositionDerivatives\",BaselineFilesParameters(3),num2str(3+numPerson),".png"],"");
+        path = strjoin(["..\ProcessedData\PositionDerivatives\",BaselineFilesParameters(3),".png"],"");
     else
         path = strjoin(["..\ProcessedData\PositionDerivatives\P",num2str(numPerson),".png"],"");
     end
