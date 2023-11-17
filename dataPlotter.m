@@ -45,19 +45,19 @@ posBaseline = [];           % Variable where the pos baseline is saved
 baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
 
 %% Baselines input data
-NEW_BASELINES = 0;          % Change the input of the default baselines if 1
+NEW_BASELINES = 1;          % Change the input of the default baselines if 1
 if NEW_BASELINES
-    BaselineMainDataFolder = "..\InputData\NewBaselines_141123"; % Name of the main folder containing all baselines data
-    SXbaseLinePath = "P_SX_None";  % Name of the folder containing the file of the L baseline
-    DXbaseLinePath = "B_DX_None";  % Name of the folder containing the file of the R baseline
-    BaseLineOutputName_SX = "\NewBaselines\P_SX_None";   % The initial part of the name of the SX baseline output
-    BaseLineOutputName_DX = "\NewBaselines\B_DX_None";   % The initial part of the name of the DX baseline output
+    BaselineMainDataFolder = "..\InputData\NewBaselines"; % Name of the main folder containing all baselines data
+    SXbaseLinePath = "B_SX_Medium";  % Name of the folder containing the file of the L baseline
+    DXbaseLinePath = "B_DX_Medium";  % Name of the folder containing the file of the R baseline
+    BaseLineOutputName_SX = "\NewBaselines\B_SX_Medium";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "\NewBaselines\B_DX_Medium";   % The initial part of the name of the DX baseline output
 else
     BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
-    SXbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
-    DXbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
-    BaseLineOutputName_SX = "B_SX_Base";   % The initial part of the name of the SX baseline output
-    BaseLineOutputName_DX = "B_DX_Base";   % The initial part of the name of the DX baseline output
+    SXbaseLinePath = "P0_L_Soft";  % Name of the folder containing the file of the L baseline
+    DXbaseLinePath = "P0_R_Soft";  % Name of the folder containing the file of the R baseline
+    BaseLineOutputName_SX = "B_SX_Soft";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "B_DX_Soft";   % The initial part of the name of the DX baseline output
 end
 
 %% Input data

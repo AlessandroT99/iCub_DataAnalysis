@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [phaseError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, involvedHand, defaultTitleName, BaselineFilesParameters)
+function [time_lag, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, involvedHand, defaultTitleName, BaselineFilesParameters)
 % This function is used to check the error made from the direct kinematic
 % alghoritm making a comparison between the position read from the state:o
 % port of iCub and the one evaluated from joint values for baselines
@@ -47,35 +47,41 @@ function [phaseError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchData
     end
 
     dirKinError = table2array(cuttedPosDataSet(:,3:5)) - evaluatedPosition;
-    fftIdeal = zeros(height(jointSynchDataSet),3);
-    fftReal = zeros(height(jointSynchDataSet),3);
-    phaseError = zeros(height(jointSynchDataSet),3); 
+    time_lag = zeros(1,3); 
     meanError = zeros(1,3); 
+    meanAbsStd = zeros(1,3); 
+    fs = 200; % Sampling frequency
     for k = 1:3
-        fftIdeal(:,k) = fft(table2array(cuttedPosDataSet(:,k+2))-mean(table2array(cuttedPosDataSet(:,k+2))));
-        fftReal(:,k) = fft(evaluatedPosition(:,k)-mean(evaluatedPosition(:,k)));
-        phaseError(:,k) = rad2deg(angle(fftIdeal(:,k))-angle(fftReal(:,k)));
+        Ideal = table2array(cuttedPosDataSet(:,k+2))-mean(table2array(cuttedPosDataSet(:,k+2)));
+        Real = evaluatedPosition(:,k)-mean(evaluatedPosition(:,k));
+        % Calculate the cross-correlation between the two signals
+        cross_corr = xcorr(Ideal, Real);
+        % Find the index of the maximum correlation value
+        [~, idx_max] = max(abs(cross_corr));
+        % Calculate the time lag corresponding to the maximum correlation
+        time_lag(k) = (idx_max - length(Ideal)) / fs;
         meanError(k) = mean(dirKinError(:,k));
+        meanAbsStd(k) = mean(std(abs(dirKinError(:,k))));
     end
     
     % Plot results
     fig1 = figure('Name','Positions comparison');
     fig1.WindowState = 'maximized';
-    subplot(3,3,1), grid on, hold on
+    subplot(2,3,1), grid on, hold on
     plot(cuttedElapsedTime, cuttedPosDataSet.xPos.*100, 'b-', 'DisplayName','Dumped position')
     plot(cuttedElapsedTime, evaluatedPosition(:,1).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
     title('Comparison between X positions')
     xlabel("Time [ min ]"), ylabel("position [ cm ]")
     legend('show')
     hold off
-    subplot(3,3,2), grid on, hold on
+    subplot(2,3,2), grid on, hold on
     plot(cuttedElapsedTime, cuttedPosDataSet.yPos.*100, 'b-', 'DisplayName','Dumped position')
     plot(cuttedElapsedTime, evaluatedPosition(:,2).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
     title('Comparison between Y positions')
     xlabel("Time [ min ]"), ylabel("position [ cm ]")
     legend('show')
     hold off
-    subplot(3,3,3), grid on, hold on
+    subplot(2,3,3), grid on, hold on
     plot(cuttedElapsedTime, cuttedPosDataSet.zPos.*100, 'b-', 'DisplayName','Dumped position')
     plot(cuttedElapsedTime, evaluatedPosition(:,3).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
     title('Comparison between Z positions')
@@ -83,59 +89,40 @@ function [phaseError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchData
     legend('show')
     hold off
 
-    subplot(3,3,4), grid on, hold on
+    subplot(2,3,4), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,1).*100, 'b-','DisplayName','Error evaluated')
-    meanLegend = strjoin(["Mean error: ",num2str(meanError(:,1)*100)],"");
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(1)*100), " cm"],"");
     yline(meanError(1).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
-    title('Error of the X position calculation')
+    meanLegend = strjoin(["Mean absoluted std: ",num2str(meanAbsStd(1)*100), " cm"],"");
+    yline(meanAbsStd(1).*100,'r--','LineWidth',2.2,'DisplayName',meanLegend);
+    titleName = strjoin(["Phase shift: ",num2str(time_lag(1))," s"],"");
+    title('Error of the X position calculation',titleName)    
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
     ylim([-3,1])
     legend('show')
     hold off
-    subplot(3,3,5), grid on, hold on
+    subplot(2,3,5), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,2).*100, 'b-','DisplayName','Error evaluated')
-    meanLegend = strjoin(["Mean error: ",num2str(meanError(:,2)*100)],"");
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(2)*100), " cm"],"");
     yline(meanError(2).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
-    title('Error of the Y position calculation')
+    meanLegend = strjoin(["Mean absoluted std: ",num2str(meanAbsStd(2)*100), " cm"],"");
+    yline(meanAbsStd(2).*100,'r--','LineWidth',2.2,'DisplayName',meanLegend);
+    titleName = strjoin(["Phase shift: ",num2str(time_lag(2))," s"],"");
+    title('Error of the Y position calculation',titleName)    
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
     ylim([-7,10])
     legend('show')
     hold off
-    subplot(3,3,6), grid on, hold on
+    subplot(2,3,6), grid on, hold on
     plot(cuttedElapsedTime, dirKinError(:,3).*100, 'b-','DisplayName','Error evaluated')
-    meanLegend = strjoin(["Mean error: ",num2str(meanError(:,3)*100)],"");
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(3)*100), " cm"],"");
     yline(meanError(3).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
-    title('Error of the Z position calculation')
+    meanLegend = strjoin(["Mean absoluted std: ",num2str(meanAbsStd(3)*100), " cm"],"");
+    yline(meanAbsStd(3).*100,'r--','LineWidth',2.2,'DisplayName',meanLegend);
+    titleName = strjoin(["Phase shift: ",num2str(time_lag(3))," s"],"");
+    title('Error of the Z position calculation',titleName)    
     xlabel("Time [ min ]"), ylabel("error [ cm ]")
     ylim([-2,2])
-    legend('show')
-    hold off
-    
-    subplot(3,3,7), grid on, hold on
-    plot(cuttedElapsedTime, phaseError(:,1), 'b-','DisplayName','Phase error evaluated')
-    meanLegend = strjoin(["Mean phase error: ",num2str(mean(phaseError(:,1)))],"");
-    yline(mean(phaseError(:,1)),'k--','LineWidth',2.2,'DisplayName',meanLegend)
-    title('Phase error of the X position')
-    xlabel("Time [ min ]"), ylabel("error [ deg ]")
-    ylim([-360,360])
-    legend('show')
-    hold off
-    subplot(3,3,8), grid on, hold on
-    plot(cuttedElapsedTime, phaseError(:,2), 'b-','DisplayName','Phase error evaluated')
-    meanLegend = strjoin(["Mean phase error: ",num2str(mean(phaseError(:,2)))],"");
-    yline(mean(phaseError(:,2)),'k--','LineWidth',2.2,'DisplayName',meanLegend)
-    title('Phase error of the Y position')
-    xlabel("Time [ min ]"), ylabel("error [ deg ]")
-    ylim([-360,360])
-    legend('show')
-    hold off
-    subplot(3,3,9), grid on, hold on
-    plot(cuttedElapsedTime, phaseError(:,3), 'b-','DisplayName','Phase error evaluated')
-    meanLegend = strjoin(["Mean phase error: ",num2str(mean(phaseError(:,3)))],"");
-    yline(mean(phaseError(:,3)),'k--','LineWidth',2.2,'DisplayName',meanLegend)
-    title('Phase error of the Z position')
-    xlabel("Time [ min ]"), ylabel("error [ deg ]")
-    ylim([-360,360])
     legend('show')
     hold off
 
@@ -151,6 +138,112 @@ function [phaseError, dirKinError] = dirKinErrorEvaluation(robot, jointSynchData
         pause(PAUSE_TIME);
         exportgraphics(fig1,path);
         close(fig1);
+    end
+
+    %% Evaluated error correction
+    fixedMeanError = meanError;
+    fixedTimeShift = time_lag;
+    fixedIndexShift = round(mean(fixedTimeShift*100));
+    if fixedIndexShift <= 0
+        fixedIndexShift = 1;
+    end
+    adjustedPosition = table2array(cuttedPosDataSet(fixedIndexShift:end,3:5));
+    adjustedPosition = adjustedPosition - fixedMeanError;
+    indexShift = length(evaluatedPosition)-length(adjustedPosition);
+    adjustedCuttedTime = cuttedElapsedTime(1:end-indexShift);
+
+    dirKinError = adjustedPosition - evaluatedPosition(1:end-indexShift,:);
+    time_lag = zeros(1,3); 
+    meanError = zeros(1,3); 
+    meanAbsStd = zeros(1,3); 
+    fs = 200; % Sampling frequency
+    for k = 1:3
+        Ideal = adjustedPosition(:,k)-mean(adjustedPosition(:,k));
+        Real = evaluatedPosition(1:end-indexShift,k)-mean(evaluatedPosition(1:end-indexShift,k));
+        % Calculate the cross-correlation between the two signals
+        cross_corr = xcorr(Ideal, Real);
+        % Find the index of the maximum correlation value
+        [~, idx_max] = max(abs(cross_corr));
+        % Calculate the time lag corresponding to the maximum correlation
+        time_lag(k) = (idx_max - length(Ideal)) / fs;
+        meanError(k) = mean(dirKinError(:,k));
+        meanAbsStd(k) = mean(std(abs(dirKinError(:,k))));
+    end
+
+    % Plot results
+    fig2 = figure('Name','Positions correction comparison');
+    fig2.WindowState = 'maximized';
+    subplot(2,3,1), grid on, hold on
+    plot(adjustedCuttedTime, adjustedPosition(:,1).*100, 'b-', 'DisplayName','Corrected dumped position')
+    plot(adjustedCuttedTime, evaluatedPosition(1:end-indexShift,1).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
+    title('Comparison between corrected X positions')
+    xlabel("Time [ min ]"), ylabel("position [ cm ]")
+    legend('show')
+    hold off
+    subplot(2,3,2), grid on, hold on
+    plot(adjustedCuttedTime, adjustedPosition(:,2).*100, 'b-', 'DisplayName','Corrected dumped position')
+    plot(adjustedCuttedTime, evaluatedPosition(1:end-indexShift,2).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
+    title('Comparison between corrected Y positions')
+    xlabel("Time [ min ]"), ylabel("position [ cm ]")
+    legend('show')
+    hold off
+    subplot(2,3,3), grid on, hold on
+    plot(adjustedCuttedTime, adjustedPosition(:,3).*100, 'b-', 'DisplayName','Corrected dumped position')
+    plot(adjustedCuttedTime, evaluatedPosition(1:end-indexShift,3).*100, 'k-', 'LineWidth', 1.2, 'DisplayName','Evaluated position')
+    title('Comparison between corrected Z positions')
+    xlabel("Time [ min ]"), ylabel("position [ cm ]")
+    legend('show')
+    hold off
+
+    subplot(2,3,4), grid on, hold on
+    plot(adjustedCuttedTime, dirKinError(:,1).*100, 'b-','DisplayName','Error evaluated')
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(1)*100), " cm"],"");
+    yline(meanError(1).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
+    meanLegend = strjoin(["Mean absoluted std: ",num2str(meanAbsStd(1)*100), " cm"],"");
+    yline(meanAbsStd(1).*100,'r--','LineWidth',2.2,'DisplayName',meanLegend);
+    titleName = strjoin(["Phase shift: ",num2str(time_lag(1))," s"],"");
+    title('Error of the X position calculation',titleName)    
+    xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    ylim([-3,1])
+    legend('show')
+    hold off
+    subplot(2,3,5), grid on, hold on
+    plot(adjustedCuttedTime, dirKinError(:,2).*100, 'b-','DisplayName','Error evaluated')
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(2)*100), " cm"],"");
+    yline(meanError(2).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
+    meanLegend = strjoin(["Mean absoluted std: ",num2str(meanAbsStd(2)*100), " cm"],"");
+    yline(meanAbsStd(2).*100,'r--','LineWidth',2.2,'DisplayName',meanLegend);
+    titleName = strjoin(["Phase shift: ",num2str(time_lag(2))," s"],"");
+    title('Error of the Y position calculation',titleName)    
+    xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    ylim([-7,10])
+    legend('show')
+    hold off
+    subplot(2,3,6), grid on, hold on
+    plot(adjustedCuttedTime, dirKinError(:,3).*100, 'b-','DisplayName','Error evaluated')
+    meanLegend = strjoin(["Mean error: ",num2str(meanError(3)*100), " cm"],"");
+    yline(meanError(3).*100,'k--','LineWidth',2.2,'DisplayName',meanLegend)
+    meanLegend = strjoin(["Mean absoluted std: ",num2str(meanAbsStd(3)*100), " cm"],"");
+    yline(meanAbsStd(3).*100,'r--','LineWidth',2.2,'DisplayName',meanLegend);
+    titleName = strjoin(["Phase shift: ",num2str(time_lag(3))," s"],"");
+    title('Error of the Z position calculation',titleName)
+    xlabel("Time [ min ]"), ylabel("error [ cm ]")
+    ylim([-2,2])
+    legend('show')
+    hold off
+
+    sgtitle(defaultTitleName)
+
+    if IMAGE_SAVING
+        mkdir ..\ProcessedData\DirectKinematicsError;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\DirectKinematicsError\",BaselineFilesParameters(3),"_Corrected.png"],"");
+        else
+            path = strjoin(["..\ProcessedData\DirectKinematicsError\P",num2str(numPerson),"_Corrected.png"],"");
+        end
+        pause(PAUSE_TIME);
+        exportgraphics(fig2,path);
+        close(fig2);
     end
 
     fprintf("                                Completed in %s minutes with a mean error of [%.2f,%.2f,%.2f] cm\n",duration(0,0,toc,'Format','mm:ss.SS'),meanError(1)*100,meanError(2)*100,meanError(3)*100)
