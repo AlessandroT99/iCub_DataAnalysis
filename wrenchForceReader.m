@@ -69,5 +69,4 @@ function cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataS
     end
     cuttedSynchWrenchDataSet = array2table(tmpCuttedSynchWrenchDataSet);
     cuttedSynchWrenchDataSet = renamevars(cuttedSynchWrenchDataSet,1:width(cuttedSynchWrenchDataSet),["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
-    cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchWrenchDataSet)';
 end

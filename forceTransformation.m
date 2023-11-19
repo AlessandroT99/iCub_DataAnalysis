@@ -34,7 +34,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     %% Simulation parameters
     IMAGE_SAVING = 1;               % Used to save some chosen plots
     PAUSE_TIME = 8;                 % Used to let the window of the plot get the full resolution size before saving
-    I_KIN_ERROR_EVALUATION = 0;     % If 0 the stated error is not evaluated
+    I_KIN_ERROR_EVALUATION = 1;     % If 0 the stated error is not evaluated
     JOINTS_ONLY_FOR_BASELINE = 0;   % If 0 the joints datahas been collected only for baselines and so portion of the code become exclusive for them
                                     % to turn this off put a number way higher than the number of tests analyzed
     
@@ -120,9 +120,41 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         fprintf("                          Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
         %% Evaluation of direct kinematics alghoritm error
-        if numPerson < JOINTS_ONLY_FOR_BASELINE
-            [dirKinPhaseError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName, BaselineFilesParameters);
+%         % Evaluate the error and then apply it in the following part as
+%         % fixed correction
+%         if numPerson < JOINTS_ONLY_FOR_BASELINE
+%             [dirKinPhaseError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName, BaselineFilesParameters);
+%         end
+
+        if numPerson < 0
+            if strcmp(personParameters(5),"DX") == 1
+                fixedMeanError = [-0.7344, -0.9190, -0.1884];
+                fixedTimeShift = [0.0609, 0.0536, 0.0486];
+            else
+                fixedMeanError = [-1.0179, 1.3797, -0.1601];
+                fixedTimeShift = [0.0559, 0.0718, 0.1127];
+            end
+        else
+            if strcmp(personParameters(5),"SX") == 1
+                fixedMeanError = [-0.7344, -0.9190, -0.1884];
+                fixedTimeShift = [0.0609, 0.0536, 0.0486];
+            else
+                fixedMeanError = [-1.0179, 1.3797, -0.1601];
+                fixedTimeShift = [0.0559, 0.0718, 0.1127];
+            end
         end
+        fixedIndexShift = round(mean(fixedTimeShift*100));
+        if fixedIndexShift <= 0
+            fixedIndexShift = 1;
+        end
+        indexShift = height(cuttedPosDataSet)-height(cuttedPosDataSet(fixedIndexShift:end,3:5));
+
+        %% Synch all the dataset with the new modification 
+        cuttedPosDataSet = cuttedPosDataSet(fixedIndexShift:end,:);
+        % The mean shifting is made directly to the force in section "3 and 4. Evaluating the force resultant for each sample"
+        cuttedElapsedTime = cuttedElapsedTime(1:end-indexShift);
+        cuttedSynchJointDataSet = cuttedSynchJointDataSet(fixedIndexShift:end,:);
+        cuttedSynchForceDataSet = cuttedSynchForceDataSet(fixedIndexShift:end,:);
 
         %% Print shoulder pitch joint dependencies with position axis
         fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
@@ -309,8 +341,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             end
         end
     
-        % 3 and 4. Evaluating the force resultant for each sample
+        %% 3 and 4. Evaluating the force resultant for each sample
         F = T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]';
+        % Apply the mean offset evaluated during the baselines dirKin analysis into the position
+        F = F + T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[fixedMeanError,1]';
         newCuttedSynchForceDataSet.Fx(i) = F(1);
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);

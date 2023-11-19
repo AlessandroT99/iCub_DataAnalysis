@@ -22,6 +22,9 @@ function [phaseError, moduleError, transformationError] = wrenchEndEffectorError
     PAUSE_TIME = 2;          % Used to let the window of the plot get the full resolution size before saving
 
     cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataSet, posStart, posEnd, handInvolved, BaselineFilesParameters);
+    % Synchying it with the true signal
+    fixedIndexShift = height(cuttedSynchWrenchDataSet)-height(newCuttedSynchForceDataSet);
+    cuttedSynchWrenchDataSet = cuttedSynchWrenchDataSet(fixedIndexShift:end,:);
 
     transformationError = cuttedSynchWrenchDataSet.Fy - newCuttedSynchForceDataSet.Fy;
     fftIdeal = fft(cuttedSynchWrenchDataSet.Fy);

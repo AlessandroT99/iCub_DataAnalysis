@@ -48,10 +48,10 @@ baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of 
 NEW_BASELINES = 1;          % Change the input of the default baselines if 1
 if NEW_BASELINES
     BaselineMainDataFolder = "..\InputData\NewBaselines"; % Name of the main folder containing all baselines data
-    SXbaseLinePath = "B_SX_Medium";  % Name of the folder containing the file of the L baseline
-    DXbaseLinePath = "B_DX_Medium";  % Name of the folder containing the file of the R baseline
-    BaseLineOutputName_SX = "\NewBaselines\B_SX_Medium";   % The initial part of the name of the SX baseline output
-    BaseLineOutputName_DX = "\NewBaselines\B_DX_Medium";   % The initial part of the name of the DX baseline output
+    SXbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
+    DXbaseLinePath = "B_DX_Soft";  % Name of the folder containing the file of the R baseline
+    BaseLineOutputName_SX = "\NewBaselines\B_SX_Soft";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "\NewBaselines\B_DX_Soft";   % The initial part of the name of the DX baseline output
 else
     BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
     SXbaseLinePath = "P0_L_Soft";  % Name of the folder containing the file of the L baseline
