@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, handInvolved, numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName, BaselineFilesParameters)
+function [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, handInvolved, numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName, BaselineFilesParameters, cuttedElapsedTime)
 % This function is used to check the error made from force transformation
 % alghoritm making a comparison with the data dumped from the /wholeBodyDynamics/left_arm/cartesianEndEffectorWrench:o 
 % port, which corresponds to the force correctly rotated into the desidered reference system
@@ -22,9 +22,9 @@ function [phaseError, moduleError, transformationError] = wrenchEndEffectorError
     PAUSE_TIME = 2;          % Used to let the window of the plot get the full resolution size before saving
 
     cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataSet, posStart, posEnd, handInvolved, BaselineFilesParameters);
-    % Synchying it with the true signal
-    fixedIndexShift = height(cuttedSynchWrenchDataSet)-height(newCuttedSynchForceDataSet);
-    cuttedSynchWrenchDataSet = cuttedSynchWrenchDataSet(fixedIndexShift:end,:);
+%     % Synchying it with the true signal
+%     fixedIndexShift = height(cuttedSynchWrenchDataSet)-height(newCuttedSynchForceDataSet);
+%     cuttedSynchWrenchDataSet = cuttedSynchWrenchDataSet(fixedIndexShift+1:end,:);
 
     transformationError = cuttedSynchWrenchDataSet.Fy - newCuttedSynchForceDataSet.Fy;
     fftIdeal = fft(cuttedSynchWrenchDataSet.Fy);

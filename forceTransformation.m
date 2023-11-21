@@ -129,32 +129,32 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         if numPerson < 0
             if strcmp(personParameters(5),"DX") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
-                fixedTimeShift = [0.0609, 0.0536, 0.0486];
+%                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
                 fixedMeanError = [-1.0179, 1.3797, -0.1601];
-                fixedTimeShift = [0.0559, 0.0718, 0.1127];
+%                 fixedTimeShift = [0.0559, 0.0718, 0.1127];
             end
         else
             if strcmp(personParameters(5),"SX") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
-                fixedTimeShift = [0.0609, 0.0536, 0.0486];
+%                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
                 fixedMeanError = [-1.0179, 1.3797, -0.1601];
-                fixedTimeShift = [0.0559, 0.0718, 0.1127];
+%                 fixedTimeShift = [0.0559, 0.0718, 0.1127];
             end
         end
-        fixedIndexShift = round(mean(fixedTimeShift*100));
-        if fixedIndexShift <= 0
-            fixedIndexShift = 1;
-        end
-        indexShift = height(cuttedPosDataSet)-height(cuttedPosDataSet(fixedIndexShift:end,3:5));
+%         fixedIndexShift = round(mean(fixedTimeShift*100));
+%         if fixedIndexShift <= 0
+%             fixedIndexShift = 1;
+%         end
+%         indexShift = height(cuttedPosDataSet)-height(cuttedPosDataSet(fixedIndexShift:end,3:5));
 
-        %% Synch all the dataset with the new modification 
-        cuttedPosDataSet = cuttedPosDataSet(fixedIndexShift:end,:);
-        % The mean shifting is made directly to the force in section "3 and 4. Evaluating the force resultant for each sample"
-        cuttedElapsedTime = cuttedElapsedTime(1:end-indexShift);
-        cuttedSynchJointDataSet = cuttedSynchJointDataSet(fixedIndexShift:end,:);
-        cuttedSynchForceDataSet = cuttedSynchForceDataSet(fixedIndexShift:end,:);
+%         %% Synch all the dataset with the new modification 
+%         cuttedPosDataSet = cuttedPosDataSet(fixedIndexShift:end,:);
+%         % The mean shifting is made directly to the force in section "3 and 4. Evaluating the force resultant for each sample"
+%         cuttedElapsedTime = cuttedElapsedTime(1:end-indexShift);
+%         cuttedSynchJointDataSet = cuttedSynchJointDataSet(fixedIndexShift:end,:);
+%         cuttedSynchForceDataSet = cuttedSynchForceDataSet(fixedIndexShift:end,:);
 
         %% Print shoulder pitch joint dependencies with position axis
         fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
@@ -443,17 +443,26 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
         %% Evaluation of the error of the force transformation
         % To elaborate this results is fundamental that the produced newCuttedSynchForceDataSet is full length
-        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName,BaselineFilesParameters);
-    
-    
-        %% Save the data
         mkdir ..\ProcessedData\ForceTransformationData;
         if numPerson < 0
             path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3)],"");
         else
             path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
         end
-        save(path,"finalJointsDataSet","newCuttedSynchForceDataSet","jointError", "phaseError", "moduleError", "transformationError");
+        save(path,"finalJointsDataSet","jointError","newCuttedSynchForceDataSet", "personParameters", "numPerson", "initialPosDataSet", "posStart", "posEnd", "defaultTitleName","BaselineFilesParameters", "cuttedElapsedTime");
+%         load(path);
+
+        [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName,BaselineFilesParameters, cuttedElapsedTime);
+    
+    
+        %% Save the data
+        mkdir ..\ProcessedData\ForceErrorTransformationData;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\",BaselineFilesParameters(3)],"");
+        else
+            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\P",num2str(numPerson)],"");
+        end
+        save(path,"phaseError", "moduleError", "transformationError");
     else
         finalJointsDataSet = 0;
     end

@@ -14,8 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVal, posMinLocalization, posMinPeaksVal, cuttedElapsedTime, numPerson, defaultTitleName, BaselineFilesParameters)
-    
+function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVal, posMinLocalization, posMinPeaksVal, cuttedElapsedTime, numPerson, defaultTitleName, BaselineFilesParameters)
     PAUSE_TIME = 2;
     frequency = 100;
     posDataSet = table2array(cuttedPosDataSet(:,4));
@@ -29,7 +28,7 @@ function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVa
     plot(cuttedElapsedTime,posDataSet,'k-')
     plot(posMaxLocalization,posMaxPeaksVal,'ro')
     plot(posMinLocalization,posMinPeaksVal,'go')
-    legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
+    legend("Signal","Max","Min",'Location','eastoutside')
     title("Position Signal")
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Position [ m ]",'Interpreter','latex')
     hold off
@@ -49,24 +48,27 @@ function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVa
     % Remove the pahse shifting and compute the output
     filteredVelocity = filtfilt(sos,gain,velocity);
 
-    maximumMovementTime = 0.15;
-    [envHigh, envLow] = envelope(filteredVelocity,maximumMovementTime*frequency*0.8,'peak');
-    velocityAverageEnv = (envLow+envHigh)/2;
-    [velMaxPeaksVal, velMaxLocalization] = findpeaks(velocityAverageEnv,'MinPeakHeight',mean(velocityAverageEnv));
-    [velMinPeaksVal, velMinLocalization] = findpeaks(-velocityAverageEnv,'MinPeakHeight',-mean(velocityAverageEnv));
+    [velMaxPeaksVal, ~] = findpeaks(filteredVelocity,'MinPeakHeight',mean(filteredVelocity));
+    [velMinPeaksVal, ~] = findpeaks(-filteredVelocity,'MinPeakHeight',-mean(filteredVelocity));
     velMinPeaksVal = -velMinPeaksVal;
-    [velMinPeaksVal,velMinLocalization,velMaxPeaksVal,velMaxLocalization] = maxMinCleaning(velMinPeaksVal,velMinLocalization,velMaxPeaksVal,velMaxLocalization,0);
-
-    % Resizing minimum and maximum values
-    velMaxLocalization = (velMaxLocalization)/(100*60);
-    velMinLocalization = (velMinLocalization)/(100*60);
+    averageMin = mean(velMinPeaksVal);
+    averageMax = mean(velMaxPeaksVal);
+    [pks1,locs1] = findpeaks(filteredVelocity, cuttedElapsedTime, 'MinPeakHeight',averageMin);
+    [~,locs2] = findpeaks(filteredVelocity, cuttedElapsedTime, 'MinPeakHeight',averageMax);
+    [~, ia] = setdiff(locs1, locs2, 'stable');
+    midPeaks = [pks1(ia); locs1(ia)];
+    p = polyfit(midPeaks(2,:),midPeaks(1,:),3);
+    midPeaksTrend = polyval(p,cuttedElapsedTime);
+    midVelocityMean = mean(midPeaksTrend);
+    midVelocityStd = std(midPeaksTrend);
 
     % Plot results
     subplot(3,1,2), grid on, hold on
     plot(cuttedElapsedTime,filteredVelocity,'k-')
-%     plot(velMaxLocalization,velMaxPeaksVal,'ro')
-%     plot(velMinLocalization,velMinPeaksVal,'go')
-%     legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
+    legend("Signal",'Location','eastoutside')
+    yline(averageMin)
+    yline(averageMax)
+    plot(cuttedElapsedTime,midPeaksTrend,'r-')
     title("Velocity Signal")
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Velocity [ $\frac{m}{s}$ ]",'Interpreter','latex')
     hold off
@@ -86,25 +88,11 @@ function positionDerivatives(cuttedPosDataSet, posMaxLocalization, posMaxPeaksVa
     % Remove the pahse shifting and compute the output
     filteredAcceleration = filtfilt(sos,gain,acceleration);
 
-    maximumMovementTime = 0.1;
-    [envHigh, envLow] = envelope(filteredAcceleration,maximumMovementTime*frequency*0.8,'peak');
-    accelerationAverageEnv = (envLow+envHigh)/2;
-    [accMaxPeaksVal, accMaxLocalization] = findpeaks(accelerationAverageEnv,'MinPeakHeight',mean(accelerationAverageEnv));
-    [accMinPeaksVal, accMinLocalization] = findpeaks(-accelerationAverageEnv,'MinPeakHeight',-mean(accelerationAverageEnv));
-    accMinPeaksVal = -accMinPeaksVal;
-    [accMinPeaksVal,accMinLocalization,accMaxPeaksVal,accMaxLocalization] = maxMinCleaning(accMinPeaksVal,accMinLocalization,accMaxPeaksVal,accMaxLocalization);
-
-    % Resizing minimum and maximum values
-    accMaxLocalization = (accMaxLocalization)/(100*60);
-    accMinLocalization = (accMinLocalization)/(100*60);
-
     % Plot results
     subplot(3,1,3), grid on, hold on
     plot(cuttedElapsedTime,filteredAcceleration,'k-')
-%     plot(accMaxLocalization,accMaxPeaksVal,'ro')
-%     plot(accMinLocalization,accMinPeaksVal,'go')
-%     legend("Signal","Max peaks","Min peaks",'Location','eastoutside')
     title("Acceleration Signal")
+    legend("Signal",'Location','eastoutside')
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Acceleration [ $\frac{m}{s^2}$ ]",'Interpreter','latex')
     hold off
 

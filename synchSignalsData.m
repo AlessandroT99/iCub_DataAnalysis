@@ -14,7 +14,7 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundaries] = ...
+function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundaries, midVelocityMean, midVelocityStd] = ...
     synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
@@ -143,8 +143,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     
     % So the peaks of the experiment time derivative are evaluated and the
     % mean of them is calculated
-    [maxPeaksVal, maxLocalization] = findpeaks(cuttedFilteredPosDerivative);
-    [minPeaksVal, minLocalization] = findpeaks(-cuttedFilteredPosDerivative);
+    [maxPeaksVal, ~] = findpeaks(cuttedFilteredPosDerivative);
+    [minPeaksVal, ~] = findpeaks(-cuttedFilteredPosDerivative);
     minPeaksVal = -minPeaksVal;
     upperPeaksBound = mean(maxPeaksVal);
     lowerPeaksBound = mean(minPeaksVal);
@@ -208,8 +208,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     
         % So the peaks of the experiment time derivative are evaluated and the
         % mean of them is calculated
-        [maxPeaksVal, maxLocalization] = findpeaks(cuttedFilteredPosDerivative);
-        [minPeaksVal, minLocalization] = findpeaks(-cuttedFilteredPosDerivative);
+        [maxPeaksVal, ~] = findpeaks(cuttedFilteredPosDerivative);
+        [minPeaksVal, ~] = findpeaks(-cuttedFilteredPosDerivative);
         minPeaksVal = -minPeaksVal;
         upperPeaksBound = mean(maxPeaksVal);
         lowerPeaksBound = mean(minPeaksVal);
@@ -471,7 +471,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Evaluation of velocity and acceleration
     tic
     fprintf("   .Computing velocity and acceleration...")
-    positionDerivatives(cuttedPosDataSet, maxLocalization, maxPeaksVal, minLocalization, minPeaksVal, cuttedElapsedTime, numPerson, defaultTitleName, BaselineFilesParameters);
+    [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSet, maxLocalization, maxPeaksVal, minLocalization, minPeaksVal, cuttedElapsedTime, numPerson, defaultTitleName, BaselineFilesParameters);
     fprintf("                         Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Saving position data
@@ -596,9 +596,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet,newBaselineBoundari
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
+            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\",BaselineFilesParameters(3),".mat"],"");
         else
-            path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
+            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\P",num2str(numPerson),".mat"],"");
         end
         if exist(path,'file')
             load(path);

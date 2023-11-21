@@ -23,6 +23,8 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 % settings, which I overwrite, so I just shut it off in the following
 warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
 
+mkdir ..\ProcessedData\Scatters\0.SoapEvaluation
+
 %% Input Data
 numPeople = 32; 
 people = readtable("..\InputData\Dati Personali EXP2.xlsx");
@@ -196,12 +198,12 @@ title("Soap cutting efficience")
 %% Save and close all the plots
 mkdir ..\ProcessedData\Scatters
 pause(2);
-exportgraphics(fig1,"..\ProcessedData\Scatters\RightHandSoapIndentation.png")
-exportgraphics(fig2,"..\ProcessedData\Scatters\LeftHandSoapIndentation.png")
-exportgraphics(fig3,"..\ProcessedData\Scatters\SoapRemovedMaterial.png")
-exportgraphics(fig4,"..\ProcessedData\Scatters\MeanAngleSoapIndentation.png")
-exportgraphics(fig5,"..\ProcessedData\Scatters\SoapIndentationParameters.png")
-exportgraphics(fig6,"..\ProcessedData\Scatters\SoapCuttingEfficience.png")
+exportgraphics(fig1,"..\ProcessedData\Scatters\0.SoapEvaluation\RightHandSoapIndentation.png")
+exportgraphics(fig2,"..\ProcessedData\Scatters\0.SoapEvaluation\LeftHandSoapIndentation.png")
+exportgraphics(fig3,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapRemovedMaterial.png")
+exportgraphics(fig4,"..\ProcessedData\Scatters\0.SoapEvaluation\MeanAngleSoapIndentation.png")
+exportgraphics(fig5,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapIndentationParameters.png")
+exportgraphics(fig6,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapCuttingEfficience.png")
 
 matx = table((1:32)',angle,removedArea');
 matx = renamevars(matx, 1:width(matx), ["ID","Angle [deg]","Removed Surface [mm^2]"]);

@@ -47,11 +47,12 @@ baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of 
 %% Baselines input data
 NEW_BASELINES = 1;          % Change the input of the default baselines if 1
 if NEW_BASELINES
+    % Remember to create manually the folders for containing this outputs!
     BaselineMainDataFolder = "..\InputData\NewBaselines"; % Name of the main folder containing all baselines data
     SXbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
     DXbaseLinePath = "B_DX_Soft";  % Name of the folder containing the file of the R baseline
-    BaseLineOutputName_SX = "\NewBaselines\B_SX_Soft";   % The initial part of the name of the SX baseline output
-    BaseLineOutputName_DX = "\NewBaselines\B_DX_Soft";   % The initial part of the name of the DX baseline output
+    BaseLineOutputName_SX = "\NewBaselines\B_SX_Soft_NoMeanShift";   % The initial part of the name of the SX baseline output
+    BaseLineOutputName_DX = "\NewBaselines\B_DX_Soft_NoMeanShift";   % The initial part of the name of the DX baseline output
 else
     BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
     SXbaseLinePath = "P0_L_Soft";  % Name of the folder containing the file of the L baseline
@@ -112,6 +113,8 @@ posAPeaksmean = notConsideredValue.*ones(1,numPeople);
 posBPeaksmean = notConsideredValue.*ones(1,numPeople);
 ROM = notConsideredValue.*ones(1,numPeople);
 testedPeople = [];
+midVelocityMean = notConsideredValue.*ones(1,numPeople);
+midVelocityStd = notConsideredValue.*ones(1,numPeople);
 
 %% Usefull data to be saved
 fprintf("\nStarting the data analysis...\n")
@@ -192,7 +195,7 @@ for i = 1:numPeople
         end
 
         % Synchronizing the two dataset to show them in a single plot
-        [synchPosDataSet, synchForceDataSet, baselineBoundaries] = ...
+        [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i)] = ...
           synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
             personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters);   
 
@@ -321,6 +324,9 @@ maxPeaksVariation = maxPeaksVariation(maxPeaksVariation(:,1)~=notConsideredValue
 minPeaksVariation = minPeaksVariation(minPeaksVariation(:,1)~=notConsideredValue,:);
 peaksInitialAndFinalVariation = peaksInitialAndFinalVariation(peaksInitialAndFinalVariation~=notConsideredValue);
 synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
+midVelocityMean = midVelocityMean(midVelocityMean~=notConsideredValue);
+midVelocityStd = midVelocityStd(midVelocityStd~=notConsideredValue);
+
 % All the following values are already in cm
 posAPeaksStd = posAPeaksStd(posAPeaksStd~=notConsideredValue).*100;
 posBPeaksStd = posBPeaksStd(posBPeaksStd~=notConsideredValue).*100;
@@ -337,7 +343,7 @@ plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_s
                                 nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, personWhoFeelsFollowerOrLeader, testedPeople, ROM, people.Delta_RTs_(testedPeople));
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, people.Delta_RTs_(testedPeople));
 fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
 %% Conclusion of the main
