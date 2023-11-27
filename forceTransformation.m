@@ -343,8 +343,8 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
         %% 3 and 4. Evaluating the force resultant for each sample
         F = T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]';
-        % Apply the mean offset evaluated during the baselines dirKin analysis into the position
-        F = F + T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[fixedMeanError,1]';
+%         % Apply the mean offset evaluated during the baselines dirKin analysis into the position
+%         F = F + T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[fixedMeanError,1]';
         newCuttedSynchForceDataSet.Fx(i) = F(1);
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);

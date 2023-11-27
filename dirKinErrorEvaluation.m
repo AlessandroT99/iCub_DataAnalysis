@@ -20,7 +20,7 @@ function [time_lag, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSe
 % port of iCub and the one evaluated from joint values for baselines
 
     IMAGE_SAVING = 1;        % Used to save some chosen plots
-    PAUSE_TIME = 2;          % Used to let the window of the plot get the full resolution size before saving
+    PAUSE_TIME = 4;          % Used to let the window of the plot get the full resolution size before saving
 
     tic
     fprintf("           .Direct kinematics error evaluation...")
