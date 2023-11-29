@@ -49,7 +49,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 jointDataSet = readtable(strjoin([BaselineFilesParameters(4),"\joints\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
             else
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
-                    if strcmp(personParameters(5),"DX") == 1
+                    if strcmp(personParameters(5),"R") == 1
                         if numPerson < 10
                             jointDataSet = strjoin(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
@@ -127,7 +127,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
 %         end
 
         if numPerson < 0
-            if strcmp(personParameters(5),"DX") == 1
+            if strcmp(personParameters(5),"R") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
 %                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
@@ -135,7 +135,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
 %                 fixedTimeShift = [0.0559, 0.0718, 0.1127];
             end
         else
-            if strcmp(personParameters(5),"SX") == 1
+            if strcmp(personParameters(5),"L") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
 %                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
@@ -206,20 +206,20 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
         jointError = zeros(NUMBER_OF_SAMPLES,length(armJointsA)-1);
         if numPerson < 0
-            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
+            if strcmp(personParameters(5),"L") % Inverted to R when not baseline
                 aik.KinematicGroup = opts(10).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_SXArm');
+                generateIKFunction(aik,'iCubIK_LArm');
             else
                aik.KinematicGroup = opts(12).KinematicGroup;
-               generateIKFunction(aik,'iCubIK_DXArm');
+               generateIKFunction(aik,'iCubIK_RArm');
             end
         else
-            if strcmp(personParameters(5),"DX") 
+            if strcmp(personParameters(5),"R") 
                 aik.KinematicGroup = opts(10).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_SXArm');
+                generateIKFunction(aik,'iCubIK_LArm');
             else
                 aik.KinematicGroup = opts(12).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_DXArm');
+                generateIKFunction(aik,'iCubIK_RArm');
             end
         end
     end
@@ -259,7 +259,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 tic
                 fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
                 
-                if strcmp(personParameters(5),"SX") && numPerson < 0
+                if strcmp(personParameters(5),"L") && numPerson < 0
                     if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                         referenceConfig = getAnglesFromConfiguration(posB,17:22);
                         referencePos = posB;
@@ -268,7 +268,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                         referencePos = posA;
                     end
                 else
-                    if strcmp(personParameters(5),"DX") && numPerson < 0
+                    if strcmp(personParameters(5),"R") && numPerson < 0
                         if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                             referenceConfig = getAnglesFromConfiguration(posA,27:32);
                             referencePos = posA;
@@ -277,7 +277,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                             referencePos = posB;
                         end
                     else
-                        if strcmp(personParameters(5),"SX") && numPerson >= 0
+                        if strcmp(personParameters(5),"L") && numPerson >= 0
                             if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                                 referenceConfig = getAnglesFromConfiguration(posA,17:22);
                                 referencePos = posA;
@@ -286,7 +286,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                                 referencePos = posB;
                             end
                         else
-                            if strcmp(personParameters(5),"DX") && numPerson >= 0
+                            if strcmp(personParameters(5),"R") && numPerson >= 0
                                 if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                                     referenceConfig = getAnglesFromConfiguration(posB,27:32);
                                     referencePos = posB;
@@ -327,14 +327,14 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         % Evaluating the transformation matrix for each sample
         if numPerson < 0
             newPos = assignJointToPose(robot, armJoints, torsoJoints, personParameters(5), numPerson);
-            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
+            if strcmp(personParameters(5),"L") % Inverted to R when not baseline
                 T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
             else
                 T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
             end
         else
             newPos = assignJointToPose(robot, evaluatedJointsDataSet(i,:), torsoJoints, personParameters(5), numPerson);
-            if strcmp(personParameters(5),"DX") 
+            if strcmp(personParameters(5),"R") 
                 T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
             else
                 T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");

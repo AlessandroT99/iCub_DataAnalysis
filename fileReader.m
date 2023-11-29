@@ -27,7 +27,7 @@ function [posDataSet, forceDataSet] = fileReader(peopleDataSet, personSubSet)
     if strcmp(peopleDataSet.Note(personSubSet),"No video") == 0 && ...
        strcmp(peopleDataSet.Note(personSubSet),"Video incompleto") == 0
         % Now chose the correct path to load data
-        if strcmp(peopleDataSet.Mano(personSubSet),"DX") == 1
+        if strcmp(peopleDataSet.Mano(personSubSet),"R") == 1
             if personSubSet < 10
                 posFilePath = join(["..\InputData\positions\leftHand\P_0000",num2str(personSubSet),"\data.log"],'');
                 forceFilePath = join(["..\InputData\forces\leftArm\P_0000",num2str(personSubSet),"\data.log"],'');

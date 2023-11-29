@@ -24,7 +24,7 @@ function cuttedSynchWrenchDataSet = wrenchForceReader(numPerson, initialPosDataS
         if numPerson == -1
             wrenchDataSet = readtable(strjoin([BaselineFilesParameters(4),"\wrench\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
         else
-            if strcmp(handInvolved,"DX") == 1
+            if strcmp(handInvolved,"R") == 1
                 if numPerson < 10
                     wrenchDataSet = strjoin(["..\InputData\wrench\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                 else

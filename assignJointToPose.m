@@ -31,7 +31,7 @@ function [newPose] = assignJointToPose(robot, armJoints, torsoJoints, personArm,
 
     % Assigning the arm joints values
     if numPerson < 0
-        if strcmp(personArm,"SX")
+        if strcmp(personArm,"L")
             newPose(16).JointPosition = armJoints(1);
             newPose(17).JointPosition = armJoints(2);
             newPose(18).JointPosition = armJoints(3);
@@ -49,7 +49,7 @@ function [newPose] = assignJointToPose(robot, armJoints, torsoJoints, personArm,
             newPose(32).JointPosition = armJoints(7);
         end
     else
-        if strcmp(personArm,"DX")
+        if strcmp(personArm,"R")
             newPose(16).JointPosition = armJoints(1);
             newPose(17).JointPosition = armJoints(2);
             newPose(18).JointPosition = armJoints(3);

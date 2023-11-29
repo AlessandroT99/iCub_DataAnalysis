@@ -18,7 +18,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
                                 nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                 movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                 peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
-                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, nearEnd)
+                                posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, nearHand)
 % This function takes in input the data generated from the position and
 % force further analysis functions and plot usefull scatter and other
 % diagrams in order to visualize trends or similars.
@@ -52,7 +52,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 % personWhoFeelsFollowerOrLeader = points self attribute for the involved status from the testers
 % testedPeople = index number of the test considered
 % ROM = Range Of Motion, difference in meters between posA and posB
-% nearEnd = near end effect read directly from the excel input file
+% nearHand = near end effect read directly from the excel input file
     
     %% Simulation parameters
     IMAGE_SAVING = 1;
@@ -79,17 +79,17 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     % Folders and priority order of the subfolders
     mkdir ..\ProcessedData\Scatters
-    mkdir ..\ProcessedData\Scatters\1.NearEnd
+    mkdir ..\ProcessedData\Scatters\1.NearHand
     mkdir ..\ProcessedData\Scatters\2.Symmetry
     mkdir ..\ProcessedData\Scatters\3.ROM
     mkdir ..\ProcessedData\Scatters\4.PullingPhases
     mkdir ..\ProcessedData\Scatters\5.Others
 
     %% Near end parameters
-    nearEnd = nearEnd'.*1000;
-    baselineYPos = max(nearEnd)+5;
+    nearHand = nearHand'.*1000;
+    baselineYPos = max(nearHand)+5;
     baselineYPosAdded = -5;
-    logicalIntervalPeaks = ~isnan(nearEnd);
+    logicalIntervalPeaks = ~isnan(nearHand);
 
     %% Experiment duration - 5. OTHERS
     fig1 = figure('Name','Experiment duration scatter');
@@ -116,9 +116,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
 %     scatter(meanRtoH_time(1:BASELINE_NUMBER).*60./10000,[baselineYPos,baselineYPosAdded],MarkerDimension,clearBlue,'filled')
 %     scatter(meanHtoR_time(1:BASELINE_NUMBER).*60./10000,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
-    scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearEnd(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*60./10000,nearEnd(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanRtoH_time(logical([0,0,logicalIntervalPeaks])),60./10,nearEnd(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+%     scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*60./10000,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    plot_mean_stdError(meanRtoH_time(logical([0,0,logicalIntervalPeaks])),60./10,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase time duration")
     xlabel("Elapsed Time [ ms ]"), ylabel("Near-Hand Effect [ ms ]")
 %     desideredPhase = 1.5;
@@ -138,9 +138,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
 %     scatter(meanRtoH_time(1:BASELINE_NUMBER).*60./10000,[baselineYPos,baselineYPosAdded],MarkerDimension,clearBlue,'filled')
 %     scatter(meanHtoR_time(1:BASELINE_NUMBER).*60./10000,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
-%     scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearEnd(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearEnd(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanHtoR_time(logical([0,0,logicalIntervalPeaks])),60./10,nearEnd(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+%     scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    plot_mean_stdError(meanHtoR_time(logical([0,0,logicalIntervalPeaks])),60./10,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phase time duration")
     xlabel("Elapsed Time [ ms ]"), ylabel("Near-Hand Effect [ ms ]")
 %     desideredPhase = 1.5;
@@ -161,9 +161,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
 %     scatter(meanRtoH_space(1:BASELINE_NUMBER).*100,[baselineYPos,baselineYPosAdded],MarkerDimension,clearBlue,'filled')
 %     scatter(meanHtoR_space(1:BASELINE_NUMBER).*100,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
-    scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearEnd(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-%     scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearEnd(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),100,nearEnd(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+%     scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
     legend('Human Pulling phase','Mean','Trend','Standard Error')
@@ -181,9 +181,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
 %     scatter(meanRtoH_space(1:BASELINE_NUMBER).*100,[baselineYPos,baselineYPosAdded],MarkerDimension,clearBlue,'filled')
 %     scatter(meanHtoR_space(1:BASELINE_NUMBER).*100,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
-%     scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearEnd(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearEnd(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanHtoR_space(logical([0,0,logicalIntervalPeaks])),100,nearEnd(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+%     scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    plot_mean_stdError(meanHtoR_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phases space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
     legend('Human Pulling phase','Mean','Trend','Standard Error')
@@ -201,9 +201,9 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     fig2c.WindowState = 'maximized';
     grid on, hold on
     xScat = phaseTimeDifference(logical([0,0,logicalIntervalPeaks]));
-    yScat = nearEnd(logicalIntervalPeaks);
+    yScat = nearHand(logicalIntervalPeaks);
     scatter(xScat.*60./10,yScat,MarkerDimension,'red','LineWidth',EmptyPointLine)    
-    plot_mean_stdError(xScat,60./10,nearEnd(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    plot_mean_stdError(xScat,60./10,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Duration Difference of the Pulling Phases")
     xlabel("Pulling Phases Time Difference (H-R) [ ms ]"), ylabel("Near-end Effect [ ms ]")
     legend("Subject",'Mean','Trend','Standard Error')
@@ -273,8 +273,8 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     scatter(minPeaksAverage(1:BASELINE_NUMBER).*100,1:BASELINE_NUMBER,MarkerDimension,clearBlue,'filled')
     scatter(maxPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'red','LineWidth',EmptyPointLine)
     scatter(minPeaksAverage(BASELINE_NUMBER+1:end).*100,BASELINE_NUMBER+1:nTest,MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    text((maxPeaksAverage(1)+minPeaksAverage(1))/2*100,1,"iCub SX hand",'FontSize',12,'HorizontalAlignment','center')
-    text((maxPeaksAverage(BASELINE_NUMBER)+minPeaksAverage(BASELINE_NUMBER))/2*100,1,"iCub DX hand",'FontSize',12,'HorizontalAlignment','center')
+    text((maxPeaksAverage(1)+minPeaksAverage(1))/2*100,1,"iCub L hand",'FontSize',12,'HorizontalAlignment','center')
+    text((maxPeaksAverage(BASELINE_NUMBER)+minPeaksAverage(BASELINE_NUMBER))/2*100,1,"iCub R hand",'FontSize',12,'HorizontalAlignment','center')
     text(minPeaksAverage(1)*100+0.5,1,"Pos B",'FontSize',8,'HorizontalAlignment','left')
     text(maxPeaksAverage(1)*100-0.5,1,"Pos A",'FontSize',8,'HorizontalAlignment','right')
     text(maxPeaksAverage(BASELINE_NUMBER)*100-0.5,1,"Pos B",'FontSize',8,'HorizontalAlignment','right')
@@ -292,7 +292,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     end
 
      %% Another alternative - ROM INTO NEAR END ZERO POS B - 1. NEAR END
-    fig5e = figure('Name','Range of Motion [ROM]');
+    fig5e = figure('Name','Range of Motion (ROM)');
     fig5e.WindowState = 'maximized';
     hold on
     
@@ -304,41 +304,41 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     tmpMinPeaksAverage(newRightHandTests) = minPeaksAverage(newRightHandTests) - minPeaksAverage(BASELINE_NUMBER);
     tmpMinPeaksAverage(newLeftHandTests) = abs(minPeaksAverage(newLeftHandTests)) - abs(minPeaksAverage(1));
 
-    % iCub DX hand - max
+    % iCub R hand - max
 %     scatter(maxPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(tmpMaxPeaksAverage(newRightHandTests).*100, nearEnd(logical(newRightHandTests(3:end))), MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(tmpMaxPeaksAverage(newRightHandTests).*100, nearHand(logical(newRightHandTests(3:end))), MarkerDimension,'red','LineWidth',EmptyPointLine)
 
-    % iCub SX hand - max
+    % iCub L hand - max
 %     scatter(abs(maxPeaksAverage(1)).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
-    scatter(tmpMaxPeaksAverage(newLeftHandTests).*100, nearEnd(logical(newLeftHandTests(3:end))), MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(tmpMaxPeaksAverage(newLeftHandTests).*100, nearHand(logical(newLeftHandTests(3:end))), MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
     % Plot union lines between points to describe ROM
     plot([tmpMaxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100;tmpMinPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100], ...
-         [nearEnd(logicalIntervalPeaks);nearEnd(logicalIntervalPeaks)], ...
+         [nearHand(logicalIntervalPeaks);nearHand(logicalIntervalPeaks)], ...
          ':','LineWidth',1,'Color',clearGreen)
 %     plot([maxPeaksAverage(1).*100;minPeaksAverage(1).*100],[baselineYPos;baselineYPos],':','LineWidth',1,'Color',clearBlue)
 %     plot([maxPeaksAverage(BASELINE_NUMBER).*100;minPeaksAverage(BASELINE_NUMBER).*100], ...
 %          [baselineYPos-baselineYPosAdded;baselineYPos-baselineYPosAdded], ...
 %          ':','LineWidth',1,'Color',clearRed)
 
-    % iCub DX hand - min
+    % iCub R hand - min
 %     scatter(minPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(tmpMinPeaksAverage(newRightHandTests).*100, nearEnd(newRightHandTests(3:end)),MarkerDimension, 'red','LineWidth',EmptyPointLine)
+    scatter(tmpMinPeaksAverage(newRightHandTests).*100, nearHand(newRightHandTests(3:end)),MarkerDimension, 'red','LineWidth',EmptyPointLine)
 
-    % iCub SX hand - min
+    % iCub L hand - min
 %     scatter(abs(minPeaksAverage(1)).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
-    scatter(tmpMinPeaksAverage(newLeftHandTests).*100, nearEnd(newLeftHandTests(3:end)), MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(tmpMinPeaksAverage(newLeftHandTests).*100, nearHand(newLeftHandTests(3:end)), MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
     % Error bars
     minPeaksStandardError = abs(posAPeaksStd)./sqrt(nMinPeaks);
-    errorbar(tmpMinPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearEnd(logicalIntervalPeaks), ...
+    errorbar(tmpMinPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
              -minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
 %     errorbar(abs(minPeaksAverage(1:BASELINE_NUMBER)).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
 %              -minPeaksStandardError(1:BASELINE_NUMBER)./2, minPeaksStandardError(1:BASELINE_NUMBER)./2, ...
 %              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
     maxPeaksStandardError = abs(posBPeaksStd)./sqrt(nMaxPeaks);
-    errorbar(tmpMaxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearEnd(logicalIntervalPeaks), ...
+    errorbar(tmpMaxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
              -maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
 %     errorbar(abs(maxPeaksAverage(1:BASELINE_NUMBER)).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
@@ -347,22 +347,22 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     xline(0,'k--','LineWidth',DottedLineWidth)
 
-    title("Range Of Motion [ROM] of iCub hand and Near-End Effect")
-    legend('DX Hand of iCub', 'SX Hand of iCub','Range Of Motion [ROM]','Location','southwest')
-    xlabel("Distance from Baseline Max Point [ cm ]"), ylabel("Near-End Effect [ ms ]")
-    xlim([-10,2]), ylim([min(nearEnd)-3,max(nearEnd)+3])
+    title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
+    legend('R Hand of iCub', 'L Hand of iCub','Range Of Motion (ROM)','Location','southwest')
+    xlabel("Distance from Baseline Max Point [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
+    xlim([-10,2]), ylim([min(nearHand)-3,max(nearHand)+3])
     set(gca, 'YDir','reverse')
 
     hold off
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5e,"..\ProcessedData\Scatters\1.NearEnd\ROM-NearEnd_AllignedPosB.png")
+        exportgraphics(fig5e,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AllignedPosB.png")
         close(fig5e);
     end
 
     %% Another alternative - ROM INTO NEAR END EFFECT ZERO MEAN CENTER - 1. NEAR END
-    fig5d = figure('Name','Range of Motion [ROM]');
+    fig5d = figure('Name','Range of Motion (ROM)');
     fig5d.WindowState = 'maximized';
     hold on
 
@@ -374,53 +374,53 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     newLeftHandTests = logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)<-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks]);
     newRightHandTests = logical([0,0,(maxPeaksAverage(BASELINE_NUMBER+1:end)>-meanROM(BASELINE_NUMBER+1:end)).*logicalIntervalPeaks]);
 
-    % iCub DX hand - max
+    % iCub R hand - max
     scatter(maxPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(maxPeaksAverage(newRightHandTests).*100, nearEnd(logical(newRightHandTests(3:end))), MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(maxPeaksAverage(newRightHandTests).*100, nearHand(logical(newRightHandTests(3:end))), MarkerDimension,'red','LineWidth',EmptyPointLine)
 
-    % iCub SX hand - max
+    % iCub L hand - max
     scatter(maxPeaksAverage(1).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
-    scatter(maxPeaksAverage(newLeftHandTests).*100, nearEnd(logical(newLeftHandTests(3:end))), MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(maxPeaksAverage(newLeftHandTests).*100, nearHand(logical(newLeftHandTests(3:end))), MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
     % Plot union lines between points to describe ROM
     plot([maxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100;minPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100], ...
-         [nearEnd(logicalIntervalPeaks);nearEnd(logicalIntervalPeaks)], ...
+         [nearHand(logicalIntervalPeaks);nearHand(logicalIntervalPeaks)], ...
          ':','LineWidth',1,'Color',clearGreen)
     plot([maxPeaksAverage(1).*100;minPeaksAverage(1).*100],[baselineYPos;baselineYPos],':','LineWidth',1,'Color',clearBlue)
     plot([maxPeaksAverage(BASELINE_NUMBER).*100;minPeaksAverage(BASELINE_NUMBER).*100], ...
          [baselineYPos-baselineYPosAdded;baselineYPos-baselineYPosAdded], ...
          ':','LineWidth',1,'Color',clearRed)
 
-    % iCub DX hand - min
+    % iCub R hand - min
     scatter(minPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(minPeaksAverage(newRightHandTests).*100, nearEnd(newRightHandTests(3:end)),MarkerDimension, 'red','LineWidth',EmptyPointLine)
+    scatter(minPeaksAverage(newRightHandTests).*100, nearHand(newRightHandTests(3:end)),MarkerDimension, 'red','LineWidth',EmptyPointLine)
 
-    % iCub SX hand - min
+    % iCub L hand - min
     scatter(minPeaksAverage(1).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
-    scatter(minPeaksAverage(newLeftHandTests).*100, nearEnd(newLeftHandTests(3:end)), MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(minPeaksAverage(newLeftHandTests).*100, nearHand(newLeftHandTests(3:end)), MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
     % Error bars
-    errorbar(minPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearEnd(logicalIntervalPeaks), ...
+    errorbar(minPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
              -minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
     errorbar(minPeaksAverage(1:BASELINE_NUMBER).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
              -minPeaksStandardError(1:BASELINE_NUMBER)./2, minPeaksStandardError(1:BASELINE_NUMBER)./2, ...
              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-    errorbar(maxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearEnd(logicalIntervalPeaks), ...
+    errorbar(maxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
              -maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
     errorbar(maxPeaksAverage(1:BASELINE_NUMBER).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
              -maxPeaksStandardError(1:BASELINE_NUMBER)./2, maxPeaksStandardError(1:BASELINE_NUMBER)./2, ...
              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
 
-    title("Range Of Motion [ROM] of iCub hand and Near-End Effect")
-    legend('DX iCub Baseline','DX iCub interaction', 'SX iCub Baseline','SX iCub interaction','Range Of Motion [ROM]','Location','eastoutside')
-    xlabel("Distance from Baseline ROM Center [ cm ]"), ylabel("Near-End Effect [ ms ]")
+    title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
+    legend('R iCub Baseline','R iCub interaction', 'L iCub Baseline','L iCub interaction','Range Of Motion (ROM)','Location','eastoutside')
+    xlabel("Distance from Baseline ROM Center [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
     xSize = 1;
     ySize = xSize/0.75*10;
     yDim = baselineYPos + ySize + 4;
     xlim([min(min(maxPeaksAverage),min(minPeaksAverage))*100-2,max(max(maxPeaksAverage),max(minPeaksAverage))*100+2])
-    ylim([min(nearEnd)-1,yDim+5])
+    ylim([min(nearHand)-1,yDim+5])
     set(gca, 'YDir','reverse')
 
     iCubImg = imread("..\InputData\images\iCub_hand.png");
@@ -433,7 +433,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5d,"..\ProcessedData\Scatters\1.NearEnd\ROM-NearEnd_AllignedCenter.png")
+        exportgraphics(fig5d,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AllignedCenter.png")
         close(fig5d);
     end
 
@@ -466,13 +466,13 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     ROMdeviationCenterFromBaseline_old = (posAidx+posBidx)./2-(posAidx(1)+posBidx(1))/2;
 
     matx = table([-1;testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, [mean(ROM(1:BASELINE_NUMBER));ROM(BASELINE_NUMBER+1:end)'], ROMdeviationCenterFromBaseline, ROMdeviationCenterFromBaseline_old, ...
-                 [mean(phaseTimeDifference(1:BASELINE_NUMBER).*60./10000);phaseTimeDifference(BASELINE_NUMBER+1:end)'.*60./10000], [0,nearEnd]', ...
+                 [mean(phaseTimeDifference(1:BASELINE_NUMBER).*60./10000);phaseTimeDifference(BASELINE_NUMBER+1:end)'.*60./10000], [0,nearHand]', ...
                  [mean(meanRtoH_time(1:BASELINE_NUMBER).*60./10000);meanRtoH_time(BASELINE_NUMBER+1:end)'.*60./10000],[mean(meanHtoR_time(1:BASELINE_NUMBER).*60./10000);meanHtoR_time(BASELINE_NUMBER+1:end)'.*60./10000], ...
                  [mean(meanRtoH_space(1:BASELINE_NUMBER).*100);meanRtoH_space(BASELINE_NUMBER+1:end)'.*100],[mean(meanHtoR_space(1:BASELINE_NUMBER).*100);meanHtoR_space(BASELINE_NUMBER+1:end)'.*100], ...
                  [mean(posBPeaksStd(1:BASELINE_NUMBER));posBPeaksStd(BASELINE_NUMBER+1:end)'], [mean(posAPeaksStd(1:BASELINE_NUMBER));posAPeaksStd(BASELINE_NUMBER+1:end)']);
 
     matx = renamevars(matx, 1:width(matx), ["ID","posB [cm]","posA [cm]", "Deviation from B [cm]","Deviation from A [cm]", ...
-                                            "ROM [cm]", "Simmetry [cm]", "Simmetry OLD [cm]", "Phase Delay [s]", "Near End [ms]", ...
+                                            "ROM [cm]", "Simmetry [cm]", "Simmetry OLD [cm]", "Phase Delay [s]", "Near-Hand [ms]", ...
                                             "Human-Phase TimeDomain [s]", "Robot-Phase TimeDomain [s]", "Human-Phase SpaceDomain [cm]", "Robot-Phase SpaceDomain [cm]", ...
                                             "std(posB) [cm]","std(posA) [cm]"]);
 
@@ -483,30 +483,30 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     fig5n.WindowState = 'maximized';
     grid on, hold on
 
-    % DX Hand
-    averageToPrintDX = abs(posBPeaksmean(newRightHandTests) + posAPeaksmean(newRightHandTests))./2; 
+    % R Hand
+    averageToPrintR = abs(posBPeaksmean(newRightHandTests) + posAPeaksmean(newRightHandTests))./2; 
 %     scatter(abs(posBPeaksmean(BASELINE_NUMBER)+posAPeaksmean(BASELINE_NUMBER))./2,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(averageToPrintDX, nearEnd(newRightHandTests(3:end)), MarkerDimension,'red','LineWidth',EmptyPointLine)
-    % SX Hand
-    averageToPrintSX = abs(posBPeaksmean(newLeftHandTests) + posAPeaksmean(newLeftHandTests))./2; 
+    scatter(averageToPrintR, nearHand(newRightHandTests(3:end)), MarkerDimension,'red','LineWidth',EmptyPointLine)
+    % L Hand
+    averageToPrintL = abs(posBPeaksmean(newLeftHandTests) + posAPeaksmean(newLeftHandTests))./2; 
 %     scatter(abs(posBPeaksmean(1)+posAPeaksmean(1))./2,baselineYPos-baselineYPosAdded,MarkerDimension,clearBlue,'filled')
-    scatter(averageToPrintSX, nearEnd(newLeftHandTests(3:end)), ...
+    scatter(averageToPrintL, nearHand(newLeftHandTests(3:end)), ...
          MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
-    scatter(mean([averageToPrintDX,averageToPrintSX]),mean(nearEnd(logicalIntervalPeaks)),150,'black','filled')
-    plot_mean_stdError([averageToPrintDX,averageToPrintSX],1,nearEnd(logicalIntervalPeaks),150,ErrorBarCapSize,ErrorBarLineWidth,'k--')
-    limY = [min(nearEnd)-2,max(nearEnd)+2];
+    scatter(mean([averageToPrintR,averageToPrintL]),mean(nearHand(logicalIntervalPeaks)),150,'black','filled')
+    plot_mean_stdError([averageToPrintR,averageToPrintL],1,nearHand(logicalIntervalPeaks),150,ErrorBarCapSize,ErrorBarLineWidth,'k--')
+    limY = [min(nearHand)-2,max(nearHand)+2];
     
     ylim(limY)
     set(gca, 'YDir','reverse')
-    title("Correlation ROM / Near-End Effect")
-    legend('DX iCub Hand', 'SX iCub Hand','Mean','Trend','Location','northeast')
-    xlabel("ROM of iCub's Hand [ cm ]"), ylabel("Near-End Effect [ ms ]")
+    title("Correlation ROM / Near-Hand Effect")
+    legend('R iCub Hand', 'L iCub Hand','Mean','Trend','Location','northeast')
+    xlabel("ROM of iCub's Hand [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
     hold off
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5n,"..\ProcessedData\Scatters\1.NearEnd\ROM-NearEnd_ROMsize.png")
+        exportgraphics(fig5n,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_ROMsize.png")
         close(fig5n);
     end
 
@@ -610,7 +610,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
         legendName(i+BASELINE_NUMBER) = strjoin(["Test N. ",num2str(i)," variation"],"");
     end
 
-    title("Range Of Motion [ROM] in time domain")
+    title("Range Of Motion (ROM) in time domain")
     legend(legendName,'Location','eastoutside')
     ylabel("Simulation progress [ % ]"), xlabel("Variation [ cm ]")
     hold off
@@ -695,7 +695,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     text(0,mean(yValue),"BASELINE POSITION",'FontSize',14,'HorizontalAlignment','center','VerticalAlignment','bottom','Rotation',90)
 
-    title("Simmetry efficience","Red = Low Near End   -   Green = High Near End")
+    title("Simmetry efficience","Red = Low Near-Hand   -   Green = High Near-Hand")
     legend("Test samples","Mean of the samples","Standard Error","Baseline",'Location','northwest')
     xlabel("Difference from baseline ROM center [ cm ]")
     ylabel("Similarity to baseline ROM size [ cm ]")

@@ -87,7 +87,7 @@ maxCutArea = zeros(1,numPeople);
 totalArea = zeros(1,numPeople);
 standardError = zeros(1,numPeople);
 for i = 1:numPeople
-    if strcmp(people.Mano(i),"DX") == 1
+    if strcmp(people.Mano(i),"R") == 1
         rPeople = rPeople + 1;
         figure(fig1)
         subplot(numPeople/8,numPeople/8,rPeople), hold on
@@ -122,7 +122,7 @@ for i = 1:numPeople
     totalArea(i) = trapz(xSoapWidth(i,:),ySoapWidth(i,:));
     halfIndxs = [find(abs(xSoapWidth(i,:)-(soapWidth(i)/2-flatWidth/2))<1e-1,1),find(abs(xSoapWidth(i,:)-(soapWidth(i)/2+flatWidth/2))<1e-1,1)];
     maxCutArea(i) = trapz(xSoapWidth(i,halfIndxs(1):halfIndxs(2)),ySoapWidth(i,halfIndxs(1):halfIndxs(2)));
-    if strcmp(people.Mano(i),"DX") == 1
+    if strcmp(people.Mano(i),"R") == 1
         yline(max(ySoapWidth(i,mins)),'k--','LineWidth',0.8);
     else
         yline(max(ySoapWidth(i,mins)),'k--','LineWidth',0.8);

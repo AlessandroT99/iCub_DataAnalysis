@@ -417,7 +417,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
     if numPerson > 0
         textPosX = cuttedElapsedTime(end)+0.1;
-        if strcmp(personParameters(5),"DX") == 1
+        if strcmp(personParameters(5),"R") == 1
             yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
             text(textPosX,baselineBoundaries(1,1),'Human Phase','FontSize',10, 'VerticalAlignment', 'middle','HorizontalAlignment','left')

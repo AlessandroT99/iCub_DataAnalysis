@@ -40,7 +40,7 @@ function dataPlotter(TELEGRAM_LOG)
     BASELINE_NUMBER = 2;        % Number of baseline in the simulation
     BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
     posBaseline = [];           % Variable where the pos baseline is saved
-    baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [DXmax,SXmax;DXmin,SXmin]
+    baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [Rmax,Lmax;Rmin,Lmin]
     
     % Logging instants in telegram
     if TELEGRAM_LOG
@@ -52,16 +52,16 @@ function dataPlotter(TELEGRAM_LOG)
     if NEW_BASELINES
         % Remember to create manually the folders for containing this outputs!
         BaselineMainDataFolder = "..\InputData\NewBaselines"; % Name of the main folder containing all baselines data
-        SXbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
-        DXbaseLinePath = "B_DX_Soft";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_SX = "\NewBaselines\B_SX_Soft_NoMeanShift";   % The initial part of the name of the SX baseline output
-        BaseLineOutputName_DX = "\NewBaselines\B_DX_Soft_NoMeanShift";   % The initial part of the name of the DX baseline output
+        LbaseLinePath = "B_L_Soft";  % Name of the folder containing the file of the L baseline
+        RbaseLinePath = "B_R_Soft";  % Name of the folder containing the file of the R baseline
+        BaseLineOutputName_L = "\NewBaselines\B_L_Soft_NoMeanShift";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "\NewBaselines\B_R_Soft_NoMeanShift";   % The initial part of the name of the R baseline output
     else
         BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
-        SXbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
-        DXbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_SX = "B_SX_Base";   % The initial part of the name of the SX baseline output
-        BaseLineOutputName_DX = "B_DX_Base";   % The initial part of the name of the DX baseline output
+        LbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
+        RbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
+        BaseLineOutputName_L = "B_L_Base";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "B_R_Base";   % The initial part of the name of the R baseline output
     end
     
     %% Input data
@@ -122,7 +122,7 @@ function dataPlotter(TELEGRAM_LOG)
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
     
-    [nDX, nSX, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(people); 
+    [nR, nL, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = parametersUpdate(people); 
     
     % Create figures for subplots
     if BIG_PLOT_ENABLE
@@ -142,17 +142,17 @@ function dataPlotter(TELEGRAM_LOG)
     for i = 1:numPeople
         if BaseLineEvaluationDone == 0
             if i == 1
-                posFilePath = strjoin([BaselineMainDataFolder,"\positions\leftHand\",SXbaseLinePath,"\data.log"],"");
-                forceFilePath = strjoin([BaselineMainDataFolder,"\forces\leftArm\",SXbaseLinePath,"\data.log"],"");
-                BaseLineOutputName = BaseLineOutputName_SX;
+                posFilePath = strjoin([BaselineMainDataFolder,"\positions\leftHand\",LbaseLinePath,"\data.log"],"");
+                forceFilePath = strjoin([BaselineMainDataFolder,"\forces\leftArm\",LbaseLinePath,"\data.log"],"");
+                BaseLineOutputName = BaseLineOutputName_L;
             else
                 if i == 2
-                    posFilePath = strjoin([BaselineMainDataFolder,"\positions\rightHand\",DXbaseLinePath,"\data.log"],"");
-                    forceFilePath = strjoin([BaselineMainDataFolder,"\forces\rightArm\",DXbaseLinePath,"\data.log"],"");
-                    BaseLineOutputName = BaseLineOutputName_DX;
+                    posFilePath = strjoin([BaselineMainDataFolder,"\positions\rightHand\",RbaseLinePath,"\data.log"],"");
+                    forceFilePath = strjoin([BaselineMainDataFolder,"\forces\rightArm\",RbaseLinePath,"\data.log"],"");
+                    BaseLineOutputName = BaseLineOutputName_R;
                 end
             end
-            BaselineFilesParameters = [SXbaseLinePath,DXbaseLinePath,BaseLineOutputName,BaselineMainDataFolder]; % just the union of the four up for faster use and function passing 
+            BaselineFilesParameters = [LbaseLinePath,RbaseLinePath,BaseLineOutputName,BaselineMainDataFolder]; % just the union of the four up for faster use and function passing 
     
             posDataSet = readtable(posFilePath);
             forceDataSet = readtable(forceFilePath);
@@ -180,9 +180,9 @@ function dataPlotter(TELEGRAM_LOG)
                 end
                 fprintf("\n- Elaborating data from Baseline test ");
                 if i == 1
-                    personParam = ["Baseline Test","  ","-","  Robot Hand: ","SX"];
+                    personParam = ["Baseline Test","  ","-","  Robot Hand: ","L"];
                 else
-                    personParam = ["Baseline Test","  ","-","  Robot Hand: ","DX"];
+                    personParam = ["Baseline Test","  ","-","  Robot Hand: ","R"];
                 end
                 fprintf("N. %d...\n",i);
             else

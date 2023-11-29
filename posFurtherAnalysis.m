@@ -73,7 +73,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     if minLocalization(1) < maxLocalization(1)
         % So start before the min to max phase
         if numPerson < 0
-            if strcmp(personParam(5),"SX")
+            if strcmp(personParam(5),"L")
                 for i = 1:min(length(minLocalization),length(maxLocalization))
                     RtoH_time(i) = maxLocalization(i)-minLocalization(i);
                     RtoH_space(i) = maxPeaksVal(i)-minPeaksVal(i);
@@ -93,7 +93,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                 end
             end
         else
-            if strcmp(personParam(5),"DX")
+            if strcmp(personParam(5),"R")
                 for i = 1:min(length(minLocalization),length(maxLocalization))
                     RtoH_time(i) = maxLocalization(i)-minLocalization(i);
                     RtoH_space(i) = maxPeaksVal(i)-minPeaksVal(i);
@@ -115,7 +115,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         end
     else
         if numPerson < 0
-            if strcmp(personParam(5),"SX")
+            if strcmp(personParam(5),"L")
                 for i = 1:min(length(minLocalization),length(maxLocalization))
                     RtoH_time(i) = minLocalization(i)-maxLocalization(i);
                     RtoH_space(i) = minPeaksVal(i)-maxPeaksVal(i);
@@ -135,7 +135,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                 end
             end
         else
-            if strcmp(personParam(5),"DX")
+            if strcmp(personParam(5),"R")
                 for i = 1:min(length(minLocalization),length(maxLocalization))
                     RtoH_time(i) = minLocalization(i)-maxLocalization(i);
                     RtoH_space(i) = minPeaksVal(i)-maxPeaksVal(i);
@@ -308,7 +308,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     minPeaksVariation = polyval(p,linspace(1,max(length(maxPeaksVal),length(minPeaksVal))));
     
     if numPerson < 0
-        if strcmp(personParam(5),"SX") == 1
+        if strcmp(personParam(5),"L") == 1
             posAPeaksStd = std(maxPeaksVal);
             posBPeaksStd = std(minPeaksVal);
             posAPeaksmean = mean(maxPeaksVal);
@@ -320,7 +320,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
             posBPeaksmean = mean(maxPeaksVal);
         end
     else
-        if strcmp(personParam(5),"DX") == 1
+        if strcmp(personParam(5),"R") == 1
             posAPeaksStd = std(maxPeaksVal);
             posBPeaksStd = std(minPeaksVal);
             posAPeaksmean = mean(maxPeaksVal);
@@ -340,7 +340,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     % Baseline signal analysis
     if numPerson >= 0 % The baseline it is skipped        
         maximumMovementTime = 0.5;
-        if strcmp(personParam(5),"DX") == 1 
+        if strcmp(personParam(5),"R") == 1 
             [envHigh, envLow] = envelope(baseline{1},maximumMovementTime*frequency*0.8,'peak');
         else
             [envHigh, envLow] = envelope(baseline{2},maximumMovementTime*frequency*0.8,'peak');

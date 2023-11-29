@@ -72,25 +72,25 @@ function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKi
         enforceJointLimits = true;
         sortByDistance = true;
         if numPerson < 0
-            if strcmp(handInvolved,"DX") == 1
-                ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+            if strcmp(handInvolved,"R") == 1
+                ikConfig = iCubIK_RArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
                 finalShoulderPitch = referencePos(26).JointPosition;
             else
-                ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                ikConfig = iCubIK_LArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
                 finalShoulderPitch = referencePos(16).JointPosition;
             end
         else
-            if strcmp(handInvolved,"SX") == 1
-                ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+            if strcmp(handInvolved,"L") == 1
+                ikConfig = iCubIK_RArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
                 finalShoulderPitch = referencePos(26).JointPosition;
             else
-                ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                ikConfig = iCubIK_LArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
                 finalShoulderPitch = referencePos(16).JointPosition;
