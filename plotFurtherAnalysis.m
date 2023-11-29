@@ -118,7 +118,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 %     scatter(meanHtoR_time(1:BASELINE_NUMBER).*60./10000,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
     scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
 %     scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*60./10000,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanRtoH_time(logical([0,0,logicalIntervalPeaks])),60./10,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    plot_mean_stdError(meanRtoH_time(logical([0,0,logicalIntervalPeaks])),60./10,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase time duration")
     xlabel("Elapsed Time [ ms ]"), ylabel("Near-Hand Effect [ ms ]")
 %     desideredPhase = 1.5;
@@ -140,7 +140,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 %     scatter(meanHtoR_time(1:BASELINE_NUMBER).*60./10000,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
 %     scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
     scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*60./10,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanHtoR_time(logical([0,0,logicalIntervalPeaks])),60./10,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    plot_mean_stdError(meanHtoR_time(logical([0,0,logicalIntervalPeaks])),60./10,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phase time duration")
     xlabel("Elapsed Time [ ms ]"), ylabel("Near-Hand Effect [ ms ]")
 %     desideredPhase = 1.5;
@@ -163,7 +163,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 %     scatter(meanHtoR_space(1:BASELINE_NUMBER).*100,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
     scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
 %     scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
     legend('Human Pulling phase','Mean','Trend','Standard Error')
@@ -183,7 +183,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 %     scatter(meanHtoR_space(1:BASELINE_NUMBER).*100,[baselineYPos,baselineYPosAdded],MarkerDimension,clearRed,'filled')
 %     scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
     scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanHtoR_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    plot_mean_stdError(meanHtoR_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phases space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
     legend('Human Pulling phase','Mean','Trend','Standard Error')
@@ -203,7 +203,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     xScat = phaseTimeDifference(logical([0,0,logicalIntervalPeaks]));
     yScat = nearHand(logicalIntervalPeaks);
     scatter(xScat.*60./10,yScat,MarkerDimension,'red','LineWidth',EmptyPointLine)    
-    plot_mean_stdError(xScat,60./10,nearHand(logicalIntervalPeaks),2*MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    plot_mean_stdError(xScat,60./10,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Duration Difference of the Pulling Phases")
     xlabel("Pulling Phases Time Difference (H-R) [ ms ]"), ylabel("Near-end Effect [ ms ]")
     legend("Subject",'Mean','Trend','Standard Error')
@@ -357,7 +357,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5e,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AllignedPosB.png")
+        exportgraphics(fig5e,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedPosB.png")
         close(fig5e);
     end
 
@@ -415,7 +415,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
 
     title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
     legend('R iCub Baseline','R iCub interaction', 'L iCub Baseline','L iCub interaction','Range Of Motion (ROM)','Location','eastoutside')
-    xlabel("Distance from Baseline ROM Center [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
+    xlabel("Range of Motion (ROM) with aligned centers [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
     xSize = 1;
     ySize = xSize/0.75*10;
     yDim = baselineYPos + ySize + 4;
@@ -433,7 +433,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5d,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AllignedCenter.png")
+        exportgraphics(fig5d,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedCenter.png")
         close(fig5d);
     end
 
@@ -484,23 +484,17 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
 
     % R Hand
-    averageToPrintR = abs(posBPeaksmean(newRightHandTests) + posAPeaksmean(newRightHandTests))./2; 
-%     scatter(abs(posBPeaksmean(BASELINE_NUMBER)+posAPeaksmean(BASELINE_NUMBER))./2,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
-    scatter(averageToPrintR, nearHand(newRightHandTests(3:end)), MarkerDimension,'red','LineWidth',EmptyPointLine)
+    scatter(ROM(newRightHandTests), nearHand(newRightHandTests(3:end)), MarkerDimension,'red','LineWidth',EmptyPointLine)
     % L Hand
-    averageToPrintL = abs(posBPeaksmean(newLeftHandTests) + posAPeaksmean(newLeftHandTests))./2; 
-%     scatter(abs(posBPeaksmean(1)+posAPeaksmean(1))./2,baselineYPos-baselineYPosAdded,MarkerDimension,clearBlue,'filled')
-    scatter(averageToPrintL, nearHand(newLeftHandTests(3:end)), ...
-         MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    scatter(ROM(newLeftHandTests), nearHand(newLeftHandTests(3:end)), MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
-    scatter(mean([averageToPrintR,averageToPrintL]),mean(nearHand(logicalIntervalPeaks)),150,'black','filled')
-    plot_mean_stdError([averageToPrintR,averageToPrintL],1,nearHand(logicalIntervalPeaks),150,ErrorBarCapSize,ErrorBarLineWidth,'k--')
+    plot_mean_stdError(ROM(logical([0,0,logicalIntervalPeaks])),1,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'k--')
     limY = [min(nearHand)-2,max(nearHand)+2];
     
     ylim(limY)
     set(gca, 'YDir','reverse')
     title("Correlation ROM / Near-Hand Effect")
-    legend('R iCub Hand', 'L iCub Hand','Mean','Trend','Location','northeast')
+    legend('R iCub Hand', 'L iCub Hand','Mean','Trend','Location','southeast')
     xlabel("ROM of iCub's Hand [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
     hold off
     
