@@ -346,13 +346,14 @@ function dataPlotter(TELEGRAM_LOG)
     posBPeaksmean = posBPeaksmean(posBPeaksmean~=notConsideredValue).*100;
     ROM = ROM(ROM~=notConsideredValue).*100;
     
-    %% Further analysis plotting
-    tic
     if TELEGRAM_LOG
         pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...");
     end
-    save ..\ProcessedData\furtherAnalysisData;
-    % load ..\ProcessedData\furtherAnalysisData;
+
+    %% Further analysis plotting
+    tic
+%     save ..\ProcessedData\furtherAnalysisData;
+%     load ..\ProcessedData\furtherAnalysisData;
     fprintf("\nPlotting position further analysis results...")
     plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
                                     nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...

@@ -494,7 +494,7 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
          MarkerDimension,'blue','LineWidth',EmptyPointLine)
 
     scatter(mean([averageToPrintDX,averageToPrintSX]),mean(nearEnd(logicalIntervalPeaks)),150,'black','filled')
-    plot_mean_stdError([averageToPrintDX,averageToPrintSX],1,nearEnd(logicalIntervalPeaks),150,ErrorBarCapSize,ErrorBarLineWidth,'k--')
+    plot_mean_stdError([averageToPrintDX,averageToPrintSX],1,nearEnd(logicalIntervalPeaks),150,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     limY = [min(nearEnd)-2,max(nearEnd)+2];
     
     ylim(limY)
@@ -713,9 +713,10 @@ function plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, m
     grid on, hold on
     scatter(midVelocityMean(1:BASELINE_NUMBER), midVelocityStd(1:BASELINE_NUMBER), MarkerDimension, clearRed, 'filled','DisplayName','Baselines')
     scatter(midVelocityMean(BASELINE_NUMBER+1:end), midVelocityStd(BASELINE_NUMBER+1:end), MarkerDimension, 'red', 'LineWidth', 1.8, 'DisplayName','Experiments values');
-    plot_mean_stdError(midVelocityMean(BASELINE_NUMBER+1:end),1,midVelocityStd(BASELINE_NUMBER+1:end),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    plot(0:1,0:1,'k-','DisplayName','Bisector')
+    plot_mean_stdError(midVelocityMean(BASELINE_NUMBER+1:end))
     title("Velocity middle peaks trend analysis")
-    legend('Baseline','Subjects','Mean','Trend','Standard Error','Location','eastoutside')
+    legend('show','Location','eastoutside')
     xlabel("Mean [ m/s ]")
     ylabel("Standar deviation [ m/s ]")
     hold off    
