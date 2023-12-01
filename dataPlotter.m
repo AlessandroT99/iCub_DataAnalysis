@@ -58,10 +58,10 @@ function dataPlotter(TELEGRAM_LOG)
         BaseLineOutputName_R = "\NewBaselines\B_DX_Soft_NoMeanShift";   % The initial part of the name of the R baseline output
     else
         BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
-        LbaseLinePath = "P0_L_Hard";  % Name of the folder containing the file of the L baseline
-        RbaseLinePath = "P0_R_Hard";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_L = "B_SX_Hard";   % The initial part of the name of the L baseline output
-        BaseLineOutputName_R = "B_DX_Hard";   % The initial part of the name of the R baseline output
+        LbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
+        RbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
+        BaseLineOutputName_L = "B_SX_Base";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "B_DX_Base";   % The initial part of the name of the R baseline output
     end
     
     %% Input data
@@ -118,6 +118,8 @@ function dataPlotter(TELEGRAM_LOG)
     testedPeople = [];
     midVelocityMean = notConsideredValue.*ones(1,numPeople);
     midVelocityStd = notConsideredValue.*ones(1,numPeople);
+    HtoR_relativeVelocity = cell(1,numPeople);
+    RtoH_relativeVelocity = cell(1,numPeople);
     
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
@@ -251,7 +253,7 @@ function dataPlotter(TELEGRAM_LOG)
                 nMaxPeaks(i), nMinPeaks(i), maxPeaksAverage(i), minPeaksAverage(i), stdPos(i), meanPos(i), ...
                 movementRange(i,:), maxMinAverageDistance(i), maxPeaksVariation(i,:), minPeaksVariation(i,:), ...
                 peaksInitialAndFinalVariation(i), synchroEfficiency(i,:), posAPeaksStd(i), ...
-                posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i), ROM(i)] = ...
+                posBPeaksStd(i), posAPeaksmean(i), posBPeaksmean(i), ROM(i), HtoR_relativeVelocity{i}, RtoH_relativeVelocity{i}] = ...
                 posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline, BaselineFilesParameters);
             fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             
@@ -275,18 +277,18 @@ function dataPlotter(TELEGRAM_LOG)
         end
         if TELEGRAM_LOG
             if i == 1
-                pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",str(i)," completed"],""),TEXT=1,filePath="");
+                pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",num2str(i)," completed"],""),TEXT=1,filePath="");
                 pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
                 pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
             else
                 if i == 2
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",str(i)," completed"],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",num2str(i)," completed"],""),TEXT=1,filePath="");
                     pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
                     pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
                 else
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Test ",str(numP)," completed"],""),TEXT=1,filePath="");
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",str(i),".png"],""))
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",str(i),".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Test ",num2str(numP)," completed"],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
                 end
             end
         end
@@ -367,7 +369,7 @@ function dataPlotter(TELEGRAM_LOG)
     %% Further analysis plotting
     tic
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...");
+        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...",TEXT=1,filePath="");
     end
     save ..\ProcessedData\furtherAnalysisData;
 %     load ..\ProcessedData\furtherAnalysisData;
@@ -375,7 +377,7 @@ function dataPlotter(TELEGRAM_LOG)
     plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
                                     nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                     movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
-                                    peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, ...
+                                    peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, HtoR_relativeVelocity, RtoH_relativeVelocity, ...
                                     posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, people.Delta_RTs_(testedPeople));
     fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
@@ -385,7 +387,7 @@ function dataPlotter(TELEGRAM_LOG)
     fprintf("\nProcess of analysis complete!\n")
     overallTime = duration(0,0,toc(tStart),'Format','mm:ss.SS');
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg=strjoin(["Simulation completed in ", str(overallTime), " minutes."],""),TEXT=1,filePath="");
+        pyrunfile("telegramLogging.py",txtMsg=strjoin(["Simulation completed in ", num2str(overallTime), " minutes."],""),TEXT=1,filePath="");
     end
     fprintf("The simulation has been executed in %s minutes\n",overallTime)
 end

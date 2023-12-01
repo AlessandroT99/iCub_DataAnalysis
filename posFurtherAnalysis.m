@@ -18,7 +18,7 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
             nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
             movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
             peaksInitialAndFinalVariation, synchroEfficiency, posAPeaksStd, ...
-            posBPeaksStd, posAPeaksmean, posBPeaksmean, ROM] = ...
+            posBPeaksStd, posAPeaksmean, posBPeaksmean, ROM, HtoR_relativeVelocity, RtoH_relativeVelocity] = ...
               posFurtherAnalysis(synchPosDataSet,numPerson,personParam,baseline, BaselineFilesParameters)
 % The main aim of this function is to elaborate position signals in order to extract
 % some interesting data that would be usefull to compare with the overrall
@@ -157,6 +157,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         end
     end
     
+    RtoH_relativeVelocity = RtoH_space./RtoH_time;
+    HtoR_relativeVelocity = HtoR_space./HtoR_time;
+
     %% Evaluation of phase time difference
     timePhasesNumber = min(length(HtoR_time),length(RtoH_time));
 %     fprintf("Difference of number of phases: %d",length(HtoR_time)-length(RtoH_time))

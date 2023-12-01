@@ -17,7 +17,7 @@
 clear all, close all,  clc
 format compact
 
-TELEGRAM_LOG = 1; % Goes to 0 if no messages on telegram are wanted        
+TELEGRAM_LOG = 0; % Goes to 0 if no messages on telegram are wanted        
 
 try
     dataPlotter(TELEGRAM_LOG);

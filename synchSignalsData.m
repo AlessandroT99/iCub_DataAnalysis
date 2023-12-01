@@ -596,12 +596,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\",BaselineFilesParameters(3),".mat"],"");
+            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
         else
-            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\P",num2str(numPerson),".mat"],"");
+            path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
         end
         if exist(path,'file')
             load(path);
+            finalCuttedSynchForceDataSet = newCuttedSynchForceDataSet;
         else
             % Has been evaluated that the force RS has to be rotated and translated
             % into the EF RS with respect to the OF
@@ -659,10 +660,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     subplot(3,1,3), grid on, hold on
     plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Transformed synched force')
     plot(cuttedElapsedTime,averageEnv,'b--','DisplayName','Average behavior')
-    plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
-    plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
-    yline(upperPeaksBound,'r--','DisplayName','Higher bound')
-    yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
+%     plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
+%     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
+%     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
+%     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
     xlabel("Elapsed time [ min ]")
     ylabel("Force [ N ]")
     ylim([lowestValue,highestValue])
