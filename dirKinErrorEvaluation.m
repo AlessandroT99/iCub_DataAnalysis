@@ -30,13 +30,13 @@ function [time_lag, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSe
     for i = 1:height(evaluatedPosition)
         pose = assignJointToPose(robot, table2array(jointSynchDataSet(i,2:end)), [0,0,0], involvedHand, numPerson);
         if numPerson < 0
-            if strcmp(involvedHand,"DX") == 1
+            if strcmp(involvedHand,"R") == 1
                 T = getTransform(robot,pose,'r_hand_dh_frame','root_link');
             else
                 T = getTransform(robot,pose,'l_hand_dh_frame','root_link');
             end
         else
-            if strcmp(involvedHand,"SX") == 1
+            if strcmp(involvedHand,"L") == 1
                 T = getTransform(robot,pose,'r_hand_dh_frame','root_link');
             else
                 T = getTransform(robot,pose,'l_hand_dh_frame','root_link');

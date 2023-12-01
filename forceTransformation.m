@@ -35,7 +35,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     IMAGE_SAVING = 1;               % Used to save some chosen plots
     PAUSE_TIME = 8;                 % Used to let the window of the plot get the full resolution size before saving
     I_KIN_ERROR_EVALUATION = 1;     % If 0 the stated error is not evaluated
-    JOINTS_ONLY_FOR_BASELINE = 0;   % If 0 the joints datahas been collected only for baselines and so portion of the code become exclusive for them
+    JOINTS_ONLY_FOR_BASELINE = 0;   % If 0 the joints data has been collected only for baselines and so portion of the code become exclusive for them
                                     % to turn this off put a number way higher than the number of tests analyzed
     
     %% Input data
@@ -49,7 +49,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 jointDataSet = readtable(strjoin([BaselineFilesParameters(4),"\joints\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
             else
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
-                    if strcmp(personParameters(5),"DX") == 1
+                    if strcmp(personParameters(5),"R") == 1
                         if numPerson < 10
                             jointDataSet = strjoin(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
@@ -127,34 +127,18 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
 %         end
 
         if numPerson < 0
-            if strcmp(personParameters(5),"DX") == 1
+            if strcmp(personParameters(5),"R") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
-%                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
                 fixedMeanError = [-1.0179, 1.3797, -0.1601];
-%                 fixedTimeShift = [0.0559, 0.0718, 0.1127];
             end
         else
-            if strcmp(personParameters(5),"SX") == 1
+            if strcmp(personParameters(5),"L") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
-%                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
                 fixedMeanError = [-1.0179, 1.3797, -0.1601];
-%                 fixedTimeShift = [0.0559, 0.0718, 0.1127];
             end
         end
-%         fixedIndexShift = round(mean(fixedTimeShift*100));
-%         if fixedIndexShift <= 0
-%             fixedIndexShift = 1;
-%         end
-%         indexShift = height(cuttedPosDataSet)-height(cuttedPosDataSet(fixedIndexShift:end,3:5));
-
-%         %% Synch all the dataset with the new modification 
-%         cuttedPosDataSet = cuttedPosDataSet(fixedIndexShift:end,:);
-%         % The mean shifting is made directly to the force in section "3 and 4. Evaluating the force resultant for each sample"
-%         cuttedElapsedTime = cuttedElapsedTime(1:end-indexShift);
-%         cuttedSynchJointDataSet = cuttedSynchJointDataSet(fixedIndexShift:end,:);
-%         cuttedSynchForceDataSet = cuttedSynchForceDataSet(fixedIndexShift:end,:);
 
         %% Print shoulder pitch joint dependencies with position axis
         fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
@@ -175,14 +159,6 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         title("Shoulder pitch w.r.t. Z position")
         
         sgtitle(defaultTitleName)
-        
-        % Plot joint wrt the XZ plane to further evaluated probabilities -> MAY NOT BE THE RIGHT PROCEDURE
-%         fig3DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis XZ');
-%         fig3DJointTraj.WindowState = 'maximized';
-%         grid on, hold on
-%         plot3(cuttedPosDataSet.xPos.*100, cuttedPosDataSet.zPos.*100, cuttedSynchJointDataSet.ShoulderPitch, 'k-')
-%         zlabel("Joint [ degrees ]"), xlabel("X position [ cm ]"), ylabel("Z position [ cm ]") 
-%         title("Shoulder pitch w.r.t. XZ plane")
     
         if IMAGE_SAVING
             mkdir ..\ProcessedData\ShoulderPitchJointPositionRelation;
@@ -206,20 +182,20 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
         jointError = zeros(NUMBER_OF_SAMPLES,length(armJointsA)-1);
         if numPerson < 0
-            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
+            if strcmp(personParameters(5),"L") % Inverted to R when not baseline
                 aik.KinematicGroup = opts(10).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_SXArm');
+                generateIKFunction(aik,'iCubIK_LArm');
             else
                aik.KinematicGroup = opts(12).KinematicGroup;
-               generateIKFunction(aik,'iCubIK_DXArm');
+               generateIKFunction(aik,'iCubIK_RArm');
             end
         else
-            if strcmp(personParameters(5),"DX") 
+            if strcmp(personParameters(5),"R") 
                 aik.KinematicGroup = opts(10).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_SXArm');
+                generateIKFunction(aik,'iCubIK_LArm');
             else
                 aik.KinematicGroup = opts(12).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_DXArm');
+                generateIKFunction(aik,'iCubIK_RArm');
             end
         end
     end
@@ -260,7 +236,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 tic
                 fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
                 
-                if strcmp(personParameters(5),"SX") && numPerson < 0
+                if strcmp(personParameters(5),"L") && numPerson < 0
                     if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                         referenceConfig = getAnglesFromConfiguration(posB,17:22);
                         referencePos = posB;
@@ -269,7 +245,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                         referencePos = posA;
                     end
                 else
-                    if strcmp(personParameters(5),"DX") && numPerson < 0
+                    if strcmp(personParameters(5),"R") && numPerson < 0
                         if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                             referenceConfig = getAnglesFromConfiguration(posA,27:32);
                             referencePos = posA;
@@ -278,7 +254,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                             referencePos = posB;
                         end
                     else
-                        if strcmp(personParameters(5),"SX") && numPerson >= 0
+                        if strcmp(personParameters(5),"L") && numPerson >= 0
                             if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                                 referenceConfig = getAnglesFromConfiguration(posA,17:22);
                                 referencePos = posA;
@@ -287,7 +263,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                                 referencePos = posB;
                             end
                         else
-                            if strcmp(personParameters(5),"DX") && numPerson >= 0
+                            if strcmp(personParameters(5),"R") && numPerson >= 0
                                 if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                                     referenceConfig = getAnglesFromConfiguration(posB,27:32);
                                     referencePos = posB;
@@ -328,14 +304,14 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         % Evaluating the transformation matrix for each sample
         if numPerson < 0
             newPos = assignJointToPose(robot, armJoints, torsoJoints, personParameters(5), numPerson);
-            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
+            if strcmp(personParameters(5),"L") % Inverted to R when not baseline
                 T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
             else
                 T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
             end
         else
             newPos = assignJointToPose(robot, evaluatedJointsDataSet(i,:), torsoJoints, personParameters(5), numPerson);
-            if strcmp(personParameters(5),"DX") 
+            if strcmp(personParameters(5),"R") 
                 T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
             else
                 T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
