@@ -22,11 +22,13 @@ TELEGRAM_LOG = 1; % Goes to 0 if no messages on telegram are wanted
 try
     dataPlotter(TELEGRAM_LOG);
 catch e
-    fprintf(2,'\n\nThe identifier was:\n%s',e.identifier);
+    if ~isempty(e.identifier)
+        fprintf(2,'\n\nThe identifier was:\n%s',e.identifier);
+    end
     fprintf(2,'\nThere was an error! The message was:\n%s',e.message);
     if TELEGRAM_LOG
         outputText = strjoin(["An error occurred! The simulation has been interrupted. Come to check the problem.",newline,newline,"The error output was: ",e.message],"");
-        pyrunfile("telegramLogging.py",txtMsg=outputText);
+        pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
     end
 end
 
