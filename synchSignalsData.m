@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundaries, midVelocityMean, midVelocityStd] = ...
-    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters)
+    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -614,13 +614,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
             catch forceErr
                 % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
                 finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
-                fprintf("There was an error! This dataset will be skipped.")
+                fprintf("\nThere was an error! This dataset will be skipped.")
                 if ~isempty(forceErr.identifier)
                     fprintf(2,'\n\nThe identifier was:\n%s',forceErr.identifier);
                 end
                 fprintf(2,'\nThe message was:\n%s',forceErr.message);
                 if TELEGRAM_LOG
-                    outputText = strjoin(["An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
+                    outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
                     pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
                 end
             end

@@ -126,20 +126,6 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
 %             [dirKinPhaseError, dirKinError] = dirKinErrorEvaluation(robot, cuttedSynchJointDataSet, numPerson, cuttedElapsedTime, cuttedPosDataSet, personParameters(5), defaultTitleName, BaselineFilesParameters);
 %         end
 
-        if numPerson < 0
-            if strcmp(personParameters(5),"R") == 1
-                fixedMeanError = [-0.7344, -0.9190, -0.1884];
-            else
-                fixedMeanError = [-1.0179, 1.3797, -0.1601];
-            end
-        else
-            if strcmp(personParameters(5),"L") == 1
-                fixedMeanError = [-0.7344, -0.9190, -0.1884];
-            else
-                fixedMeanError = [-1.0179, 1.3797, -0.1601];
-            end
-        end
-
         %% Print shoulder pitch joint dependencies with position axis
         fig2DJointTraj = figure('Name', 'Shoulder pitch joint value w.r.t. position axis');
         fig2DJointTraj.WindowState = 'maximized';
@@ -176,6 +162,21 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     %% Procedure of force transformation
     newCuttedSynchForceDataSet = cuttedSynchForceDataSet;
 
+    % Setting the mean error shift needed for the force transformation
+    if numPerson < 0
+        if strcmp(personParameters(5),"R") == 1
+            fixedMeanError = [-0.7344, -0.9190, -0.1884];
+        else
+            fixedMeanError = [-1.0179, 1.3797, -0.1601];
+        end
+    else
+        if strcmp(personParameters(5),"L") == 1
+            fixedMeanError = [-0.7344, -0.9190, -0.1884];
+        else
+            fixedMeanError = [-1.0179, 1.3797, -0.1601];
+        end
+    end
+
     NUMBER_OF_SAMPLES = 0;
     if I_KIN_ERROR_EVALUATION
         NUMBER_OF_SAMPLES = height(newCuttedSynchForceDataSet); 
@@ -211,6 +212,8 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             if I_KIN_ERROR_EVALUATION
                 T_HtoOF = getTransform(robot,assignJointToPose(robot,armJoints,torsoJoints,personParameters(5),numPerson),aik.KinematicGroup.EndEffectorBodyName,'root_link');
             end
+        else
+            armJoints = 0;
         end
 
         R_HtoOF = axis2dcm(cuttedPosDataSet.ax(i),cuttedPosDataSet.ay(i),cuttedPosDataSet.az(i),cuttedPosDataSet.theta(i));

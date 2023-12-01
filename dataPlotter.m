@@ -44,7 +44,7 @@ function dataPlotter(TELEGRAM_LOG)
     
     % Logging instants in telegram
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="HRI Data analysis - Starting simulation...",TEXT=1,filePath="");
+        pyrunfile("telegramLogging.py",txtMsg="[STARTING] HRI Data analysis - Starting simulation...",TEXT=1,filePath="");
     end
     
     %% Baselines input data
@@ -178,7 +178,7 @@ function dataPlotter(TELEGRAM_LOG)
             personTime = tic;
             if BaseLineEvaluationDone == 0
                 if TELEGRAM_LOG
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Evaluation of Baseline n.",num2str(i)],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Evaluation of Baseline n.",num2str(i)],""),TEXT=1,filePath="");
                 end
                 fprintf("\n- Elaborating data from Baseline test ");
                 if i == 1
@@ -189,7 +189,7 @@ function dataPlotter(TELEGRAM_LOG)
                 fprintf("N. %d...\n",i);
             else
                 if TELEGRAM_LOG
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Evaluation of participant n.",num2str(numP)],""),TEXT=1,filePath="");            
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Evaluation of participant n.",num2str(numP)],""),TEXT=1,filePath="");            
                 end
                 testedPeople = [testedPeople,i-BASELINE_NUMBER];
                 evaluatedPeople = evaluatedPeople + 1;
@@ -208,7 +208,7 @@ function dataPlotter(TELEGRAM_LOG)
             % Synchronizing the two dataset to show them in a single plot
             [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i)] = ...
               synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
-                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters);   
+                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG);   
     
             if BIG_PLOT_ENABLE && BaseLineEvaluationDone
                 if strcmp(people.Genere(i),"M") == 1
@@ -277,16 +277,16 @@ function dataPlotter(TELEGRAM_LOG)
         end
         if TELEGRAM_LOG
             if i == 1
-                pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",num2str(i)," completed"],""),TEXT=1,filePath="");
+                pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
                 pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
                 pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
             else
                 if i == 2
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",num2str(i)," completed"],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
                     pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
                     pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
                 else
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Test ",num2str(numP)," completed"],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Participant n.",num2str(numP)," completed"],""),TEXT=1,filePath="");
                     pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
                     pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
                 end
@@ -363,14 +363,11 @@ function dataPlotter(TELEGRAM_LOG)
     ROM = ROM(ROM~=notConsideredValue).*100;
     
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...",TEXT=1,filePath="");
+        pyrunfile("telegramLogging.py",txtMsg="[INFO] Further position analysis started...",TEXT=1,filePath="");
     end
 
     %% Further analysis plotting
     tic
-    if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...",TEXT=1,filePath="");
-    end
     save ..\ProcessedData\furtherAnalysisData;
 %     load ..\ProcessedData\furtherAnalysisData;
     fprintf("\nPlotting position further analysis results...")
@@ -387,7 +384,7 @@ function dataPlotter(TELEGRAM_LOG)
     fprintf("\nProcess of analysis complete!\n")
     overallTime = duration(0,0,toc(tStart),'Format','mm:ss.SS');
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg=strjoin(["Simulation completed in ", num2str(overallTime), " minutes."],""),TEXT=1,filePath="");
+        pyrunfile("telegramLogging.py",txtMsg=strjoin(["[COMPLETION] Simulation completed in ", num2str(overallTime), " minutes."],""),TEXT=1,filePath="");
     end
     fprintf("The simulation has been executed in %s minutes\n",overallTime)
 end
