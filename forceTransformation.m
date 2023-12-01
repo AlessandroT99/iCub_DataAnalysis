@@ -49,7 +49,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 jointDataSet = readtable(strjoin([BaselineFilesParameters(4),"\joints\rightArm\",BaselineFilesParameters(2),"\data.log"],""));
             else
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
-                    if strcmp(personParameters(5),"R") == 1
+                    if strcmp(personParameters(5),"DX") == 1
                         if numPerson < 10
                             jointDataSet = strjoin(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
@@ -127,7 +127,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
 %         end
 
         if numPerson < 0
-            if strcmp(personParameters(5),"R") == 1
+            if strcmp(personParameters(5),"DX") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
 %                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
@@ -135,7 +135,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
 %                 fixedTimeShift = [0.0559, 0.0718, 0.1127];
             end
         else
-            if strcmp(personParameters(5),"L") == 1
+            if strcmp(personParameters(5),"SX") == 1
                 fixedMeanError = [-0.7344, -0.9190, -0.1884];
 %                 fixedTimeShift = [0.0609, 0.0536, 0.0486];
             else
@@ -206,20 +206,20 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         evaluatedJointsDataSet = zeros(NUMBER_OF_SAMPLES,length(armJointsA));
         jointError = zeros(NUMBER_OF_SAMPLES,length(armJointsA)-1);
         if numPerson < 0
-            if strcmp(personParameters(5),"L") % Inverted to R when not baseline
+            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
                 aik.KinematicGroup = opts(10).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_LArm');
+                generateIKFunction(aik,'iCubIK_SXArm');
             else
                aik.KinematicGroup = opts(12).KinematicGroup;
-               generateIKFunction(aik,'iCubIK_RArm');
+               generateIKFunction(aik,'iCubIK_DXArm');
             end
         else
-            if strcmp(personParameters(5),"R") 
+            if strcmp(personParameters(5),"DX") 
                 aik.KinematicGroup = opts(10).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_LArm');
+                generateIKFunction(aik,'iCubIK_SXArm');
             else
                 aik.KinematicGroup = opts(12).KinematicGroup;
-                generateIKFunction(aik,'iCubIK_RArm');
+                generateIKFunction(aik,'iCubIK_DXArm');
             end
         end
     end
@@ -227,6 +227,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     tic
     fprintf("       .Evaluation of the rotation matrix of the first set of data...")
 
+    errorsComputed = 0; % Number of errors computed which are admissibile in the iKin evaluation
     for i = 1:height(cuttedSynchForceDataSet)
         %% 1. Rotation matrix from hand to OF
         if numPerson < JOINTS_ONLY_FOR_BASELINE
@@ -259,7 +260,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 tic
                 fprintf("       .Evaluation of the inverse kinematics of the first set of data...")
                 
-                if strcmp(personParameters(5),"L") && numPerson < 0
+                if strcmp(personParameters(5),"SX") && numPerson < 0
                     if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                         referenceConfig = getAnglesFromConfiguration(posB,17:22);
                         referencePos = posB;
@@ -268,7 +269,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                         referencePos = posA;
                     end
                 else
-                    if strcmp(personParameters(5),"R") && numPerson < 0
+                    if strcmp(personParameters(5),"DX") && numPerson < 0
                         if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                             referenceConfig = getAnglesFromConfiguration(posA,27:32);
                             referencePos = posA;
@@ -277,7 +278,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                             referencePos = posB;
                         end
                     else
-                        if strcmp(personParameters(5),"L") && numPerson >= 0
+                        if strcmp(personParameters(5),"SX") && numPerson >= 0
                             if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                                 referenceConfig = getAnglesFromConfiguration(posA,17:22);
                                 referencePos = posA;
@@ -286,7 +287,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                                 referencePos = posB;
                             end
                         else
-                            if strcmp(personParameters(5),"R") && numPerson >= 0
+                            if strcmp(personParameters(5),"DX") && numPerson >= 0
                                 if mean(cuttedPosDataSet.yPos) < cuttedPosDataSet.yPos(1)
                                     referenceConfig = getAnglesFromConfiguration(posB,27:32);
                                     referencePos = posB;
@@ -307,7 +308,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             
             % Inverse Kinematic Evaluation
             if i < NUMBER_OF_SAMPLES
-                [evaluatedJointsDataSet(i,:), referenceConfig, referencePos, jointError(i,:)] = iKinJointEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson); 
+                [evaluatedJointsDataSet(i,:), referenceConfig, referencePos, jointError(i,:), errorsComputed] = iKinJointEvaluation(robot, aik, referenceConfig, referencePos ,cuttedPosDataSet(i,3:5), armJoints, R_HtoOF, personParameters(5), numPerson, errorsComputed); 
             end
 
             if i == 1 % Only after the first iteration
@@ -327,14 +328,14 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         % Evaluating the transformation matrix for each sample
         if numPerson < 0
             newPos = assignJointToPose(robot, armJoints, torsoJoints, personParameters(5), numPerson);
-            if strcmp(personParameters(5),"L") % Inverted to R when not baseline
+            if strcmp(personParameters(5),"SX") % Inverted to DX when not baseline
                 T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
             else
                 T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
             end
         else
             newPos = assignJointToPose(robot, evaluatedJointsDataSet(i,:), torsoJoints, personParameters(5), numPerson);
-            if strcmp(personParameters(5),"R") 
+            if strcmp(personParameters(5),"DX") 
                 T_TFtoH = getTransform(robot,newPos,"l_upper_arm","l_hand_dh_frame");
             else
                 T_TFtoH = getTransform(robot,newPos,"r_upper_arm","r_hand_dh_frame");
@@ -343,8 +344,8 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
         %% 3 and 4. Evaluating the force resultant for each sample
         F = T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[cuttedSynchForceDataSet.Fx(i),cuttedSynchForceDataSet.Fy(i),cuttedSynchForceDataSet.Fz(i),1]';
-%         % Apply the mean offset evaluated during the baselines dirKin analysis into the position
-%         F = F + T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[fixedMeanError,1]';
+        % Apply the mean offset evaluated during the baselines dirKin analysis into the position
+        F = F + T_TFtoH*[R_HtoOF,zeros(3,1);zeros(1,3),1]*[fixedMeanError,1]';
         newCuttedSynchForceDataSet.Fx(i) = F(1);
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);

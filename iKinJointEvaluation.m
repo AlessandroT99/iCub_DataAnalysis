@@ -16,11 +16,14 @@
 
 % NOTICE THAT THE "jointError" IS IN DEGREES
 
-function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKinJointEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson)
+function [newJoints, newReferenceConfig, newReferencePos, finalJointError, newErrorComputed] = iKinJointEvaluation(robot, aik, referenceConfig, referencePos, cuttedPosDataSet, armJoints, rotMatrix, handInvolved, numPerson, errorComputed)
 % This function is used to test the generated position from direct
 % kinematics and understand if using inverse kinematics would be possible
 % to get to the desidered joints with a very small error
     
+    ERROR_ADMITTED = 50; % Number of admitted error for the iKin alghoritm
+    newErrorComputed = errorComputed;
+
     % To check orthogonormality of the matrix uncomment the following and
     % look for a similar eye(3)
     detTollerance = 1e-5;
@@ -30,6 +33,7 @@ function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKi
 
     eeBodyName = aik.KinematicGroup.EndEffectorBodyName;
     baseName = aik.KinematicGroup.BaseName;
+
 
     shoulderPitchJoint = -pi;
     % Check the results and keep cycling until a feasible result is found    
@@ -72,25 +76,25 @@ function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKi
         enforceJointLimits = true;
         sortByDistance = true;
         if numPerson < 0
-            if strcmp(handInvolved,"R") == 1
-                ikConfig = iCubIK_RArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+            if strcmp(handInvolved,"DX") == 1
+                ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
                 finalShoulderPitch = referencePos(26).JointPosition;
             else
-                ikConfig = iCubIK_LArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
                 finalShoulderPitch = referencePos(16).JointPosition;
             end
         else
-            if strcmp(handInvolved,"L") == 1
-                ikConfig = iCubIK_RArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+            if strcmp(handInvolved,"SX") == 1
+                ikConfig = iCubIK_DXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(26).JointPosition = shoulderPitchJoint + referencePos(26).JointPosition;
                 finalShoulderPitch = referencePos(26).JointPosition;
             else
-                ikConfig = iCubIK_LArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
+                ikConfig = iCubIK_SXArm(evaluatedT_HtoS1,enforceJointLimits,sortByDistance,referenceConfig);
                 % Save the new eventual shoulder pitch position into the configuration struct
                 referencePos(16).JointPosition = shoulderPitchJoint + referencePos(16).JointPosition;
                 finalShoulderPitch = referencePos(16).JointPosition;
@@ -108,7 +112,13 @@ function [newJoints, newReferenceConfig, newReferencePos, finalJointError] = iKi
 
     % Check if at least one results has been found, if not raise an error
     if isempty(ikConfig) == 1
-        error("The result from inverse kinematics is empty - So the configuration of transformation matrix is not a reachable pose for the kinematic chain.");
+        if ERROR_ADMITTED > newErrorComputed
+            newErrorComputed = newErrorComputed + 1;
+            ikConfig = referenceConfig;
+        else
+            error(strjoin(["The result from inverse kinematics is empty - So the configuration of transformation matrix is not a reachable pose for the kinematic chain.",newline, ...
+                "This error has been found for 50 times, which is the limit imposed. The simulation has been interrupted."],""));
+        end
     end
 
     % Assign each possible solution to its configuration struct

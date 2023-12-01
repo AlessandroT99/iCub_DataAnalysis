@@ -44,7 +44,7 @@ function dataPlotter(TELEGRAM_LOG)
     
     % Logging instants in telegram
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="HRI Data analysis - Starting simulation...");
+        pyrunfile("telegramLogging.py",txtMsg="HRI Data analysis - Starting simulation...",TEXT=1,filePath="");
     end
     
     %% Baselines input data
@@ -176,7 +176,7 @@ function dataPlotter(TELEGRAM_LOG)
             personTime = tic;
             if BaseLineEvaluationDone == 0
                 if TELEGRAM_LOG
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Evaluation of Baseline n.",num2str(i)],""));
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Evaluation of Baseline n.",num2str(i)],""),TEXT=1,filePath="");
                 end
                 fprintf("\n- Elaborating data from Baseline test ");
                 if i == 1
@@ -187,7 +187,7 @@ function dataPlotter(TELEGRAM_LOG)
                 fprintf("N. %d...\n",i);
             else
                 if TELEGRAM_LOG
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Evaluation of participant n.",num2str(numP)],""));            
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Evaluation of participant n.",num2str(numP)],""),TEXT=1,filePath="");            
                 end
                 testedPeople = [testedPeople,i-BASELINE_NUMBER];
                 evaluatedPeople = evaluatedPeople + 1;
@@ -274,7 +274,21 @@ function dataPlotter(TELEGRAM_LOG)
             fprintf("The total computational time for this test has been %s minutes.\n",duration(0,0,toc(personTime),'Format','mm:ss.SS'))
         end
         if TELEGRAM_LOG
-            pyrunfile("telegramLogging.py",txtMsg="Completed");
+            if i == 1
+                pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",str(i)," completed"],""),TEXT=1,filePath="");
+                pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
+                pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
+            else
+                if i == 2
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Baseline ",str(i)," completed"],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
+                else
+                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["Test ",str(numP)," completed"],""),TEXT=1,filePath="");
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",str(i),".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",str(i),".png"],""))
+                end
+            end
         end
     end
     
@@ -347,12 +361,15 @@ function dataPlotter(TELEGRAM_LOG)
     ROM = ROM(ROM~=notConsideredValue).*100;
     
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...");
+        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...",TEXT=1,filePath="");
     end
 
     %% Further analysis plotting
     tic
-%     save ..\ProcessedData\furtherAnalysisData;
+    if TELEGRAM_LOG
+        pyrunfile("telegramLogging.py",txtMsg="Further position analysis started...");
+    end
+    save ..\ProcessedData\furtherAnalysisData;
 %     load ..\ProcessedData\furtherAnalysisData;
     fprintf("\nPlotting position further analysis results...")
     plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
@@ -366,8 +383,9 @@ function dataPlotter(TELEGRAM_LOG)
     close all;
     
     fprintf("\nProcess of analysis complete!\n")
+    overallTime = duration(0,0,toc(tStart),'Format','mm:ss.SS');
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg="Simulation completed.");
+        pyrunfile("telegramLogging.py",txtMsg=strjoin(["Simulation completed in ", str(overallTime), " minutes."],""),TEXT=1,filePath="");
     end
-    fprintf("The simulation has been executed in %s minutes\n",duration(0,0,toc(tStart),'Format','mm:ss.SS'))
+    fprintf("The simulation has been executed in %s minutes\n",overallTime)
 end
