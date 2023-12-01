@@ -634,6 +634,14 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         end
     end
 
+    %% Remove the mean to the force signal
+    % Due to the evaluation error of the force signal, its real module
+    % value will not be taken in consideration and it will be evaluated
+    % with zero mean
+    finalCuttedSynchForceDataSet.Fx = finalCuttedSynchForceDataSet.Fx - mean(finalCuttedSynchForceDataSet.Fx);
+    finalCuttedSynchForceDataSet.Fy = finalCuttedSynchForceDataSet.Fy - mean(finalCuttedSynchForceDataSet.Fy);
+    finalCuttedSynchForceDataSet.Fz = finalCuttedSynchForceDataSet.Fz - mean(finalCuttedSynchForceDataSet.Fz);
+
     %% Finding min e MAX peaks of the force
     tic
     fprintf("   .Concluding computation of usefull parameters of the force...")
