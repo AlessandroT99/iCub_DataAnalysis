@@ -48,20 +48,20 @@ function dataPlotter(TELEGRAM_LOG)
     end
     
     %% Baselines input data
-    NEW_BASELINES = 1;          % Change the input of the default baselines if 1
+    NEW_BASELINES = 0;          % Change the input of the default baselines if 1
     if NEW_BASELINES
         % Remember to create manually the folders for containing this outputs!
         BaselineMainDataFolder = "..\InputData\NewBaselines"; % Name of the main folder containing all baselines data
-        LbaseLinePath = "B_L_Soft";  % Name of the folder containing the file of the L baseline
-        RbaseLinePath = "B_R_Soft";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_L = "\NewBaselines\B_L_Soft_NoMeanShift";   % The initial part of the name of the L baseline output
-        BaseLineOutputName_R = "\NewBaselines\B_R_Soft_NoMeanShift";   % The initial part of the name of the R baseline output
+        LbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
+        RbaseLinePath = "B_DX_Soft";  % Name of the folder containing the file of the R baseline
+        BaseLineOutputName_L = "\NewBaselines\B_SX_Soft_NoMeanShift";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "\NewBaselines\B_DX_Soft_NoMeanShift";   % The initial part of the name of the R baseline output
     else
         BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
-        LbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
-        RbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_L = "B_L_Base";   % The initial part of the name of the L baseline output
-        BaseLineOutputName_R = "B_R_Base";   % The initial part of the name of the R baseline output
+        LbaseLinePath = "P0_L_Hard";  % Name of the folder containing the file of the L baseline
+        RbaseLinePath = "P0_R_Hard";  % Name of the folder containing the file of the R baseline
+        BaseLineOutputName_L = "B_SX_Hard";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "B_DX_Hard";   % The initial part of the name of the R baseline output
     end
     
     %% Input data
