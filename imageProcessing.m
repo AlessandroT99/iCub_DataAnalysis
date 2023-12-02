@@ -27,6 +27,8 @@ warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
 IMAGE_SAVING = 1;   % Used to let the window of the plot get the full resolution size before saving
 PAUSE_TIME = 3;     % Put to 1 in order to save the main plots
 
+maximumMovementTime = 2; % Variable used to determine the time span of the envelope in sec
+
 MarkerDimension = 80;
 ErrorBarCapSize = 12;
 ErrorBarLineWidth = 1;
@@ -42,45 +44,33 @@ people = readtable("..\InputData\Dati Personali EXP2.xlsx");
 people = people(1:NUM_PEOPLE,:);
 
 imageDataSetParam = readtable("..\InputData\imageProcessing\UsefullData.xlsx");
-TEST_TO_AVOID = [2,7,13,18,20,22,26,28];
+TEST_TO_AVOID = [2,7,13,18,20,22,26,27,28];
 
 totalLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables used to contain mean and std for each test
-HumanAngle = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);   % General variables used to contain mean and std for each test
-RobotAngle = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);   % General variables used to contain mean and std for each test
+HumanAngle = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),3);   % General variables used to contain mean, max value and std for each test
+RobotAngle = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),3);   % General variables used to contain mean, max value and std for each test
 HumanLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables used to contain mean and std for each test
 RobotLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables used to contain mean and std for each test
+TensedWirePercentage = zeros(1,NUM_PEOPLE-length(TEST_TO_AVOID)); % Variable that define the % of time in which the wire was tensed
 
 % Create the directories in which the files would be saved
 mkdir ..\ProcessedData\ImageProcessing
 fprintf("\nStarting Evaluation...")
 
 %% Results evaluation
-for i = 1:NUM_PEOPLE
-    if sum(find(i==TEST_TO_AVOID)) == 0
-        fprintf("\nTest N. %d",i)
-        dataset = readtable(strjoin(["../InputData/imageProcessing/SingleExperimentData/Test",num2str(i),"_ImageProcessingData"],""));
+i = 0;
+for cnt = 1:NUM_PEOPLE
+    if sum(find(cnt==TEST_TO_AVOID)) == 0
+        i = i + 1;
+        fprintf("\nTest N. %d",cnt)
+        dataset = readtable(strjoin(["../InputData/imageProcessing/SingleExperimentData/Test",num2str(cnt),"_ImageProcessingData"],""));
         % Save the maximum length of the wire
-        tensedWire = dataset.totalLength(imageDataSetParam.FrameOfTheTensedWire(i));
-        if ~isnan(imageDataSetParam.InitialNumberConsidered(i))
+        tensedWire = dataset.totalLength(imageDataSetParam.FrameOfTheTensedWire(cnt));
+        if ~isnan(imageDataSetParam.InitialNumberConsidered(cnt))
             % Cut the dataset due to post processing decision saved in the excell file
-            dataset = dataset(imageDataSetParam.InitialNumberConsidered(i):imageDataSetParam.FinalNumberConsidered(i),:);
+            dataset = dataset(imageDataSetParam.InitialNumberConsidered(cnt):imageDataSetParam.FinalNumberConsidered(cnt),:);
         end
-        
-        % Save mean values and std values of the overall dataset
-        totalLength(i,:) = [mean(dataset.totalLength),std(dataset.totalLength)];
-        % If the human hand is R then look for the left side of the interaction camera
-        if strcmp(people.Mano(i),"R") == 1
-            HumanAngle(i,:) = [mean(dataset.leftAngle),std(dataset.leftAngle)];
-            RobotAngle(i,:) = [mean(dataset.rightAngle),std(dataset.rightAngle)];
-            HumanLength(i,:) = [mean(dataset.leftLength),std(dataset.leftLength)];
-            RobotLength(i,:) = [mean(dataset.rightLength),std(dataset.rightLength)];
-        else
-            HumanAngle(i,:) = [mean(dataset.rightAngle),std(dataset.rightAngle)];
-            RobotAngle(i,:) = [mean(dataset.leftAngle),std(dataset.leftAngle)];
-            HumanLength(i,:) = [mean(dataset.rightLength),std(dataset.rightLength)];
-            RobotLength(i,:) = [mean(dataset.leftLength),std(dataset.leftLength)];
-        end
-    
+
         %% Filtering data
         fc = 2;
         gain = 1;
@@ -95,37 +85,57 @@ for i = 1:NUM_PEOPLE
         filteredRightAngle = filtfilt(sos,gain,dataset.rightAngle);
         filteredLeftAngle = filtfilt(sos,gain,dataset.leftAngle);
         filteredtotalLength = filtfilt(sos,gain,dataset.totalLength);
+        
+        envTotalLength = behavior(filteredtotalLength);
+        envRightAngle = behavior(filteredRightAngle);
+        envLeftAngle = behavior(filteredLeftAngle);
+
+        TensedWirePercentage(i) = sum(filteredtotalLength >= tensedWire-tensedWire/100)/length(filteredtotalLength)*100;
+
+        % Save mean values and std values of the overall dataset
+        totalLength(i,:) = [mean(dataset.totalLength),std(dataset.totalLength)];
+        % If the human hand is R then look for the left side of the interaction camera
+        if strcmp(people.Mano(i),"R") == 1
+            HumanAngle(i,:) = [mean(envLeftAngle),max(envLeftAngle),std(envLeftAngle)];
+            RobotAngle(i,:) = [mean(envRightAngle),max(envRightAngle),std(envRightAngle)];
+            HumanLength(i,:) = [mean(filteredLeftLength),std(filteredLeftLength)];
+            RobotLength(i,:) = [mean(filteredRightLength),std(filteredRightLength)];
+        else
+            HumanAngle(i,:) = [mean(envRightAngle),max(envRightAngle),std(envRightAngle)];
+            RobotAngle(i,:) = [mean(envLeftAngle),max(envLeftAngle),std(envLeftAngle)];
+            HumanLength(i,:) = [mean(filteredRightLength),std(filteredRightLength)];
+            RobotLength(i,:) = [mean(filteredLeftLength),std(filteredLeftLength)];
+        end
 
         %% Plot results for total length
         fig1 = figure('Name','Wire Length');
         fig1.WindowState = 'maximized';
         grid on, hold on
         x = linspace(0,100,length(dataset.totalLength));
-        plot(x,filteredtotalLength,'r')
-        yline(tensedWire,'k--','LineWidth',1.8)
-        legend("Length of the wire","Tensed wire length",'Location','eastoutside')
+        plot(x,filteredtotalLength,'k')
+        plot(1:100,envTotalLength,'r')
+        yline(tensedWire-tensedWire/100,'k--','LineWidth',1.8)
+        legend("Length of the wire","Envelope","Tensed wire length (-1% tollerance)",'Location','eastoutside')
         xlabel("Experiment progress [ % ]"), ylabel("Length in the image frame [ cm ]")
-        title("Wire total length")
+        title("Wire total length",strjoin(["Tensed wire Percentage: ",num2str(TensedWirePercentage(i))," %"],""))
         
         %% Plot results for side length
         fig2 = figure('Name','Wire side lengths');
         fig2.WindowState = 'maximized';
         subplot(2,1,1), grid on, hold on
         if strcmp(people.Mano(i),"R") == 1
-            plot(x,filteredLeftLength,'r')
+            plot(x,filteredLeftLength,'k')
         else
-            plot(x,filteredRightLength,'r')
+            plot(x,filteredRightLength,'k')
         end
         title("Wire length Human side")
         xlabel("Experiment progress [ % ]"), ylabel("Length in the image frame [ cm ]")
         hold off
         subplot(2,1,2), grid on, hold on
         if strcmp(people.Mano(i),"R") == 1
-%            plot(x,dataset.rightLength,'k')
-           plot(x,filteredRightLength,'r')
+            plot(x,filteredRightLength,'k')
         else
-%             plot(x,dataset.leftLength,'k')
-            plot(x,filteredLeftLength,'r')
+            plot(x,filteredLeftLength,'k')
         end
         title("Wire length Robot side")
         xlabel("Experiment progress [ % ]"), ylabel("Length in the image frame [ cm ]")
@@ -136,20 +146,26 @@ for i = 1:NUM_PEOPLE
         fig3.WindowState = 'maximized';
         subplot(2,1,1), grid on, hold on
         if strcmp(people.Mano(i),"R") == 1
-            plot(x,filteredLeftAngle,'r')
+            plot(x,filteredLeftAngle,'k')
+            plot(1:100,envLeftAngle,'r')
         else
-            plot(x,filteredRightAngle,'r')
+            plot(x,filteredRightAngle,'k')
+            plot(1:100,envRightAngle,'r')
         end
         title("Wire angle Human side")
+        legend("Angle of the side of wire","Envelope",'Location','eastoutside')
         xlabel("Experiment progress [ % ]"), ylabel("Angle between the center marker horizontal [ deg ]")
         hold off
         subplot(2,1,2), grid on, hold on
         if strcmp(people.Mano(i),"R") == 1
-            plot(x,filteredRightAngle,'r')
+            plot(x,filteredRightAngle,'k')
+            plot(1:100,envRightAngle,'r')
         else
-            plot(x,filteredLeftAngle,'r')
+            plot(x,filteredLeftAngle,'k')
+            plot(1:100,envLeftAngle,'r')
         end
         title("Wire angle Robot side")
+        legend("Angle of the side of wire","Envelope",'Location','eastoutside')
         xlabel("Experiment progress [ % ]"), ylabel("Angle between the center marker horizontal [ deg ]")
         hold off
     
@@ -174,26 +190,39 @@ for i = 1:NUM_PEOPLE
     end
 end
 
-save('ImageProcessingData',"totalLength","HumanAngle","RobotAngle","HumanLength","RobotLength");
+save('../ProcessedData/ImageProcessing/ImageProcessingData',"totalLength","HumanAngle","RobotAngle","HumanLength","RobotLength","TensedWirePercentage");
 
-%% Scatter plotting
-fprintf("\nScatter plotting...")
-mkdir ../ProcessedData/Scatters/0.ImageProcessing
-% fig4 = figure('Name','WireLength scatter');
-% fig4.WindowState = 'maximized';
-% grid on, hold on
-% scatter(,MarkerDimension,clearBlue,'filled')
-% plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),1,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
-% title("Human pulling phase space duration")
-% xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
-% legend('Human Pulling phase','Mean','Trend','Standard Error')
-% hold off
-% 
-% 
-% if IMAGE_SAVING
-%     pause(PAUSE_TIME);
-%     exportgraphics(fig4,"..\ProcessedData\Scatters\4.PullingPhases\HumanPhaseSpaceDuration.png")
-%     close(fig4);
-% end
+fig4 = figure('Name','Tensed wire vs. mean human angle');
+fig4.WindowState = 'maximized';
+hold on, grid on
+scatter(HumanAngle(:,1),TensedWirePercentage,80,"cyan","filled")
+lsline
+xlabel("Mean Human Angle [ deg ]"), ylabel("Tensed wire time percentage [ % ]")
+title("Tensed wire vs. mean human angle")
+
+fig5 = figure('Name','Tensed wire vs. max human angle');
+fig5.WindowState = 'maximized';
+hold on, grid on
+scatter(HumanAngle(:,2),TensedWirePercentage,80,"cyan","filled")
+lsline
+xlabel("Max Human Angle [ deg ]"), ylabel("Tensed wire time percentage [ % ]")
+title("Tensed wire vs. max human angle")
+
+if IMAGE_SAVING
+    pause(PAUSE_TIME); 
+    exportgraphics(fig4,"..\ProcessedData\ImageProcessing\TensedWirePercentage-MaxHumanAngle.png")
+    close(fig4);
+    exportgraphics(fig5,"..\ProcessedData\ImageProcessing\TensedWirePercentage-MeanHumanAngle.png")
+    close(fig5);
+end
 
 fprintf("\nEvaluation completed...")
+
+%% Function
+function [signalBehavior] = behavior(signal)
+   ORDER = 4;
+   signalBehavior = zeros(1,100);
+   for i = 0:99
+        signalBehavior(i+1) = mean(signal(round(i*length(signal)/100)+1:round((i+1)*length(signal)/100))); 
+   end
+end
