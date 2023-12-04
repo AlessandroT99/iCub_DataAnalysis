@@ -86,7 +86,12 @@ removedArea = zeros(1,numPeople);
 maxCutArea = zeros(1,numPeople);
 totalArea = zeros(1,numPeople);
 standardError = zeros(1,numPeople);
+removedAreaPercentage = zeros(1,numPeople);
 for i = 1:numPeople
+    if people.RobotSide(i) < people.HumanSide(i)
+        angle(i) = -angle(i);
+    end
+    
     if strcmp(people.Mano(i),"R") == 1
         rPeople = rPeople + 1;
         figure(fig1)
@@ -130,6 +135,7 @@ for i = 1:numPeople
     plot(xSoapWidth(i,:),ySoapWidth(i,:),'k')
     hold off
     standardError(i) = std(ySoapWidth(i,mins(1):mins(2))-yPlot(mins(1):mins(2)))/sqrt(length(ySoapWidth));
+    removedAreaPercentage(i) = (removedArea(i))/totalArea(i)*100;
 end
 
 figure(fig1), hold off
@@ -152,7 +158,6 @@ hold on, grid on
 scatter(removedArea,1:numPeople,'red','filled','DisplayName','Removed material')
 xline(mean(removedArea),'r--','LineWidth',0.8,'DisplayName','Removed material in average')
 xline(mean(totalArea),'k--','LineWidth',2.2,'DisplayName','Available material in average')
-% errorbar(removedArea,1:numPeople,standardError,'Horizontal', 'k', 'LineStyle','none','CapSize',12,'LineWidth',0.8,'DisplayName','Standard Error')
 legend('show','Location','eastoutside')
 xlabel("Removed material [ mm^2 ]"), ylabel("# Test")
 title("Trend of removed material after the cutting")
@@ -170,14 +175,14 @@ fig5 = figure('Name','Soap Indentation parameters');
 fig5.WindowState = 'maximized';
 hold on, grid on
 scatter(angle,removedArea,50,'red','LineWidth',1.5)
+lsline
 scatter(mean(angle),mean(removedArea), 150,'red','filled')
-errorbar(mean(angle),mean(removedArea),std(removedArea)/sqrt(numPeople), 'k', 'LineStyle','none','LineWidth',0.8)
-errorbar(mean(angle),mean(removedArea),std(angle)/sqrt(numPeople), 'Horizontal', 'k', 'LineStyle','none','LineWidth',0.8)
+errorbar(mean(angle),mean(removedArea),-std(removedArea)/(2*sqrt(numPeople)),std(removedArea)/(2*sqrt(numPeople)), 'k', 'LineStyle','none','LineWidth',0.8)
+errorbar(mean(angle),mean(removedArea),-std(angle)/(2*sqrt(numPeople)),std(angle)/(2*sqrt(numPeople)), 'Horizontal', 'k', 'LineStyle','none','LineWidth',0.8)
 limX = [min(angle),max(angle)];
 limY = [min(removedArea),max(removedArea)];
 xlim([limX(1)-1,limX(2)+1]), ylim([limY(1)-25,limY(2)+25])
-% plot(bisector([limX(1),limY(1)],[limX(2),limY(2)]),'k--')
-legend("Test samples","Mean of the samples","Standard Error",'Location','northwest')
+legend("Test samples","Trend line","Mean of the samples","Standard Error",'Location','northwest')
 xlabel("Angle [ deg ]"), ylabel("Removed material [ mm^2 ]")
 title("Comparison between indentation angle and removed material from soap bars")
 
@@ -195,7 +200,7 @@ xlim([0,100])
 xlabel("Efficiency [ % ]"), ylabel("# Test")
 title("Soap cutting efficience")
 
-%% Save and close all the plots
+%% Save and close all the plot
 mkdir ..\ProcessedData\Scatters
 pause(2);
 exportgraphics(fig1,"..\ProcessedData\Scatters\0.SoapEvaluation\RightHandSoapIndentation.png")
@@ -205,8 +210,8 @@ exportgraphics(fig4,"..\ProcessedData\Scatters\0.SoapEvaluation\MeanAngleSoapInd
 exportgraphics(fig5,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapIndentationParameters.png")
 exportgraphics(fig6,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapCuttingEfficience.png")
 
-matx = table((1:32)',angle,removedArea');
-matx = renamevars(matx, 1:width(matx), ["ID","Angle [deg]","Removed Surface [mm^2]"]);
+matx = table((1:32)',angle,removedArea',removedAreaPercentage');
+matx = renamevars(matx, 1:width(matx), ["ID","Angle Human Side [deg]","Removed Surface [mm^2]","Percentage of removed material [%]"]);
 
 writetable(matx, "..\ProcessedData\SoapData.xlsx");
 

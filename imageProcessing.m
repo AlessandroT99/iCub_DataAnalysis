@@ -14,6 +14,11 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
+% This software aims to analyze the data of images saved during the experiment of
+% soap cutting, elaborated with color isolation and pattern recognition in
+% a python file. Here the data are filtered and elaborated to get the
+% hidden informations
+
 clear all, close all, clc
 format compact
 
@@ -190,8 +195,6 @@ for cnt = 1:NUM_PEOPLE
     end
 end
 
-save('../ProcessedData/ImageProcessing/ImageProcessingData',"totalLength","HumanAngle","RobotAngle","HumanLength","RobotLength","TensedWirePercentage");
-
 fig4 = figure('Name','Tensed wire vs. mean human angle');
 fig4.WindowState = 'maximized';
 hold on, grid on
@@ -216,7 +219,33 @@ if IMAGE_SAVING
     close(fig5);
 end
 
-fprintf("\nEvaluation completed...")
+%% Saving data
+variablesToBeSaved = 6;
+toSave = zeros(NUM_PEOPLE,variablesToBeSaved);
+cnt = 0;
+for i = 1:NUM_PEOPLE
+    if sum(find(i==TEST_TO_AVOID)) == 0
+        cnt = cnt + 1;
+        toSave(i,1) = totalLength(cnt);
+        toSave(i,2) = HumanAngle(cnt);
+        toSave(i,3) = RobotAngle(cnt);
+        toSave(i,4) = HumanLength(cnt);
+        toSave(i,5) = RobotLength(cnt);
+        toSave(i,6) = TensedWirePercentage(cnt);
+    else
+        toSave(i,:) = nan*ones(1,variablesToBeSaved);
+    end
+end
+totalLength = toSave(:,1);
+HumanAngle = toSave(:,2);
+RobotAngle = toSave(:,3);
+HumanLength = toSave(:,4);
+RobotLength = toSave(:,5);
+TensedWirePercentage = toSave(:,6);
+
+save('../ProcessedData/ImageProcessing/ImageProcessingData',"totalLength","HumanAngle","RobotAngle","HumanLength","RobotLength","TensedWirePercentage");
+
+fprintf("\nEvaluation completed\n\n")
 
 %% Function
 function [signalBehavior] = behavior(signal)
