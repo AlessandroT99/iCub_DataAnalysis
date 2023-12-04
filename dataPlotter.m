@@ -274,21 +274,22 @@ function dataPlotter(TELEGRAM_LOG)
             end
     
             fprintf("The total computational time for this test has been %s minutes.\n",duration(0,0,toc(personTime),'Format','mm:ss.SS'))
-        end
-        if TELEGRAM_LOG
-            if i == 1
-                pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
-                pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
-                pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
-            else
-                if i == 2
+            
+            if TELEGRAM_LOG
+                if i == 1
                     pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
                 else
-                    pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Participant n.",num2str(numP)," completed"],""),TEXT=1,filePath="");
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
+                    if i == 2
+                        pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
+                    else
+                        pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Participant n.",num2str(numP)," completed"],""),TEXT=1,filePath="");
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
+                    end
                 end
             end
         end

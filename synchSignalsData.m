@@ -610,7 +610,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
             fprintf("   .Computing force transformation...")
             try
                 [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
-                    cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters);
+                    cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG);
             catch forceErr
                 % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
                 finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset

@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(robot, aik, opts, initialPosDataSet, cuttedPosDataSet, ...
-    cuttedSynchForceDataSet, posStart, posEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters)
+    cuttedSynchForceDataSet, posStart, posEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG)
 % This function is used to evaluate the transformation of the force in order to have the 
 % exact value of the force module in the hand RF and the orientation in the OF.
 % In the following a brief explanation of the procedure computed:
@@ -115,7 +115,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         end
         cuttedSynchJointDataSet = array2table(tmpCuttedSynchJointDataSet);
         cuttedSynchJointDataSet = renamevars(cuttedSynchJointDataSet,1:width(cuttedSynchJointDataSet),["Time","ShoulderPitch","ShoulderRoll","ShoulderYaw","Elbow","WristProsup","WristPitch","WristRoll"]);
-        cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchForceDataSet)';
+%         cuttedElapsedTime = minutesDataPointsConverter(cuttedSynchForceDataSet)';
     
         fprintf("                          Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
         
@@ -335,7 +335,6 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     end
     
     %% Plot new force dataset
-%     Y_RANGE = 5;                    % Newton absolute range for force plotting
 
     fig1 = figure('Name','Force transformation');
     fig1.WindowState = 'maximized';
@@ -423,15 +422,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
         %% Evaluation of the error of the force transformation
         % To elaborate this results is fundamental that the produced newCuttedSynchForceDataSet is full length
-        mkdir ..\ProcessedData\ForceTransformationData;
-        if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3)],"");
-        else
-            path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
-        end
-        save(path,"finalJointsDataSet","jointError","newCuttedSynchForceDataSet", "personParameters", "numPerson", "initialPosDataSet", "posStart", "posEnd", "defaultTitleName","BaselineFilesParameters", "cuttedElapsedTime");
 %         load(path);
-
         [phaseError, moduleError, transformationError] = wrenchEndEffectorErrorEvaluation(newCuttedSynchForceDataSet, personParameters(5), numPerson, initialPosDataSet, posStart, posEnd, defaultTitleName,BaselineFilesParameters, cuttedElapsedTime);
     
     
@@ -442,9 +433,22 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         else
             path = strjoin(["..\ProcessedData\ForceErrorTransformationData\P",num2str(numPerson)],"");
         end
-        save(path,"phaseError", "moduleError", "transformationError");
+        save(path,"phaseError", "moduleError", "transformationError","finalJointsDataSet","jointError");
     else
         finalJointsDataSet = 0;
+    end
+
+    mkdir ..\ProcessedData\ForceTransformationData;
+    if numPerson < 0
+        path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3)],"");
+    else
+        path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
+    end
+    save(path,"newCuttedSynchForceDataSet", "personParameters", "numPerson", "initialPosDataSet", "posStart", "posEnd", "defaultTitleName","BaselineFilesParameters");
+    
+    if TELEGRAM_LOG
+        outputText = strjoin(["[FORCE] For the dataset ", num2str(numPerson), " the force data have been saved!"],"");
+        pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
     end
 
     %% DH matrices evaluation for POS A from hand to OF - ONLY HAND REFERENCE SYSTEM - USEFULL FOR GRAPH PLOTTING
