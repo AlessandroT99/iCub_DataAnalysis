@@ -59,6 +59,7 @@ dataProcessing = dataProcessing(2:end,:);
 soap4image = soap;
 soap4dataProcessing = soap;
 cnt = 1;
+nearHandLogic = zeros(height(dataProcessing),1);
 for i = 1:NUM_PEOPLE
     if isnan(RobotLength(i))
         soap4image(i,:) = array2table(nan.*ones(1,width(soap4image)));
@@ -155,7 +156,7 @@ end
 %% End of the simulation
 fprintf("\nAnalysis completed.\n\n");
 
-%% Functions
+%% Function
 function plot_scatterProcedure(x,xMultiplier,y)
     % Usefull common plot parameters
     MarkerDimension = 80;

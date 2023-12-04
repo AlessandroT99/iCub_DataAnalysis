@@ -14,6 +14,9 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
+% This software aim is to analyzed the ata from the manual reading of
+% measures on the soap bars used during the experiment.
+
 clear all, close all, clc
 format compact
 

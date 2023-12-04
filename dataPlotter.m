@@ -246,7 +246,7 @@ function dataPlotter(TELEGRAM_LOG)
             end
             save(fileName, "synchPosDataSet", "numP", 'personParam');
     
-            % Further analysis
+            % Position further analysis
             tic
             fprintf("   .Computing further analysis on the position...")
             [experimentDuration(i), meanHtoR_time(i), meanRtoH_time(i), meanHtoR_space(i), meanRtoH_space(i), phaseTimeDifference(i), ...
@@ -257,10 +257,11 @@ function dataPlotter(TELEGRAM_LOG)
                 posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline, BaselineFilesParameters);
             fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             
-    %         tic
-    %         fprintf("   .Computing further analysis on the force...")
-    %         forceFurtherAnalysis(synchForceDataSet,numP,personParam);
-    %         fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+            % Force further analysis
+            tic
+            fprintf("   .Computing further analysis on the force...")
+            forceFurtherAnalysis(synchForceDataSet,numP,personParam);
+            fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
             % Output parameters collection
             if BaseLineEvaluationDone
@@ -367,25 +368,34 @@ function dataPlotter(TELEGRAM_LOG)
         pyrunfile("telegramLogging.py",txtMsg="[INFO] Further position analysis started...",TEXT=1,filePath="");
     end
 
-    %% Further analysis plotting
-    tic
+    %% Further analysis data saving
     save ..\ProcessedData\furtherAnalysisData;
 %     load ..\ProcessedData\furtherAnalysisData;
+
+    %% Position further analysis plotting
+    tic
     fprintf("\nPlotting position further analysis results...")
-    plotFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
+    plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, meanRtoH_space, phaseTimeDifference, ...
                                     nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                     movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                     peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, HtoR_relativeVelocity, RtoH_relativeVelocity, ...
                                     posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, people.Delta_RTs_(testedPeople));
     fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
+    %% Force further analysis
+    tic
+    fprintf("\nPlotting force further analysis results...")
+    plotForceFurtherAnalysis();
+    fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+
     %% Conclusion of the main
     close all;
     
     fprintf("\nProcess of analysis complete!\n")
-    overallTime = duration(0,0,toc(tStart),'Format','mm:ss.SS');
+    overallTime = duration(0,0,toc(tStart),'Format','dd:hh:mm:ss.SS');
     if TELEGRAM_LOG
-        pyrunfile("telegramLogging.py",txtMsg=strjoin(["[COMPLETION] Simulation completed in ", num2str(overallTime), " minutes."],""),TEXT=1,filePath="");
+        pyrunfile("telegramLogging.py",txtMsg=strjoin(["[COMPLETION] Simulation completed in ", num2str(overallTime), " days."],""),TEXT=1,filePath="");
     end
-    fprintf("The simulation has been executed in %s minutes\n",overallTime)
+    overallTime = duration(0,0,toc(tStart),'Format','hh:mm:ss.SS');
+    fprintf("The simulation has been executed in %s hours\n",overallTime)
 end
