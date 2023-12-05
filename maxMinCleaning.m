@@ -23,10 +23,8 @@ function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] =
     iterations = 0;
     timeThreshold = 1.4*100; % Check that this has to be lower than the average phase duration for baselines
     while abs(length(minLocalization)-length(maxLocalization)) > 1
-        for i = 1:length(minLocalization) - 1
-            if i > length(minLocalization) - 1
-                break;
-            end
+        i = 1;
+        while i <= length(minLocalization) - 1
             if minLocalization(i+1) - minLocalization(i) < timeThreshold
                 if minPeaksVal(i+1) < minPeaksVal(i)
                     minLocalization(i) = [];
@@ -42,6 +40,7 @@ function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] =
                     i = i - numberOfBackIndx;
                 end
             end
+            i = i + 1;
         end
         for i = 1:length(maxLocalization) - 1
             if i > length(maxLocalization) - 1

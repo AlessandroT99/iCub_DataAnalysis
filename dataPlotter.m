@@ -260,7 +260,7 @@ function dataPlotter(TELEGRAM_LOG)
             % Force further analysis
             tic
             fprintf("   .Computing further analysis on the force...")
-            forceFurtherAnalysis(synchForceDataSet,numP,personParam);
+            forceFurtherAnalysis(synchForceDataSet, numP, personParam, posBaseline, BaselineFilesParameters);
             fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
             % Output parameters collection

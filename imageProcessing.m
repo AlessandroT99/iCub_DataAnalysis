@@ -70,7 +70,9 @@ for cnt = 1:NUM_PEOPLE
         fprintf("\nTest N. %d",cnt)
         dataset = readtable(strjoin(["../InputData/imageProcessing/SingleExperimentData/Test",num2str(cnt),"_ImageProcessingData"],""));
         % Save the maximum length of the wire
-        tensedWire = dataset.totalLength(imageDataSetParam.FrameOfTheTensedWire(cnt));
+        imageSubSet = 30; % 30 fps = 30 images for 1s of reality
+        secondsOfShift = 300; % 10 sec of image threshold from the choosen one to avoid initial problems
+        tensedWire = mean(dataset.totalLength(imageDataSetParam.FrameOfTheTensedWire(cnt)+secondsOfShift:imageDataSetParam.FrameOfTheTensedWire(cnt)+secondsOfShift+imageSubSet));
         if ~isnan(imageDataSetParam.InitialNumberConsidered(cnt))
             % Cut the dataset due to post processing decision saved in the excell file
             dataset = dataset(imageDataSetParam.InitialNumberConsidered(cnt):imageDataSetParam.FinalNumberConsidered(cnt),:);
@@ -213,9 +215,9 @@ title("Tensed wire vs. max human angle")
 
 if IMAGE_SAVING
     pause(PAUSE_TIME); 
-    exportgraphics(fig4,"..\ProcessedData\ImageProcessing\TensedWirePercentage-MaxHumanAngle.png")
+    exportgraphics(fig4,"..\ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MaxHumanAngle.png")
     close(fig4);
-    exportgraphics(fig5,"..\ProcessedData\ImageProcessing\TensedWirePercentage-MeanHumanAngle.png")
+    exportgraphics(fig5,"..\ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MeanHumanAngle.png")
     close(fig5);
 end
 

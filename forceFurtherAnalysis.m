@@ -29,29 +29,73 @@ function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend] = forceFurtherAnalysis
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParam],"");
     PAUSE_TIME = 2;
 
-    %% PEAKS ANALYSIS
-    maximumMovementTime = 0.5;
-    [envHigh, envLow] = envelope(synchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
-    averageEnv = (envLow+envHigh)/2;
-    
-    [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
-    [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
-    minPeaksVal = -minPeaksVal;
+    cuttedElapsedTime = synchForceDataSet(:,1);
 
+    save ("..\ProcessedData\ForceFurtherAnalysis");
+%     load ..\ProcessedData\ForceFurtherAnalysis;
     %% AVERAGE TREND ANALYSIS
-    meanTrend = behavior(synchForceDataSet);
+    maximumMovementTime = 0.2;
+    [envHigh, envLow] = envelope(synchForceDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
+    averageEnv = (envLow+envHigh)/2;
+
+    percentageMean = 5;
+    meanTrend = behavior(synchForceDataSet(:,2),percentageMean);
+    
+    %% PEAKS ANALYSIS
+    maxPeaksVal = [];
+    maxLocalization = [];
+    minPeaksVal = [];
+    minLocalization = [];
+    idxMean = round(length(meanTrend)/percentageMean);
+    idxSignal = round(length(averageEnv)/percentageMean);
+    lastSignalIdx = 0;
+    cnt = 0;
+    while lastSignalIdx < length(averageEnv)
+        cnt = cnt +  1;
+        lastSignalIdx = idxSignal*cnt;
+        if lastSignalIdx > length(averageEnv)
+            lastSignalIdx = length(averageEnv);
+        end
+        lastMeanIdx = idxMean*cnt;
+        if lastMeanIdx > length(percentageMean)
+            lastMeanIdx = length(percentageMean);
+        end
+        [maxPeaks, maxLoc] = findpeaks(averageEnv((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",meanTrend(lastMeanIdx));
+        idxToRemove = find(maxPeaks<meanTrend(lastMeanIdx));
+        maxLoc(idxToRemove) = [];
+        maxPeaks(idxToRemove) = [];
+        maxPeaksVal = [maxPeaksVal;maxPeaks];
+        maxLocalization = [maxLocalization; maxLoc+(cnt-1)*idxSignal+1];
+        [minPeaks, minLoc] = findpeaks(-averageEnv((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",-meanTrend(lastMeanIdx));
+        minPeaks = -minPeaks;
+        idxToRemove = find(minPeaks>meanTrend(lastMeanIdx));
+        minLoc(idxToRemove) = [];
+        minPeaks(idxToRemove) = [];
+        minPeaksVal = [minPeaksVal; minPeaks];
+        minLocalization = [minLocalization; minLoc+(cnt-1)*idxSignal+1];
+    end
+
+    [minPeaksVal, minLocalization, maxPeaksVal, maxLocalization] = maxMinCleaning(minPeaksVal, minLocalization, maxPeaksVal, maxLocalization);
 
     %% AMPLITUDE TREND ANALYSIS
-    upAmplitudeTrend = behavior(envHigh);
-    lowAmplitudeTrend = bahvior(envLow);
+    upAmplitudeTrend = behavior(envHigh,5);
+    lowAmplitudeTrend = behavior(envLow,5);
+
+    % Plot results
+    figure, grid on, hold on
+%     plot(cuttedElapsedTime, synchForceDataSet(:,2), 'k-')
+    plot(cuttedElapsedTime, averageEnv, 'b-')
+    plot(linspace(cuttedElapsedTime(1),cuttedElapsedTime(end),length(meanTrend)), meanTrend,'k--')
+    plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'ro')
+    plot(cuttedElapsedTime(minLocalization),minPeaksVal,'go')
 
 end
 
 %% Function
-function [signalBehavior] = behavior(signal)
+function [signalBehavior] = behavior(signal, percentageMean)
    ORDER = 1;
-   signalBehavior = zeros(1,100);
-   for i = 0:99
-        signalBehavior(i+1) = mean(signal(round(i*length(signal)/100)+1:round((i+1)*length(signal)/100))); 
+   signalBehavior = zeros(1,round(100/percentageMean));
+   for i = 0:round(100/percentageMean)-1
+        signalBehavior(i+1) = mean(signal(round(i*length(signal)/100*percentageMean)+1:round((i+1)*length(signal)/100*percentageMean))); 
    end
 end
