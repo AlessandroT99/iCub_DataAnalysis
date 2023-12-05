@@ -120,6 +120,10 @@ function dataPlotter(TELEGRAM_LOG)
     midVelocityStd = notConsideredValue.*ones(1,numPeople);
     HtoR_relativeVelocity = cell(1,numPeople);
     RtoH_relativeVelocity = cell(1,numPeople);
+
+    meanTrend = notConsideredValue.*ones(1,numPeople);
+    lowSlope = notConsideredValue.*ones(1,numPeople);
+    upSlope = notConsideredValue.*ones(1,numPeople);
     
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
@@ -258,11 +262,14 @@ function dataPlotter(TELEGRAM_LOG)
             fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             
             % Force further analysis
-            tic
-            fprintf("   .Computing further analysis on the force...")
-            forceFurtherAnalysis(synchForceDataSet, numP, personParam, posBaseline, BaselineFilesParameters);
-            fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
-    
+            if strcmp(people.Mano,"L")
+                tic
+                fprintf("   .Computing further analysis on the force...")
+                [meanTrend(i), lowSlope(i), upSlope(i)] ...
+                    = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
+                fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+            end
+            
             % Output parameters collection
             if BaseLineEvaluationDone
                 totalMeanHtoR = totalMeanHtoR + meanHtoR_time(i);  

@@ -17,12 +17,12 @@
 % This software aims to find data from the force signal in order to
 % determine a parameter to increase efficience of the interaction
 
-% TODO: 
-% - Analisi picchi
-% - Analisi trend media
-% - Analisi trend ampiezza
+%% TODO: 
+% - Save differences from slope up and low
+% - Give in output something usual for the peaks
 
-function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend] = forceFurtherAnalysis(synchForceDataSet,numPerson,personParam,baseline, BaselineFilesParameters)
+function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend, minPeaksVal, maxPeaksVal, lowSlope, upSlope] ...
+    = forceFurtherAnalysis(synchForceDataSet,numPerson,personParam,BaselineFilesParameters)
     %% SIMULATION PARAMETERS
     frequency = 100;
     IMAGE_SAVING = 1;
@@ -34,7 +34,7 @@ function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend] = forceFurtherAnalysis
     save ("..\ProcessedData\ForceFurtherAnalysis");
 %     load ..\ProcessedData\ForceFurtherAnalysis;
     %% AVERAGE TREND ANALYSIS
-    maximumMovementTime = 0.2;
+    maximumMovementTime = 0.4;
     [envHigh, envLow] = envelope(synchForceDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
     averageEnv = (envLow+envHigh)/2;
 
@@ -78,16 +78,49 @@ function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend] = forceFurtherAnalysis
     [minPeaksVal, minLocalization, maxPeaksVal, maxLocalization] = maxMinCleaning(minPeaksVal, minLocalization, maxPeaksVal, maxLocalization);
 
     %% AMPLITUDE TREND ANALYSIS
-    upAmplitudeTrend = behavior(envHigh,5);
-    lowAmplitudeTrend = behavior(envLow,5);
+    p = polyfit(cuttedElapsedTime(maxLocalization),maxPeaksVal,1);
+    upAmplitudeTrend = polyval(p,cuttedElapsedTime);
+    upSlope = p(1);
+    p = polyfit(cuttedElapsedTime(minLocalization),minPeaksVal,1);
+    lowAmplitudeTrend = polyval(p,cuttedElapsedTime);
+    lowSlope = p(1);
 
     % Plot results
-    figure, grid on, hold on
-%     plot(cuttedElapsedTime, synchForceDataSet(:,2), 'k-')
+    fig1 = figure('Name','Force signal analysis');
+    fig1.WindowState = 'maximized';
+    subplot(2,1,1), grid on, hold on
+    plot(cuttedElapsedTime, synchForceDataSet(:,2), 'k-')
+    plot(cuttedElapsedTime, upAmplitudeTrend, 'r-')
+    plot(cuttedElapsedTime, lowAmplitudeTrend, 'g-')
+    legend("Signal zero mean","Upper envelope trend","Lower envelope trend")
+    title("Reconstructed force signal")
+    xlabel("Time [ min ]"), ylabel("Force [ N ]")
+
+    subplot(2,1,2), grid on, hold on
     plot(cuttedElapsedTime, averageEnv, 'b-')
     plot(linspace(cuttedElapsedTime(1),cuttedElapsedTime(end),length(meanTrend)), meanTrend,'k--')
     plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'ro')
     plot(cuttedElapsedTime(minLocalization),minPeaksVal,'go')
+    legend("Signal behavior","Signal Mean Trend", ...
+        strjoin([num2str(length(maxLocalization))," maximum peaks"],""), ...
+        strjoin([num2str(length(minLocalization))," minimum peaks"],""))
+    title("Force signal analysis")
+    xlabel("Time [ min ]"), ylabel("Force [ N ]")
+
+    sgtitle(defaultTitleName)
+
+    % Figure saving for phase time duration
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        mkdir ..\ProcessedData\ForceFurtherAnalysis;
+        if numPerson < 0
+            path = strjoin(["..\ProcessedData\ForceFurtherAnalysis\",BaselineFilesParameters(3),".png"],"");
+        else    
+            path = strjoin(["..\ProcessedData\ForceFurtherAnalysis\P",num2str(numPerson),".png"],"");
+        end
+        exportgraphics(fig1a,path)
+        close(fig1a);
+    end
 
 end
 
