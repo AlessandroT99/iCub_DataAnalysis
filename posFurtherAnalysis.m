@@ -63,8 +63,8 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     [envHigh, envLow] = envelope(synchPosDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
     averageEnv = (envLow+envHigh)/2;
     
-    [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
-    [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
+    [maxPeaksVal, maxLocalization] = findpeaks(averageEnv,"MinPeakHeight",mean(averageEnv));
+    [minPeaksVal, minLocalization] = findpeaks(-averageEnv,"MinPeakHeight",-mean(averageEnv));
     minPeaksVal = -minPeaksVal;
     
     % Cleaning the peaks from doubles
@@ -80,6 +80,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(minLocalization)
                         HtoR_time(i) = minLocalization(i+1)-maxLocalization(i);
                         HtoR_space(i) = minPeaksVal(i+1)-maxPeaksVal(i);
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
                     end
                 end
             else
@@ -89,6 +92,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(minLocalization)
                         RtoH_time(i) = minLocalization(i+1)-maxLocalization(i);
                         RtoH_space(i) = minPeaksVal(i+1)-maxPeaksVal(i);
+                        if RtoH_time(i) > 200 || HtoR_time(i) > 200
+                            fprintf("")
+                        end
                     end
                 end
             end
@@ -100,7 +106,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(minLocalization)
                         HtoR_time(i) = minLocalization(i+1)-maxLocalization(i);
                         HtoR_space(i) = minPeaksVal(i+1)-maxPeaksVal(i);
-                    end
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
+                    end                    
                 end
             else
                 for i = 1:min(length(minLocalization),length(maxLocalization))
@@ -109,6 +118,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(minLocalization)
                         RtoH_time(i) = minLocalization(i+1)-maxLocalization(i);
                         RtoH_space(i) =  minPeaksVal(i+1)-maxPeaksVal(i);
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
                     end
                 end
             end
@@ -122,6 +134,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(maxLocalization)
                         HtoR_time(i) = maxLocalization(i+1)-minLocalization(i);
                         HtoR_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
                     end
                 end
             else
@@ -131,7 +146,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(maxLocalization)
                         RtoH_time(i) = maxLocalization(i+1)-minLocalization(i);
                         RtoH_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
-                    end
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
+                    end 
                 end
             end
         else
@@ -142,6 +160,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(maxLocalization)
                         HtoR_time(i) = maxLocalization(i+1)-minLocalization(i);
                         HtoR_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
                     end
                 end
             else
@@ -151,6 +172,9 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
                     if i+1 <= length(maxLocalization)
                         RtoH_time(i) = maxLocalization(i+1)-minLocalization(i);
                         RtoH_space(i) = maxPeaksVal(i+1)-minPeaksVal(i);
+                        if RtoH_time(i) > 300 || HtoR_time(i) > 300
+                            fprintf("")
+                        end
                     end
                 end
             end
@@ -168,8 +192,8 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     fig1a = figure('Name','Phases duration');
     fig1a.WindowState = 'maximized';
     hold on, grid on
-    plot((RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber)).*60./10000,'ro','DisplayName','Time difference')
-    yline(phaseTimeDifference.*60./10000,'b--','DisplayName',"Mean",'LineWidth',2)
+    plot((RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber))./100,'ro','DisplayName','Time difference')
+    yline(phaseTimeDifference./100,'b--','DisplayName',"Mean",'LineWidth',2)
     title("Simmetry index - Difference in time between H and R phases",defaultTitleName)
     xlabel("Phase number")
     ylabel("Time [ s ]")
@@ -197,10 +221,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     fig1 = figure('Name','Phases duration');
     fig1.WindowState = 'maximized';
     hold on, grid on
-    plot(HtoR_time.*60./10000,'ro','DisplayName','Human to Robot phase')
-    plot(RtoH_time.*60./10000,'bo','DisplayName','Robot to Human phase')
-    yline(meanHtoR_time.*60./10000,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
-    yline(meanRtoH_time.*60./10000,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
+    plot(HtoR_time./100,'ro','DisplayName','Human to Robot phase')
+    plot(RtoH_time./100,'bo','DisplayName','Robot to Human phase')
+    yline(meanHtoR_time./100,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
+    yline(meanRtoH_time./100,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
     title("Time length of phases",defaultTitleName)
     xlabel("Phase number")
     ylabel("Time [ s ]")
@@ -220,21 +244,21 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     end
 
     %% Plot results for phase space duration
-    meanHtoR_space = mean(abs(HtoR_space));
-    meanRtoH_space = mean(abs(RtoH_space));
-
     fig2 = figure('Name','Phases duration');
     fig2.WindowState = 'maximized';
     hold on, grid on
     plot(HtoR_space.*100,'ro','DisplayName','Human to Robot phase')
     plot(RtoH_space.*100,'bo','DisplayName','Robot to Human phase')
-    yline(meanHtoR_space.*100,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
-    yline(meanRtoH_space.*100,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
+    yline(mean(HtoR_space).*100,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
+    yline(mean(RtoH_space).*100,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
     title("Range Of Motion of phases",defaultTitleName)
     xlabel("Phase number")
     ylabel("Phase Range Of Motion [ROM] [ cm ]")
     legend('show')
     hold off
+
+    meanHtoR_space = mean(abs(HtoR_space));
+    meanRtoH_space = mean(abs(RtoH_space));
 
     % Figure saving for phase space duration
     if IMAGE_SAVING

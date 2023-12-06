@@ -36,7 +36,7 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     %% Velocity evaluation
     velocity = zeros(1,length(posDataSet)-1);
     for i = 2:length(posDataSet)
-        velocity(i) = (posDataSet(i)-posDataSet(i-1))/(0.01/60);
+        velocity(i) = (posDataSet(i)-posDataSet(i-1))/(0.01);
     end
     
     fc = 5;
@@ -65,10 +65,10 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     % Plot results
     subplot(3,1,2), grid on, hold on
     plot(cuttedElapsedTime,filteredVelocity,'k-')
-    legend("Signal",'Location','eastoutside')
-    yline(averageMin)
-    yline(averageMax)
+    yline(averageMin,'r--')
+    yline(averageMax,'g--')
     plot(cuttedElapsedTime,midPeaksTrend,'r-')
+    legend("Signal","Lower Bound","Upper Bound","Middle peaks Trend",'Location','eastoutside')
     title("Velocity Signal")
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Velocity [ $\frac{m}{s}$ ]",'Interpreter','latex')
     hold off
@@ -76,7 +76,7 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     %% Acceleration evaluation
     acceleration = zeros(1,length(filteredVelocity)-1);
     for i = 2:length(filteredVelocity)
-        acceleration(i) = (filteredVelocity(i)-filteredVelocity(i-1))/(0.01/60);
+        acceleration(i) = (filteredVelocity(i)-filteredVelocity(i-1))/(0.01);
     end
 
     fc = 2;

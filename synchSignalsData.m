@@ -14,8 +14,8 @@
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 % Public License for more details
 
-function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundaries, midVelocityMean, midVelocityStd] = ...
-    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG)
+function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundaries, midVelocityMean, midVelocityStd, meanXforce] = ...
+    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, NOT_ABLE_TO_GENERATE_FORCE)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -42,7 +42,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
-    
+
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData;
     end
@@ -415,8 +415,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     plot(minLocalization,minPeaksVal,'go','DisplayName',legendName)
     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
+    xlim([0,4])
     if numPerson > 0
-        textPosX = cuttedElapsedTime(end)+0.1;
+        textPosX = 4+0.05;
         if strcmp(personParameters(5),"R") == 1
             yline(baselineBoundaries(1,1),'k--','LineWidth',1.8,'DisplayName','Baseline upper boundary');
             yline(baselineBoundaries(2,1),'k--','LineWidth',1.8,'DisplayName','Baseline lower boundary');
@@ -591,7 +592,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     % Reference "tic" in the "Force analysis" section 
     fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
-    %     save synchBaseLine;
+    meanXforce = mean(cuttedSynchForceDataSet.Fx); 
     
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
@@ -604,27 +605,32 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
             load(path);
             finalCuttedSynchForceDataSet = newCuttedSynchForceDataSet;
         else
-            % Has been evaluated that the force RS has to be rotated and translated
-            % into the EF RS with respect to the OF
-            forceTransformTime = tic;
-            fprintf("   .Computing force transformation...")
-            try
-                [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
-                    cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG);
-            catch forceErr
-                % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
-                finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
-                fprintf("\nThere was an error! This dataset will be skipped.")
-                if ~isempty(forceErr.identifier)
-                    fprintf(2,'\n\nThe identifier was:\n%s',forceErr.identifier);
+            if sum(find(numPerson == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
+                finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+            else
+                % Has been evaluated that the force RS has to be rotated and translated
+                % into the EF RS with respect to the OF
+                forceTransformTime = tic;
+                fprintf("   .Computing force transformation...")
+                try
+                    [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
+                        cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG);
+                catch forceErr
+                    % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
+                    finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
+                    fprintf("\nThere was an error! This dataset will be skipped.")
+                    if ~isempty(e.identifier)
+                        fprintf(2,"\n%s\n\n",getReport(e))
+                    else
+                        fprintf(2,'\nThe message was:\n%s',e.message);
+                    end
+                    if TELEGRAM_LOG
+                        outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
+                        pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
+                    end
                 end
-                fprintf(2,'\nThe message was:\n%s',forceErr.message);
-                if TELEGRAM_LOG
-                    outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
-                    pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
-                end
+                fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
             end
-            fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
         end
     else
         if numPerson < 0
@@ -667,11 +673,6 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     figure(fig3);
     subplot(3,1,3), grid on, hold on
     plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Transformed synched force')
-    plot(cuttedElapsedTime,averageEnv,'b--','DisplayName','Average behavior')
-%     plot(maxLocalization,maxPeaksVal,'ro','DisplayName','Maximums')
-%     plot(minLocalization,minPeaksVal,'go','DisplayName','Minimums')
-%     yline(upperPeaksBound,'r--','DisplayName','Higher bound')
-%     yline(lowerPeaksBound,'g--','DisplayName','Lower bound')
     xlabel("Elapsed time [ min ]")
     ylabel("Force [ N ]")
     ylim([lowestValue,highestValue])

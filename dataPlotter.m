@@ -42,6 +42,8 @@ function dataPlotter(TELEGRAM_LOG)
     posBaseline = [];           % Variable where the pos baseline is saved
     baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [Rmax,Lmax;Rmin,Lmin]
     
+    NOT_ABLE_TO_GENERATE_FORCE = [9,17];
+
     % Logging instants in telegram
     if TELEGRAM_LOG
         pyrunfile("telegramLogging.py",txtMsg="[STARTING] HRI Data analysis - Starting simulation...",TEXT=1,filePath="");
@@ -121,10 +123,11 @@ function dataPlotter(TELEGRAM_LOG)
     HtoR_relativeVelocity = cell(1,numPeople);
     RtoH_relativeVelocity = cell(1,numPeople);
 
-    meanTrend = notConsideredValue.*ones(numPeople,100);
+    meanTrend = notConsideredValue.*ones(1,numPeople);
     lowSlope = notConsideredValue.*ones(1,numPeople);
     upSlope = notConsideredValue.*ones(1,numPeople);
-    meanAmplitude = notConsideredValue.*ones(1,numPeople);
+    peaksAmplitude = cell(1,numPeople);
+    meanXforce = notConsideredValue.*ones(1,numPeople);
     
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
@@ -211,9 +214,9 @@ function dataPlotter(TELEGRAM_LOG)
             end
     
             % Synchronizing the two dataset to show them in a single plot
-            [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i)] = ...
+            [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i), meanXforce(i)] = ...
               synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
-                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG);   
+                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, NOT_ABLE_TO_GENERATE_FORCE);   
     
             if BIG_PLOT_ENABLE && BaseLineEvaluationDone
                 if strcmp(people.Genere(i),"M") == 1
@@ -263,10 +266,10 @@ function dataPlotter(TELEGRAM_LOG)
             fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             
             % Force further analysis on left hand of the robot or the baseline with robot left hand
-            if or(strcmp(people.Mano(i),"R") == 1, i == 1)
+            if or(strcmp(people.Mano(i),"R") == 1, i == 1) && i ~= 2 && sum(find(numP==NOT_ABLE_TO_GENERATE_FORCE)) == 0
                 tic
                 fprintf("   .Computing further analysis on the force...")
-                [meanTrend(i), lowSlope(i), upSlope(i), meanAmplitude(i)] ...
+                [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude(i)] ...
                     = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
                 fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             end
@@ -368,8 +371,9 @@ function dataPlotter(TELEGRAM_LOG)
     meanTrend = meanTrend(meanTrend~=notConsideredValue);
     lowSlope = lowSlope(lowSlope~=notConsideredValue);
     upSlope = upSlope(upSlope~=notConsideredValue);
-    meanAmplitude = meanAmplitude(meanAmplitude~=notConsideredValue);
-    
+    peaksAmplitude = peaksAmplitude(peaksAmplitude~=notConsideredValue);
+    meanXforce = meanXforce(meanXforce~=notConsideredValue);
+
     % All the following values are already in cm
     posAPeaksStd = posAPeaksStd(posAPeaksStd~=notConsideredValue).*100;
     posBPeaksStd = posBPeaksStd(posBPeaksStd~=notConsideredValue).*100;
@@ -392,13 +396,13 @@ function dataPlotter(TELEGRAM_LOG)
                                     nMaxPeaks, nMinPeaks, maxPeaksAverage, minPeaksAverage, stdPos, meanPos, ...
                                     movementRange, maxMinAverageDistance, maxPeaksVariation, minPeaksVariation, ...
                                     peaksInitialAndFinalVariation, synchroEfficiency, BASELINE_NUMBER, HtoR_relativeVelocity, RtoH_relativeVelocity, ...
-                                    posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, people.Delta_RTs_(testedPeople));
+                                    posAPeaksStd, posBPeaksStd, posAPeaksmean, posBPeaksmean, midVelocityMean, midVelocityStd, testedPeople, ROM, people.Delta_RTs_(testedPeople), meanXforce);
     fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Force further analysis
     tic
     fprintf("\nPlotting force further analysis results...")
-    plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude);
+    plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude);
     fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
     %% Conclusion of the main

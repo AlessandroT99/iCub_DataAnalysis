@@ -82,13 +82,8 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
     fig3.WindowState = 'maximized';
     grid on, hold on
     scatter(1:length(lowSlope),lowSlope,MarkerDimension,clearRed,'filled')
-%     h = lsline;
-%     h.Color = [1,0,0];
     scatter(1:length(upSlope),upSlope,MarkerDimension,clearBlue,'filled')
-%     h = lsline;
-%     h.Color = [0,0,1];
     title("Slope of the force signal in the upper and lower peaks")
-%     legend("Lower slope","Lower trend","Upper slope","Upper trend")
     legend("Lower slope","Upper slope")
     xlabel("Slope")
     ylabel("# Test")
@@ -99,5 +94,4 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
         exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\7.ForceAnalysis\Slope.png")
         close(fig3);
     end
-
 end

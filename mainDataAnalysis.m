@@ -24,9 +24,10 @@ try
 catch e
     fprintf("\n\nThere was an error!")
     if ~isempty(e.identifier)
-        fprintf(2,'\nThe identifier was:\n%s',e.identifier);
+        fprintf(2,"\n%s\n\n",getReport(e))
+    else
+        fprintf(2,'\nThe message was:\n%s',e.message);
     end
-    fprintf(2,'\nThe message was:\n%s',e.message);
     if TELEGRAM_LOG
         outputText = strjoin(["[FATAL ERROR] An error occurred! The simulation has been interrupted. Come to check the problem.",newline,newline,"The error output was: ",e.message],"");
         pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
