@@ -51,13 +51,13 @@ function dataPlotter(TELEGRAM_LOG)
     NEW_BASELINES = 0;          % Change the input of the default baselines if 1
     if NEW_BASELINES
         % Remember to create manually the folders for containing this outputs!
-        BaselineMainDataFolder = "..\InputData\NewBaselines"; % Name of the main folder containing all baselines data
+        BaselineMainDataFolder = "..\iCub_InputData\NewBaselines"; % Name of the main folder containing all baselines data
         LbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
         RbaseLinePath = "B_DX_Soft";  % Name of the folder containing the file of the R baseline
         BaseLineOutputName_L = "\NewBaselines\B_SX_Soft_NoMeanShift";   % The initial part of the name of the L baseline output
         BaseLineOutputName_R = "\NewBaselines\B_DX_Soft_NoMeanShift";   % The initial part of the name of the R baseline output
     else
-        BaselineMainDataFolder = "..\InputData"; % Name of the main folder containing all baselines data
+        BaselineMainDataFolder = "..\iCub_InputData"; % Name of the main folder containing all baselines data
         LbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
         RbaseLinePath = "P0_R_Base";  % Name of the folder containing the file of the R baseline
         BaseLineOutputName_L = "B_SX_Base";   % The initial part of the name of the L baseline output
@@ -68,7 +68,7 @@ function dataPlotter(TELEGRAM_LOG)
     fprintf("Simulation starting up...\n")
     
     numPeople = 32+BASELINE_NUMBER; 
-    people = readtable("..\InputData\Dati Personali EXP2.xlsx");
+    people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
     people = people(1:numPeople-BASELINE_NUMBER,:);
     
     % The following command is part of the robotic toolbox
@@ -242,11 +242,11 @@ function dataPlotter(TELEGRAM_LOG)
             fprintf("              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
             % Usefull data for further analysis
-            mkdir ..\ProcessedData\SimulationData;
+            mkdir ..\iCub_ProcessedData\SimulationData;
             if numP < 0
-                fileName = strjoin(["..\ProcessedData\SimulationData\",BaseLineOutputName],"");
+                fileName = strjoin(["..\iCub_ProcessedData\SimulationData\",BaseLineOutputName],"");
             else
-                fileName = strjoin(["..\ProcessedData\SimulationData\P",num2str(numP)],"");
+                fileName = strjoin(["..\iCub_ProcessedData\SimulationData\P",num2str(numP)],"");
             end
             save(fileName, "synchPosDataSet", "numP", 'personParam');
     
@@ -286,17 +286,17 @@ function dataPlotter(TELEGRAM_LOG)
             if TELEGRAM_LOG
                 if i == 1
                     pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
-                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\PositionVisualizing\",BaseLineOutputName_L,".png"],""))
+                    pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaseLineOutputName_L,".png"],""))
                 else
                     if i == 2
                         pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Baseline n.",num2str(i)," completed"],""),TEXT=1,filePath="");
-                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
-                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\PositionVisualizing\",BaseLineOutputName_R,".png"],""))
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaseLineOutputName_R,".png"],""))
                     else
                         pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Participant n.",num2str(numP)," completed"],""),TEXT=1,filePath="");
-                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
-                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
+                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
                     end
                 end
             end
@@ -330,8 +330,8 @@ function dataPlotter(TELEGRAM_LOG)
         
         % Print the images in order to see them more easily
         % fprintf("\n\nStart image saving...\n")
-        % exportgraphics(figM,'ProcessedData\Male analysis output.png')
-        % exportgraphics(figF,'ProcessedData\Female analysis output.png') 
+        % exportgraphics(figM,'iCub_ProcessedData\Male analysis output.png')
+        % exportgraphics(figF,'iCub_ProcessedData\Female analysis output.png') 
         % fprintf("Image saving done\n")
         % close all
     end
@@ -376,8 +376,8 @@ function dataPlotter(TELEGRAM_LOG)
     end
 
     %% Further analysis data saving
-    save ..\ProcessedData\furtherAnalysisData;
-%     load ..\ProcessedData\furtherAnalysisData;
+    save ..\iCub_ProcessedData\furtherAnalysisData;
+%     load ..\iCub_ProcessedData\furtherAnalysisData;
 
     %% Position further analysis plotting
     tic

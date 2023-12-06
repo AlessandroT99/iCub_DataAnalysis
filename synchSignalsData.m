@@ -44,7 +44,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
     
     if IMAGE_SAVING
-        mkdir ..\ProcessedData;
+        mkdir ..\iCub_ProcessedData;
     end
 
     tic
@@ -116,7 +116,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     
     %% Identification of starting
     % Average slope of the position signal in the first robot phase
-    stdRequired = 0.9; % Estimated graphycally looking at the plots into \ProcessedData\PositionDerivativeSTD
+    stdRequired = 0.9; % Estimated graphycally looking at the plots into \iCub_ProcessedData\PositionDerivativeSTD
     subSetDimension = 25;
 
     findedFlag = 0;
@@ -374,13 +374,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         sgtitle(defaultTitleName)
     
         if IMAGE_SAVING
-            mkdir ..\ProcessedData\HandTrajectory;
+            mkdir ..\iCub_ProcessedData\HandTrajectory;
             if numPerson < 0
-                path = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),".png"],"");
-                path2 = strjoin(["..\ProcessedData\HandTrajectory\",BaselineFilesParameters(3),"_3D.fig"],"");
+                path = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),".png"],"");
+                path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),"_3D.fig"],"");
             else
-                path = strjoin(["..\ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
-                path2 = strjoin(["..\ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
+                path = strjoin(["..\iCub_ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
+                path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
             end
             pause(PAUSE_TIME);
             savefig(fig3DTraj,path2);
@@ -446,20 +446,20 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
 
     % Figure saving for position
     if IMAGE_SAVING
-        mkdir ..\ProcessedData\PositionVisualizing;
+        mkdir ..\iCub_ProcessedData\PositionVisualizing;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PositionVisualizing\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PositionVisualizing\",BaselineFilesParameters(3),".png"],"");
         else
-            path = strjoin(["..\ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
         end
         pause(PAUSE_TIME);
         exportgraphics(fig1,path)
 
-        mkdir ..\ProcessedData\PositionProcessing;
+        mkdir ..\iCub_ProcessedData\PositionProcessing;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PositionProcessing\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PositionProcessing\",BaselineFilesParameters(3),".png"],"");
         else
-            path = strjoin(["..\ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
         end
         pause(PAUSE_TIME);
         exportgraphics(fig2,path)
@@ -475,11 +475,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     fprintf("                         Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
     %% Saving position data
-    mkdir ..\ProcessedData\SynchedPositionData;
+    mkdir ..\iCub_ProcessedData\SynchedPositionData;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\SynchedPositionData\",BaselineFilesParameters(3)],"");
+        path = strjoin(["..\iCub_ProcessedData\SynchedPositionData\",BaselineFilesParameters(3)],"");
     else
-        path = strjoin(["..\ProcessedData\SynchedPositionData\P",num2str(numPerson)],"");
+        path = strjoin(["..\iCub_ProcessedData\SynchedPositionData\P",num2str(numPerson)],"");
     end
     save(path,"cuttedPosDataSet","minLocalization","minPeaksVal","maxLocalization","maxPeaksVal","cuttedElapsedTime");
 
@@ -596,9 +596,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     %% Force transformation
     if FORCE_TRANSFORMATION_EVALUATION
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
         else
-            path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
         end
         if exist(path,'file')
             load(path);
@@ -733,11 +733,11 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     
     % Figure saving for force
     if IMAGE_SAVING
-        mkdir ..\ProcessedData\ForceSynchronization;
+        mkdir ..\iCub_ProcessedData\ForceSynchronization;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
         else
-            path = strjoin(["..\ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
         end
         pause(PAUSE_TIME);
         exportgraphics(fig3,path)

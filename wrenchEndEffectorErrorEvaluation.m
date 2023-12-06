@@ -55,11 +55,11 @@ function [phaseError, moduleError, transformationError] = wrenchEndEffectorError
     sgtitle(defaultTitleName)
 
     if IMAGE_SAVING
-        mkdir ..\ProcessedData\ForceTranformationError;
+        mkdir ..\iCub_ProcessedData\ForceTranformationError;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTranformationError\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceTranformationError\",BaselineFilesParameters(3),".png"],"");
         else
-            path = strjoin(["..\ProcessedData\ForceTranformationError\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceTranformationError\P",num2str(numPerson),".png"],"");
         end
         pause(PAUSE_TIME);
         exportgraphics(fig1,path);

@@ -80,12 +80,12 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     leftHandTests = logical([0,0,maxPeaksAverage(BASELINE_NUMBER+1:end)<0]);
 
     % Folders and priority order of the subfolders
-    mkdir ..\ProcessedData\Scatters
-    mkdir ..\ProcessedData\Scatters\1.NearHand
-    mkdir ..\ProcessedData\Scatters\2.Symmetry
-    mkdir ..\ProcessedData\Scatters\3.ROM
-    mkdir ..\ProcessedData\Scatters\4.PullingPhases
-    mkdir ..\ProcessedData\Scatters\5.Others
+    mkdir ..\iCub_ProcessedData\Scatters
+    mkdir ..\iCub_ProcessedData\Scatters\1.NearHand
+    mkdir ..\iCub_ProcessedData\Scatters\2.Symmetry
+    mkdir ..\iCub_ProcessedData\Scatters\3.ROM
+    mkdir ..\iCub_ProcessedData\Scatters\4.PullingPhases
+    mkdir ..\iCub_ProcessedData\Scatters\5.Others
 
     %% Near end parameters
     nearHand = nearHand'.*1000;
@@ -108,7 +108,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig1,"..\ProcessedData\Scatters\5.Others\ExperimentDuration.png")
+        exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\5.Others\ExperimentDuration.png")
         close(fig1);
     end
     
@@ -126,7 +126,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2aa,"..\ProcessedData\Scatters\4.PullingPhases\HumanPhaseTimeDuration.png")
+        exportgraphics(fig2aa,"..\iCub_ProcessedData\Scatters\4.PullingPhases\HumanPhaseTimeDuration.png")
         close(fig2aa);
     end
 
@@ -143,7 +143,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2ab,"..\ProcessedData\Scatters\4.PullingPhases\RobotPhaseTimeDuration.png")
+        exportgraphics(fig2ab,"..\iCub_ProcessedData\Scatters\4.PullingPhases\RobotPhaseTimeDuration.png")
         close(fig2ab);
     end
 
@@ -161,7 +161,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2ba,"..\ProcessedData\Scatters\4.PullingPhases\HumanPhaseSpaceDuration.png")
+        exportgraphics(fig2ba,"..\iCub_ProcessedData\Scatters\4.PullingPhases\HumanPhaseSpaceDuration.png")
         close(fig2ba);
     end
 
@@ -178,7 +178,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2bb,"..\ProcessedData\Scatters\4.PullingPhases\RobotPhaseSpaceDuration.png")
+        exportgraphics(fig2bb,"..\iCub_ProcessedData\Scatters\4.PullingPhases\RobotPhaseSpaceDuration.png")
         close(fig2bb);
     end
 
@@ -197,7 +197,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2c,"..\ProcessedData\Scatters\4.PullingPhases\DurationDifference-PullingPhases.png")
+        exportgraphics(fig2c,"..\iCub_ProcessedData\Scatters\4.PullingPhases\DurationDifference-PullingPhases.png")
         close(fig2c);
     end
 
@@ -226,7 +226,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2va,"..\ProcessedData\Scatters\4.PullingPhases\HumanPhaseRelativeVelocity.png")
+        exportgraphics(fig2va,"..\iCub_ProcessedData\Scatters\4.PullingPhases\HumanPhaseRelativeVelocity.png")
         close(fig2va);
     end
 
@@ -243,7 +243,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig2vb,"..\ProcessedData\Scatters\4.PullingPhases\RobotPhaseRelativeVelocity.png")
+        exportgraphics(fig2vb,"..\iCub_ProcessedData\Scatters\4.PullingPhases\RobotPhaseRelativeVelocity.png")
         close(fig2vb);
     end
 
@@ -264,7 +264,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig3,"..\ProcessedData\Scatters\5.Others\PeaksNumber.png")
+        exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\5.Others\PeaksNumber.png")
         close(fig3);
     end
     
@@ -285,7 +285,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig4,"..\ProcessedData\Scatters\5.Others\PeaksNumber-ExperimentDuration.png")
+        exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\5.Others\PeaksNumber-ExperimentDuration.png")
         close(fig4);
     end
 
@@ -318,7 +318,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5,"..\ProcessedData\Scatters\3.ROM\ROM_NoPhoto.png")
+        exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\3.ROM\ROM_NoPhoto.png")
         close(fig5);
     end
 
@@ -377,7 +377,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5e,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedPosB.png")
+        exportgraphics(fig5e,"..\iCub_ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedPosB.png")
         close(fig5e);
     end
 
@@ -446,7 +446,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     ylim([min(nearHand)-1,yDim+5])
     set(gca, 'YDir','reverse')
 
-    iCubImg = imread("..\InputData\images\iCub_hand.png");
+    iCubImg = imread("..\iCub_InputData\images\iCub_hand.png");
     iCubImg = flipud(iCubImg);
     vSpace = 2.5;
     xDim = 0;
@@ -456,7 +456,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5d,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedCenter.png")
+        exportgraphics(fig5d,"..\iCub_ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedCenter.png")
         close(fig5d);
     end
 
@@ -499,7 +499,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
                                             "Human-Phase TimeDomain [s]", "Robot-Phase TimeDomain [s]", "Human-Phase SpaceDomain [cm]", "Robot-Phase SpaceDomain [cm]", ...
                                             "std(posB) [cm]","std(posA) [cm]"]);
 
-    writetable(matx, "..\ProcessedData\PeaksPositionData.xlsx");
+    writetable(matx, "..\iCub_ProcessedData\PeaksPositionData.xlsx");
 
     %% Difference between ROM centers - 1. NEAR END
     fig5n = figure('Name','Difference betweeen ROM centers');
@@ -523,7 +523,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig5n,"..\ProcessedData\Scatters\1.NearHand\ROM-NearHand_ROMsize.png")
+        exportgraphics(fig5n,"..\iCub_ProcessedData\Scatters\1.NearHand\ROM-NearHand_ROMsize.png")
         close(fig5n);
     end
 
@@ -541,7 +541,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig6,"..\ProcessedData\Scatters\5.Others\StandardDeviation.png")
+        exportgraphics(fig6,"..\iCub_ProcessedData\Scatters\5.Others\StandardDeviation.png")
         close(fig6);
     end
 
@@ -564,7 +564,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig7,"..\ProcessedData\Scatters\5.Others\MeanValues.png")
+        exportgraphics(fig7,"..\iCub_ProcessedData\Scatters\5.Others\MeanValues.png")
         close(fig7);
     end
 
@@ -589,7 +589,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig8,"..\ProcessedData\Scatters\5.Others\MovementRange.png")
+        exportgraphics(fig8,"..\iCub_ProcessedData\Scatters\5.Others\MovementRange.png")
         close(fig8);
     end
 
@@ -607,7 +607,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig9,"..\ProcessedData\Scatters\5.Others\MaxMinAverageDistance.png")
+        exportgraphics(fig9,"..\iCub_ProcessedData\Scatters\5.Others\MaxMinAverageDistance.png")
         close(fig9);
     end
 
@@ -634,7 +634,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig10,"..\ProcessedData\Scatters\3.ROM\ROM_TimeDomain.png")
+        exportgraphics(fig10,"..\iCub_ProcessedData\Scatters\3.ROM\ROM_TimeDomain.png")
         close(fig10);
     end
     
@@ -652,7 +652,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig11,"..\ProcessedData\Scatters\5.Others\PeaksInitialFinalVariation.png")
+        exportgraphics(fig11,"..\iCub_ProcessedData\Scatters\5.Others\PeaksInitialFinalVariation.png")
         close(fig11);
     end
 
@@ -678,7 +678,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig12,"..\ProcessedData\Scatters\5.Others\SynchroEfficience.png")
+        exportgraphics(fig12,"..\iCub_ProcessedData\Scatters\5.Others\SynchroEfficience.png")
         close(fig12);
     end
 
@@ -720,7 +720,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig13,"..\ProcessedData\Scatters\2.Symmetry\SimmetryEfficience.png")
+        exportgraphics(fig13,"..\iCub_ProcessedData\Scatters\2.Symmetry\SimmetryEfficience.png")
         close(fig13);
     end
 
@@ -739,7 +739,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig14,"..\ProcessedData\Scatters\5.Others\VelocityAnalysis.png")
+        exportgraphics(fig14,"..\iCub_ProcessedData\Scatters\5.Others\VelocityAnalysis.png")
         close(fig14);
     end
 end

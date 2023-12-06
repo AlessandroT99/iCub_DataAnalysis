@@ -26,11 +26,11 @@ warning('OFF','MATLAB:MKDIR:DirectoryExists');
 % settings, which I overwrite, so I just shut it off in the following
 warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
 
-mkdir ..\ProcessedData\Scatters\0.SoapEvaluation
+mkdir ..\iCub_ProcessedData\Scatters\0.SoapEvaluation
 
 %% Input Data
 numPeople = 32; 
-people = readtable("..\InputData\Dati Personali EXP2.xlsx");
+people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
 people = people(1:numPeople,:);
 
 soapWidth = people.WidthSoap;               % mm
@@ -204,18 +204,18 @@ xlabel("Efficiency [ % ]"), ylabel("# Test")
 title("Soap cutting efficience")
 
 %% Save and close all the plot
-mkdir ..\ProcessedData\Scatters
+mkdir ..\iCub_ProcessedData\Scatters
 pause(2);
-exportgraphics(fig1,"..\ProcessedData\Scatters\0.SoapEvaluation\RightHandSoapIndentation.png")
-exportgraphics(fig2,"..\ProcessedData\Scatters\0.SoapEvaluation\LeftHandSoapIndentation.png")
-exportgraphics(fig3,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapRemovedMaterial.png")
-exportgraphics(fig4,"..\ProcessedData\Scatters\0.SoapEvaluation\MeanAngleSoapIndentation.png")
-exportgraphics(fig5,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapIndentationParameters.png")
-exportgraphics(fig6,"..\ProcessedData\Scatters\0.SoapEvaluation\SoapCuttingEfficience.png")
+exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\RightHandSoapIndentation.png")
+exportgraphics(fig2,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\LeftHandSoapIndentation.png")
+exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\SoapRemovedMaterial.png")
+exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\MeanAngleSoapIndentation.png")
+exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\SoapIndentationParameters.png")
+exportgraphics(fig6,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\SoapCuttingEfficience.png")
 
 matx = table((1:32)',angle,removedArea',removedAreaPercentage');
 matx = renamevars(matx, 1:width(matx), ["ID","Angle Human Side [deg]","Removed Surface [mm^2]","Percentage of removed material [%]"]);
 
-writetable(matx, "..\ProcessedData\SoapData.xlsx");
+writetable(matx, "..\iCub_ProcessedData\SoapData.xlsx");
 
 close all

@@ -117,11 +117,11 @@ function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personP
     
     % Figure saving for force and position comparison
     if IMAGE_SAVING
-        mkdir ..\ProcessedData\ForcePositionComparison;
+        mkdir ..\iCub_ProcessedData\ForcePositionComparison;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForcePositionComparison\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForcePositionComparison\",BaselineFilesParameters(3),".png"],"");
         else
-            path = strjoin(["..\ProcessedData\ForcePositionComparison\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForcePositionComparison\P",num2str(numPerson),".png"],"");
         end
         pause(PAUSE_TIME);
         exportgraphics(fig4,path)

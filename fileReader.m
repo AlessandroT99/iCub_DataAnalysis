@@ -29,19 +29,19 @@ function [posDataSet, forceDataSet] = fileReader(peopleDataSet, personSubSet)
         % Now chose the correct path to load data
         if strcmp(peopleDataSet.Mano(personSubSet),"R") == 1
             if personSubSet < 10
-                posFilePath = join(["..\InputData\positions\leftHand\P_0000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\InputData\forces\leftArm\P_0000",num2str(personSubSet),"\data.log"],'');
+                posFilePath = join(["..\iCub_InputData\positions\leftHand\P_0000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\forces\leftArm\P_0000",num2str(personSubSet),"\data.log"],'');
             else
-                posFilePath = join(["..\InputData\positions\leftHand\P_000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\InputData\forces\leftArm\P_000",num2str(personSubSet),"\data.log"],'');
+                posFilePath = join(["..\iCub_InputData\positions\leftHand\P_000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\forces\leftArm\P_000",num2str(personSubSet),"\data.log"],'');
             end
         else
             if personSubSet < 10
-                posFilePath = join(["..\InputData\positions\rightHand\P_0000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\InputData\forces\rightArm\P_0000",num2str(personSubSet),"\data.log"],'');
+                posFilePath = join(["..\iCub_InputData\positions\rightHand\P_0000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\forces\rightArm\P_0000",num2str(personSubSet),"\data.log"],'');
             else
-                posFilePath = join(["..\InputData\positions\rightHand\P_000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\InputData\forces\rightArm\P_000",num2str(personSubSet),"\data.log"],'');
+                posFilePath = join(["..\iCub_InputData\positions\rightHand\P_000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\forces\rightArm\P_000",num2str(personSubSet),"\data.log"],'');
             end
         end
     

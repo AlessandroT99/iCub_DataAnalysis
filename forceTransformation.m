@@ -51,15 +51,15 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 if numPerson < JOINTS_ONLY_FOR_BASELINE
                     if strcmp(personParameters(5),"R") == 1
                         if numPerson < 10
-                            jointDataSet = strjoin(["..\InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\iCub_InputData\joints\leftArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
-                            jointDataSet = strjoin(["..\InputData\joints\leftArm\P_000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\iCub_InputData\joints\leftArm\P_000",num2str(numPerson),"\data.log"],'');
                         end
                     else
                         if personSubSet < 10
-                            jointDataSet = strjoin(["..\InputData\joints\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\iCub_InputData\joints\rightArm\P_0000",num2str(numPerson),"\data.log"],'');
                         else
-                            jointDataSet = strjoin(["..\InputData\joints\rightArm\P_000",num2str(numPerson),"\data.log"],'');
+                            jointDataSet = strjoin(["..\iCub_InputData\joints\rightArm\P_000",num2str(numPerson),"\data.log"],'');
                         end
                     end
                 end
@@ -147,11 +147,11 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         sgtitle(defaultTitleName)
     
         if IMAGE_SAVING
-            mkdir ..\ProcessedData\ShoulderPitchJointPositionRelation;
+            mkdir ..\iCub_ProcessedData\ShoulderPitchJointPositionRelation;
             if numPerson < 0
-                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\",BaselineFilesParameters(3),".png"],"");
+                path = strjoin(["..\iCub_ProcessedData\ShoulderPitchJointPositionRelation\",BaselineFilesParameters(3),".png"],"");
             else
-                path = strjoin(["..\ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
+                path = strjoin(["..\iCub_ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
             end
             pause(PAUSE_TIME);
             exportgraphics(fig2DJointTraj,path)
@@ -366,11 +366,11 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     sgtitle(defaultTitleName)
     
     if IMAGE_SAVING
-        mkdir ..\ProcessedData\ForceTransformation;
+        mkdir ..\iCub_ProcessedData\ForceTransformation;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceTransformation\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceTransformation\",BaselineFilesParameters(3),".png"],"");
         else
-            path = strjoin(["..\ProcessedData\ForceTransformation\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceTransformation\P",num2str(numPerson),".png"],"");
         end
         pause(PAUSE_TIME);
         exportgraphics(fig1,path)
@@ -400,11 +400,11 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             ylabel('Error [degrees]'), xlabel("Joint number")
     
             if IMAGE_SAVING
-                mkdir ..\ProcessedData\iKinJointsError;
+                mkdir ..\iCub_ProcessedData\iKinJointsError;
                 if numPerson < 0
-                    path = strjoin(["..\ProcessedData\iKinJointsError\",BaselineFilesParameters(3),".png"],"");
+                    path = strjoin(["..\iCub_ProcessedData\iKinJointsError\",BaselineFilesParameters(3),".png"],"");
                 else
-                    path = strjoin(["..\ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
+                    path = strjoin(["..\iCub_ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");
                 end
                 pause(PAUSE_TIME);
                 exportgraphics(fig2,path)
@@ -427,22 +427,22 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     
     
         %% Save the data
-        mkdir ..\ProcessedData\ForceErrorTransformationData;
+        mkdir ..\iCub_ProcessedData\ForceErrorTransformationData;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\",BaselineFilesParameters(3)],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceErrorTransformationData\",BaselineFilesParameters(3)],"");
         else
-            path = strjoin(["..\ProcessedData\ForceErrorTransformationData\P",num2str(numPerson)],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceErrorTransformationData\P",num2str(numPerson)],"");
         end
         save(path,"phaseError", "moduleError", "transformationError","finalJointsDataSet","jointError");
     else
         finalJointsDataSet = 0;
     end
 
-    mkdir ..\ProcessedData\ForceTransformationData;
+    mkdir ..\iCub_ProcessedData\ForceTransformationData;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\ForceTransformationData\",BaselineFilesParameters(3)],"");
+        path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\",BaselineFilesParameters(3)],"");
     else
-        path = strjoin(["..\ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
+        path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\P",num2str(numPerson)],"");
     end
     save(path,"newCuttedSynchForceDataSet", "personParameters", "numPerson", "initialPosDataSet", "posStart", "posEnd", "defaultTitleName","BaselineFilesParameters");
     

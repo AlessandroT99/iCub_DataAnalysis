@@ -179,11 +179,11 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     % Figure saving for phase time duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        mkdir ..\ProcessedData\PhaseTimeDifference;
+        mkdir ..\iCub_ProcessedData\PhaseTimeDifference;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseTimeDifference\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseTimeDifference\",BaselineFilesParameters(3),".png"],"");
         else    
-            path = strjoin(["..\ProcessedData\PhaseTimeDifference\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseTimeDifference\P",num2str(numPerson),".png"],"");
         end
         exportgraphics(fig1a,path)
         close(fig1a);
@@ -210,11 +210,11 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     % Figure saving for phase time duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        mkdir ..\ProcessedData\PhaseTimeDuration;
+        mkdir ..\iCub_ProcessedData\PhaseTimeDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseTimeDuration\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseTimeDuration\",BaselineFilesParameters(3),".png"],"");
         else    
-            path = strjoin(["..\ProcessedData\PhaseTimeDuration\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseTimeDuration\P",num2str(numPerson),".png"],"");
         end
         exportgraphics(fig1,path)
     end
@@ -239,11 +239,11 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     % Figure saving for phase space duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        mkdir ..\ProcessedData\PhaseSpaceDuration;
+        mkdir ..\iCub_ProcessedData\PhaseSpaceDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
         else    
-            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
         end
         exportgraphics(fig2,path)
     end
@@ -265,11 +265,11 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     % Figure saving for phase space duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        mkdir ..\ProcessedData\PhaseSpaceDuration;
+        mkdir ..\iCub_ProcessedData\PhaseSpaceDuration;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
         else    
-            path = strjoin(["..\ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
         end
         exportgraphics(fig3,path)
     end

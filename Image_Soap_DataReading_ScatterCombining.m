@@ -37,22 +37,22 @@ PAUSE_TIME = 3;     % Put to 1 in order to save the main plots
 maximumMovementTime = 2; % Variable used to determine the time span of the envelope in sec
 
 % Folder created to containts all the ipothesis made in this software
-mkdir ..\ProcessedData\Scatters\6.CorrelationResearch
+mkdir ..\iCub_ProcessedData\Scatters\6.CorrelationResearch
 
 %% Input data
 NUM_PEOPLE = 32;    % Overall number of test analyzed
 
-people = readtable("..\InputData\Dati Personali EXP2.xlsx");
+people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
 people = people(1:NUM_PEOPLE,:);
 
 % IMAGE PROCESSING USEFULL PARAMETERS
-load ..\ProcessedData\ImageProcessing\ImageProcessingData.mat;
+load ..\iCub_ProcessedData\ImageProcessing\ImageProcessingData.mat;
 
 % SOAP MEASURE USEFULL PARAMETERS
-soap = readtable("..\ProcessedData\SoapData.xlsx");
+soap = readtable("..\iCub_ProcessedData\SoapData.xlsx");
 
 % DATA PROCESSING USEFULL PARAMETERS
-dataProcessing = readtable("..\ProcessedData\PeaksPositionData.xlsx");
+dataProcessing = readtable("..\iCub_ProcessedData\PeaksPositionData.xlsx");
 dataProcessing = dataProcessing(2:end,:);
 
 %% Data adjusting
@@ -137,19 +137,19 @@ legend("Participants","Trend","Mean","Standard Deviation")
 %% Saving results
 if IMAGE_SAVING
     pause(PAUSE_TIME); 
-    exportgraphics(fig1,"..\ProcessedData\Scatters\6.CorrelationResearch\TensedWire-RemovedMaterial.png")
+    exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\TensedWire-RemovedMaterial.png")
     close(fig1);
-    exportgraphics(fig2,"..\ProcessedData\Scatters\6.CorrelationResearch\ImageAngle-SoapIndentationAngle.png")
+    exportgraphics(fig2,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\ImageAngle-SoapIndentationAngle.png")
     close(fig2);
-    exportgraphics(fig3,"..\ProcessedData\Scatters\6.CorrelationResearch\AsimmetryPosA-RemovedMaterial.png")
+    exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\AsimmetryPosA-RemovedMaterial.png")
     close(fig3);
-    exportgraphics(fig4,"..\ProcessedData\Scatters\6.CorrelationResearch\HumanPullingPhaseTime-RemovedMaterial.png")
+    exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\HumanPullingPhaseTime-RemovedMaterial.png")
     close(fig4);
-    exportgraphics(fig5,"..\ProcessedData\Scatters\6.CorrelationResearch\NearHand-RemovedMaterial.png")
+    exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\NearHand-RemovedMaterial.png")
     close(fig5);
-    exportgraphics(fig6,"..\ProcessedData\Scatters\6.CorrelationResearch\ROM-RemovedMaterial.png")
+    exportgraphics(fig6,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\ROM-RemovedMaterial.png")
     close(fig6);
-    exportgraphics(fig7,"..\ProcessedData\Scatters\6.CorrelationResearch\PullingPhaseTimeDifference-RemovedMaterial.png")
+    exportgraphics(fig7,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\PullingPhaseTimeDifference-RemovedMaterial.png")
     close(fig7);
 end
 

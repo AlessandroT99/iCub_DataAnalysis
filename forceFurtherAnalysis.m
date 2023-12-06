@@ -31,8 +31,8 @@ function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend, minPeaksVal, maxPeaksV
 
     cuttedElapsedTime = synchForceDataSet(:,1);
 
-    save ("..\ProcessedData\ForceFurtherAnalysis");
-%     load ..\ProcessedData\ForceFurtherAnalysis;
+    save ("..\iCub_ProcessedData\ForceFurtherAnalysis");
+%     load ..\iCub_ProcessedData\ForceFurtherAnalysis;
     %% AVERAGE TREND ANALYSIS
     maximumMovementTime = 0.4;
     [envHigh, envLow] = envelope(synchForceDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
@@ -112,11 +112,11 @@ function [meanTrend, upAmplitudeTrend, lowAmplitudeTrend, minPeaksVal, maxPeaksV
     % Figure saving for phase time duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        mkdir ..\ProcessedData\ForceFurtherAnalysis;
+        mkdir ..\iCub_ProcessedData\ForceFurtherAnalysis;
         if numPerson < 0
-            path = strjoin(["..\ProcessedData\ForceFurtherAnalysis\",BaselineFilesParameters(3),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceFurtherAnalysis\",BaselineFilesParameters(3),".png"],"");
         else    
-            path = strjoin(["..\ProcessedData\ForceFurtherAnalysis\P",num2str(numPerson),".png"],"");
+            path = strjoin(["..\iCub_ProcessedData\ForceFurtherAnalysis\P",num2str(numPerson),".png"],"");
         end
         exportgraphics(fig1a,path)
         close(fig1a);

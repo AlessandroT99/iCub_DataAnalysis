@@ -35,12 +35,12 @@ function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters
     ylabel("Position [ m ]")
     legend("x position","y position","z position",'Location','eastoutside')
 
-    mkdir ..\ProcessedData;
-    mkdir ..\ProcessedData\3AxisPosition;
+    mkdir ..\iCub_ProcessedData;
+    mkdir ..\iCub_ProcessedData\3AxisPosition;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\3AxisPosition\",BaselineFilesParameters(3),".png"],"");
+        path = strjoin(["..\iCub_ProcessedData\3AxisPosition\",BaselineFilesParameters(3),".png"],"");
     else
-        path = strjoin(["..\ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
+        path = strjoin(["..\iCub_ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
     end
     exportgraphics(fig1,path);
     close(fig1);
@@ -63,11 +63,11 @@ function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters
     ylabel("Force [ N ]")
     legend("x force","y force","z force",'Location','eastoutside')
 
-    mkdir ..\ProcessedData\3AxisForce;
+    mkdir ..\iCub_ProcessedData\3AxisForce;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\3AxisForce\",BaselineFilesParameters(3),".png"],"");
+        path = strjoin(["..\iCub_ProcessedData\3AxisForce\",BaselineFilesParameters(3),".png"],"");
     else
-        path = strjoin(["..\ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
+        path = strjoin(["..\iCub_ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
     end
     exportgraphics(fig2,path);
     close(fig2);

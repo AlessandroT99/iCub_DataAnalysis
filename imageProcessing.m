@@ -45,10 +45,10 @@ clearYellow = [255,253,116]./255;
 %% Simulation input
 NUM_PEOPLE = 32;    % Overall number of test analyzed
 
-people = readtable("..\InputData\Dati Personali EXP2.xlsx");
+people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
 people = people(1:NUM_PEOPLE,:);
 
-imageDataSetParam = readtable("..\InputData\imageProcessing\UsefullData.xlsx");
+imageDataSetParam = readtable("..\iCub_InputData\imageProcessing\UsefullData.xlsx");
 TEST_TO_AVOID = [2,7,13,18,20,22,26,27,28];
 
 totalLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables used to contain mean and std for each test
@@ -59,7 +59,7 @@ RobotLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables us
 TensedWirePercentage = zeros(1,NUM_PEOPLE-length(TEST_TO_AVOID)); % Variable that define the % of time in which the wire was tensed
 
 % Create the directories in which the files would be saved
-mkdir ..\ProcessedData\ImageProcessing
+mkdir ..\iCub_ProcessedData\ImageProcessing
 fprintf("\nStarting Evaluation...")
 
 %% Results evaluation
@@ -68,7 +68,7 @@ for cnt = 1:NUM_PEOPLE
     if sum(find(cnt==TEST_TO_AVOID)) == 0
         i = i + 1;
         fprintf("\nTest N. %d",cnt)
-        dataset = readtable(strjoin(["../InputData/imageProcessing/SingleExperimentData/Test",num2str(cnt),"_ImageProcessingData"],""));
+        dataset = readtable(strjoin(["../iCub_InputData/imageProcessing/SingleExperimentData/Test",num2str(cnt),"_ImageProcessingData"],""));
         % Save the maximum length of the wire
         imageSubSet = 30; % 30 fps = 30 images for 1s of reality
         secondsOfShift = 300; % 10 sec of image threshold from the choosen one to avoid initial problems
@@ -179,18 +179,18 @@ for cnt = 1:NUM_PEOPLE
         %% Save results
         if IMAGE_SAVING
             pause(PAUSE_TIME); 
-            mkdir ..\ProcessedData\ImageProcessing\WireLength
-            path = strjoin(["..\ProcessedData\ImageProcessing\WireLength\P",num2str(i),".png"],"");
+            mkdir ..\iCub_ProcessedData\ImageProcessing\WireLength
+            path = strjoin(["..\iCub_ProcessedData\ImageProcessing\WireLength\P",num2str(i),".png"],"");
             exportgraphics(fig1,path)
             close(fig1);
     
-            mkdir ..\ProcessedData\ImageProcessing\WireSideLength
-            path = strjoin(["..\ProcessedData\ImageProcessing\WireSideLength\P",num2str(i),".png"],"");
+            mkdir ..\iCub_ProcessedData\ImageProcessing\WireSideLength
+            path = strjoin(["..\iCub_ProcessedData\ImageProcessing\WireSideLength\P",num2str(i),".png"],"");
             exportgraphics(fig2,path)
             close(fig2);
     
-            mkdir ..\ProcessedData\ImageProcessing\WireAngles
-            path = strjoin(["..\ProcessedData\ImageProcessing\WireAngles\P",num2str(i),".png"],"");
+            mkdir ..\iCub_ProcessedData\ImageProcessing\WireAngles
+            path = strjoin(["..\iCub_ProcessedData\ImageProcessing\WireAngles\P",num2str(i),".png"],"");
             exportgraphics(fig3,path)
             close(fig3);
         end
@@ -215,9 +215,9 @@ title("Tensed wire vs. max human angle")
 
 if IMAGE_SAVING
     pause(PAUSE_TIME); 
-    exportgraphics(fig4,"..\ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MaxHumanAngle.png")
+    exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MaxHumanAngle.png")
     close(fig4);
-    exportgraphics(fig5,"..\ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MeanHumanAngle.png")
+    exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MeanHumanAngle.png")
     close(fig5);
 end
 
@@ -245,7 +245,7 @@ HumanLength = toSave(:,4);
 RobotLength = toSave(:,5);
 TensedWirePercentage = toSave(:,6);
 
-save('../ProcessedData/ImageProcessing/ImageProcessingData',"totalLength","HumanAngle","RobotAngle","HumanLength","RobotLength","TensedWirePercentage");
+save('../iCub_ProcessedData/ImageProcessing/ImageProcessingData',"totalLength","HumanAngle","RobotAngle","HumanLength","RobotLength","TensedWirePercentage");
 
 fprintf("\nEvaluation completed\n\n")
 

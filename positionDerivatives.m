@@ -97,11 +97,11 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     hold off
 
     %% Figure saving
-    mkdir ..\ProcessedData\PositionDerivatives;
+    mkdir ..\iCub_ProcessedData\PositionDerivatives;
     if numPerson < 0
-        path = strjoin(["..\ProcessedData\PositionDerivatives\",BaselineFilesParameters(3),".png"],"");
+        path = strjoin(["..\iCub_ProcessedData\PositionDerivatives\",BaselineFilesParameters(3),".png"],"");
     else
-        path = strjoin(["..\ProcessedData\PositionDerivatives\P",num2str(numPerson),".png"],"");
+        path = strjoin(["..\iCub_ProcessedData\PositionDerivatives\P",num2str(numPerson),".png"],"");
     end
     pause(PAUSE_TIME);
     exportgraphics(fig1,path)
