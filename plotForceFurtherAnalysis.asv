@@ -45,13 +45,15 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
     mkdir ..\iCub_ProcessedData\Scatters\7.ForceAnalysis
 
     %% Mean Trend - 7. FORCE MEAN TREND
-    fig1 = figure('Name','Mean behavior of each force signal');
+    fig1 = figure('Name','Experiment duration scatter');
     fig1.WindowState = 'maximized';
     grid on, hold on
-    plot(linspace(0,100,size(meanTrend,2)),meanTrend)
-    title("Mean behavior of each force signal")
-    ylabel("Force [ N ]")
-    xlabel("Experiment progression [ % ]")
+    scatter(1:length(meanTrend),meanTrend,MarkerDimension,clearRed,'filled')
+    lsline
+    title("Trend of experiment duration")
+    legend("BaseLine","Desidered duration")
+    xlabel("Force [ N ]")
+    ylabel("# Test")
     hold off
 
     if IMAGE_SAVING
@@ -65,8 +67,9 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
     fig2.WindowState = 'maximized';
     grid on, hold on
     scatter(1:length(meanAmplitude),meanAmplitude,MarkerDimension,clearRed,'filled')
-%     lsline
-    title("Mean amplitude of the force signal")
+    lsline
+    title("Trend of experiment duration")
+    legend("BaseLine","Desidered duration")
     xlabel("Force [ N ]")
     ylabel("# Test")
     hold off
@@ -78,7 +81,7 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
     end
 
     %% Slope - 9. FORCE SLOPE
-    fig3 = figure('Name','Slope of the force signal in the upper and lower peaks');
+    fig3 = figure('Name','Experiment duration scatter');
     fig3.WindowState = 'maximized';
     grid on, hold on
     scatter(1:length(lowSlope),lowSlope,MarkerDimension,clearRed,'filled')
@@ -87,7 +90,7 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
     scatter(1:length(upSlope),upSlope,MarkerDimension,clearBlue,'filled')
 %     h = lsline;
 %     h.Color = [0,0,1];
-    title("Slope of the force signal in the upper and lower peaks")
+    title("Slope of the force signal in the upper pea")
 %     legend("Lower slope","Lower trend","Upper slope","Upper trend")
     legend("Lower slope","Upper slope")
     xlabel("Slope")

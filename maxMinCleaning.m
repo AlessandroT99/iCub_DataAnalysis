@@ -19,56 +19,59 @@ function [newMinPeaksVal,newMinLocalization,newMaxPeaksVal,newMaxLocalization] =
     if nargin == 4
         ITERATE = 1;
     end
-    numberOfBackIndx= 2;
+    numberOfBackIndx = 3;
     iterations = 0;
     timeThreshold = 1.4*100; % Check that this has to be lower than the average phase duration for baselines
-    while abs(length(minLocalization)-length(maxLocalization)) > 1
-        i = 1;
-        while i <= length(minLocalization) - 1
-            if minLocalization(i+1) - minLocalization(i) < timeThreshold
-                if minPeaksVal(i+1) < minPeaksVal(i)
-                    minLocalization(i) = [];
-                    minPeaksVal(i) = [];
+    while abs(length(minLocalization)-length(maxLocalization)) > 1 || (length(minLocalization) >= 80 && length(maxLocalization) >= 80)
+
+        cnt = 1;
+        while cnt <= length(minLocalization) - 1
+            if minLocalization(cnt+1) - minLocalization(cnt) < timeThreshold
+                if minPeaksVal(cnt+1) < minPeaksVal(cnt)
+                    minLocalization(cnt) = [];
+                    minPeaksVal(cnt) = [];
                 else
-                    minLocalization(i+1) = [];
-                    minPeaksVal(i+1) = [];
+                    minLocalization(cnt+1) = [];
+                    minPeaksVal(cnt+1) = [];
                 end
-                
-                if i - numberOfBackIndx < 1
-                    i = 1;
+                if cnt - numberOfBackIndx < 1
+                    cnt = 1;
                 else
-                    i = i - numberOfBackIndx;
+                    cnt = cnt - numberOfBackIndx;
                 end
+            else
+                cnt = cnt + 1;
             end
-            i = i + 1;
         end
-        for i = 1:length(maxLocalization) - 1
-            if i > length(maxLocalization) - 1
-                break;
-            end
-            if maxLocalization(i+1) - maxLocalization(i) < timeThreshold
-                if maxPeaksVal(i+1) > maxPeaksVal(i)
-                    maxLocalization(i) = [];
-                    maxPeaksVal(i) = [];
+
+        cnt = 1;
+        while cnt <= length(maxLocalization) - 1
+            if maxLocalization(cnt+1) - maxLocalization(cnt) < timeThreshold
+                if maxPeaksVal(cnt+1) > maxPeaksVal(cnt)
+                    maxLocalization(cnt) = [];
+                    maxPeaksVal(cnt) = [];
                 else
-                    maxLocalization(i+1) = [];
-                    maxPeaksVal(i+1) = [];
+                    maxLocalization(cnt+1) = [];
+                    maxPeaksVal(cnt+1) = [];
                 end
-                if i - numberOfBackIndx < 1
-                    i = 1;
+                if cnt - numberOfBackIndx < 1
+                    cnt = 1;
                 else
-                    i = i - numberOfBackIndx;
+                    cnt = cnt - numberOfBackIndx;
                 end
+            else
+                cnt = cnt + 1;
             end
         end
         iterations = iterations + 1;
         if iterations > 10 && abs(length(minLocalization)-length(maxLocalization)) < 3
+%             disp("Threshold of minimum reached, ending cleaning.")
             break;
         else 
             if iterations > 20 && ITERATE
                 error("Error in maxMinCleaning.m - Peaks cleaning has not been successfull.");
             else
-                % If iterate is = 0 we do not care of the error
+                % If ITERATE is = 0 we do not care of the error
                 break;
             end
         end

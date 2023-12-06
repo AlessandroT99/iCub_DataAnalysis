@@ -53,9 +53,9 @@ function dataPlotter(TELEGRAM_LOG)
         % Remember to create manually the folders for containing this outputs!
         BaselineMainDataFolder = "..\iCub_InputData\NewBaselines"; % Name of the main folder containing all baselines data
         LbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
-        RbaseLinePath = "B_DX_Soft";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_L = "\NewBaselines\B_SX_Soft_NoMeanShift";   % The initial part of the name of the L baseline output
-        BaseLineOutputName_R = "\NewBaselines\B_DX_Soft_NoMeanShift";   % The initial part of the name of the R baseline output
+        RbaseLinePath = "B_DX_Soft_NewSensor";  % Name of the folder containing the file of the R baseline
+        BaseLineOutputName_L = "\NewBaselines\B_SX_Soft";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "\NewBaselines\B_DX_Soft_NewSensor";   % The initial part of the name of the R baseline output
     else
         BaselineMainDataFolder = "..\iCub_InputData"; % Name of the main folder containing all baselines data
         LbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
@@ -121,9 +121,10 @@ function dataPlotter(TELEGRAM_LOG)
     HtoR_relativeVelocity = cell(1,numPeople);
     RtoH_relativeVelocity = cell(1,numPeople);
 
-    meanTrend = notConsideredValue.*ones(1,numPeople);
+    meanTrend = notConsideredValue.*ones(numPeople,100);
     lowSlope = notConsideredValue.*ones(1,numPeople);
     upSlope = notConsideredValue.*ones(1,numPeople);
+    meanAmplitude = notConsideredValue.*ones(1,numPeople);
     
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
@@ -261,11 +262,11 @@ function dataPlotter(TELEGRAM_LOG)
                 posFurtherAnalysis(synchPosDataSet,numP, personParam, posBaseline, BaselineFilesParameters);
             fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             
-            % Force further analysis
-            if strcmp(people.Mano,"L")
+            % Force further analysis on left hand of the robot or the baseline with robot left hand
+            if or(strcmp(people.Mano(i),"R") == 1, i == 1)
                 tic
                 fprintf("   .Computing further analysis on the force...")
-                [meanTrend(i), lowSlope(i), upSlope(i)] ...
+                [meanTrend(i), lowSlope(i), upSlope(i), meanAmplitude(i)] ...
                     = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
                 fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             end
@@ -363,6 +364,11 @@ function dataPlotter(TELEGRAM_LOG)
     synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
     midVelocityMean = midVelocityMean(midVelocityMean~=notConsideredValue);
     midVelocityStd = midVelocityStd(midVelocityStd~=notConsideredValue);
+
+    meanTrend = meanTrend(meanTrend~=notConsideredValue);
+    lowSlope = lowSlope(lowSlope~=notConsideredValue);
+    upSlope = upSlope(upSlope~=notConsideredValue);
+    meanAmplitude = meanAmplitude(meanAmplitude~=notConsideredValue);
     
     % All the following values are already in cm
     posAPeaksStd = posAPeaksStd(posAPeaksStd~=notConsideredValue).*100;
@@ -392,7 +398,7 @@ function dataPlotter(TELEGRAM_LOG)
     %% Force further analysis
     tic
     fprintf("\nPlotting force further analysis results...")
-    plotForceFurtherAnalysis();
+    plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude);
     fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
     %% Conclusion of the main
