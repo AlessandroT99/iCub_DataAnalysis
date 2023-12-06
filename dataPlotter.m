@@ -128,6 +128,7 @@ function dataPlotter(TELEGRAM_LOG)
     upSlope = notConsideredValue.*ones(1,numPeople);
     peaksAmplitude = cell(1,numPeople);
     meanXforce = notConsideredValue.*ones(1,numPeople);
+    numP = 0;
     
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
@@ -182,7 +183,7 @@ function dataPlotter(TELEGRAM_LOG)
     
         % Before iterating check that the person has not an invalid dataset
         % which has to be skipped
-        if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0
+        if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0 && sum(find(numP==NOT_ABLE_TO_GENERATE_FORCE)) == 0
             personTime = tic;
             if BaseLineEvaluationDone == 0
                 if TELEGRAM_LOG
@@ -269,7 +270,7 @@ function dataPlotter(TELEGRAM_LOG)
             if or(strcmp(people.Mano(i),"R") == 1, i == 1) && i ~= 2 && sum(find(numP==NOT_ABLE_TO_GENERATE_FORCE)) == 0
                 tic
                 fprintf("   .Computing further analysis on the force...")
-                [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude(i)] ...
+                [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude{i}] ...
                     = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
                 fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             end
@@ -367,12 +368,15 @@ function dataPlotter(TELEGRAM_LOG)
     synchroEfficiency = synchroEfficiency(synchroEfficiency(:,1)~=notConsideredValue,:);
     midVelocityMean = midVelocityMean(midVelocityMean~=notConsideredValue);
     midVelocityStd = midVelocityStd(midVelocityStd~=notConsideredValue);
+    HtoR_relativeVelocity = HtoR_relativeVelocity(~cellfun('isempty',HtoR_relativeVelocity));
+    RtoH_relativeVelocity = RtoH_relativeVelocity(~cellfun('isempty',RtoH_relativeVelocity));
 
     meanTrend = meanTrend(meanTrend~=notConsideredValue);
     lowSlope = lowSlope(lowSlope~=notConsideredValue);
     upSlope = upSlope(upSlope~=notConsideredValue);
     peaksAmplitude = peaksAmplitude(peaksAmplitude~=notConsideredValue);
     meanXforce = meanXforce(meanXforce~=notConsideredValue);
+    peaksAmplitude = peaksAmplitude(~cellfun('isempty',peaksAmplitude));
 
     % All the following values are already in cm
     posAPeaksStd = posAPeaksStd(posAPeaksStd~=notConsideredValue).*100;

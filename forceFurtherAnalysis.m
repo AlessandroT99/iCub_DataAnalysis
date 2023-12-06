@@ -58,11 +58,11 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
     for j = 1:min(length(minLocalization),length(maxLocalization))
         if minLocalization(1) < maxLocalization(1)
             if j+1 < length(maxLocalization) && j < length(minLocalization)
-                peaksAmplitude(i) = abs(abs(minLocalization(j))-abs(maxLocalization(j+1)));
+                peaksAmplitude(j) = abs(abs(minLocalization(j))-abs(maxLocalization(j+1)));
             end
         else
             if j < length(maxLocalization) && j+1 < length(minLocalization)
-                peaksAmplitude(i) = abs(abs(maxLocalization(j))-abs(minLocalization(j+1)));
+                peaksAmplitude(j) = abs(abs(maxLocalization(j))-abs(minLocalization(j+1)));
             end
         end
     end

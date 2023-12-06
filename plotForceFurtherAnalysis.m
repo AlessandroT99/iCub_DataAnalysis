@@ -18,7 +18,7 @@
 % determine a parameter to increase efficience of the interaction,
 % especially it is used to plot the data saved for each dataset involved.
 
-function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
+function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude)
     %% Simulation parameters
     IMAGE_SAVING = 1; % Put to 1 in order to save the main plots
     PAUSE_TIME = 2; % Used to let the window of the plot get the full resolution size before saving
@@ -61,10 +61,14 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, meanAmplitude)
     end
 
     %% Mean Amplitude - 8. FORCE MEAN AMPLITUDE
+    meanPeaksAmplitude = zeros(1,length(peaksAmplitude));
+    for i = 1:length(peaksAmplitude)
+        meanPeaksAmplitude(i) = mean(peaksAmplitude{i});
+    end
     fig2 = figure('Name','Experiment duration scatter');
     fig2.WindowState = 'maximized';
     grid on, hold on
-    scatter(1:length(meanAmplitude),meanAmplitude,MarkerDimension,clearRed,'filled')
+    scatter(1:length(meanPeaksAmplitude),meanPeaksAmplitude,MarkerDimension,clearRed,'filled')
 %     lsline
     title("Mean amplitude of the force signal")
     xlabel("Force [ N ]")
