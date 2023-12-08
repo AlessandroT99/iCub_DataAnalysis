@@ -18,7 +18,7 @@
 % determine a parameter to increase efficience of the interaction,
 % especially it is used to plot the data saved for each dataset involved.
 
-function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude)
+function plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, peaksAmplitude)
     %% Simulation parameters
     IMAGE_SAVING = 1; % Put to 1 in order to save the main plots
     PAUSE_TIME = 2; % Used to let the window of the plot get the full resolution size before saving
@@ -45,20 +45,19 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude)
     mkdir ..\iCub_ProcessedData\Scatters\7.ForceAnalysis
 
     %% Mean Trend - 7. FORCE MEAN TREND
-    fig1 = figure('Name','Mean behavior of each force signal');
-    fig1.WindowState = 'maximized';
-    grid on, hold on
-    plot(linspace(0,100,size(meanTrend,2)),meanTrend)
-    title("Mean behavior of each force signal")
-    ylabel("Force [ N ]")
-    xlabel("Experiment progression [ % ]")
-    hold off
-
-    if IMAGE_SAVING
-        pause(PAUSE_TIME);
-        exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\7.ForceAnalysis\MeanTrend.png")
-        close(fig1);
-    end
+%     fig1 = figure('Name','Mean behavior of each force signal');
+%     fig1.WindowState = 'maximized';
+%     grid on, hold on
+%     plot(meanTrend,linspace(0,100,size(meanTrend,2)))
+%     title("Mean behavior of each force signal")
+%     xlabel("Force [ N ]"), ylabel("Experiment progression [ % ]")
+%     hold off
+% 
+%     if IMAGE_SAVING
+%         pause(PAUSE_TIME);
+%         exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\7.ForceAnalysis\MeanTrend.png")
+%         close(fig1);
+%     end
 
     %% Mean Amplitude - 8. FORCE MEAN AMPLITUDE
     meanPeaksAmplitude = zeros(1,length(peaksAmplitude));
@@ -68,11 +67,9 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude)
     fig2 = figure('Name','Experiment duration scatter');
     fig2.WindowState = 'maximized';
     grid on, hold on
-    scatter(1:length(meanPeaksAmplitude),meanPeaksAmplitude,MarkerDimension,clearRed,'filled')
-%     lsline
+    scatter(meanPeaksAmplitude,1:length(meanPeaksAmplitude),MarkerDimension,clearRed,'filled')
     title("Mean amplitude of the force signal")
-    xlabel("Force [ N ]")
-    ylabel("# Test")
+    xlabel("Force [ N ]"), ylabel("# Test")
     hold off
 
     if IMAGE_SAVING
@@ -85,12 +82,11 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude)
     fig3 = figure('Name','Slope of the force signal in the upper and lower peaks');
     fig3.WindowState = 'maximized';
     grid on, hold on
-    scatter(1:length(lowSlope),lowSlope,MarkerDimension,clearRed,'filled')
-    scatter(1:length(upSlope),upSlope,MarkerDimension,clearBlue,'filled')
+    scatter(lowSlope,1:length(lowSlope),MarkerDimension,clearRed,'filled')
+    scatter(upSlope,1:length(upSlope),MarkerDimension,clearBlue,'filled')
     title("Slope of the force signal in the upper and lower peaks")
     legend("Lower slope","Upper slope")
-    xlabel("Slope")
-    ylabel("# Test")
+    xlabel("Slope"), ylabel("# Test")
     hold off
 
     if IMAGE_SAVING
@@ -98,4 +94,9 @@ function plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude)
         exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\7.ForceAnalysis\Slope.png")
         close(fig3);
     end
+
+    %% Save data
+    matx = table([testedPeople, upSlope-lowSlope, meanPeaksAmplitude]);
+    matx = renamevars(matx, 1:width(matx),["ID","Force Resultant slope","Peaks Mean amplitude"]);
+    writetable(matx, "..\iCub_ProcessedData\PeaksForceData.xlsx");
 end

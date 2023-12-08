@@ -408,6 +408,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
                 end
                 pause(PAUSE_TIME);
                 exportgraphics(fig2,path)
+                close(fig2);
             end
         end    
     

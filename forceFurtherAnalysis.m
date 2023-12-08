@@ -46,8 +46,9 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
             [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder(meanTrend,percentageMean,averageEnv);
             processComplete = 1;
         catch err
-            fprintf("\n\nSolving the issue: \n%s",getReport(err))
+            fprintf("\n\nSolving the issue: \n%s\n",getReport(err))
             percentageMean = percentageMean + 5;
+            fprintf("\nAdded 5 percent in the range of mean evaluation, now it is solved for each %d percent of the signal.\n",percentageMean)
             processComplete = 0;
         end
     end
@@ -57,12 +58,12 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
     peaksAmplitude = zeros(1,min(length(minLocalization),length(maxLocalization)));
     for j = 1:min(length(minLocalization),length(maxLocalization))
         if minLocalization(1) < maxLocalization(1)
-            if j+1 < length(maxLocalization) && j < length(minLocalization)
-                peaksAmplitude(j) = abs(abs(minLocalization(j))-abs(maxLocalization(j+1)));
+            if j+1 < length(maxPeaksVal) && j < length(minPeaksVal)
+                peaksAmplitude(j) = abs(abs(minPeaksVal(j))-abs(maxPeaksVal(j+1)));
             end
         else
-            if j < length(maxLocalization) && j+1 < length(minLocalization)
-                peaksAmplitude(j) = abs(abs(maxLocalization(j))-abs(minLocalization(j+1)));
+            if j < length(maxPeaksVal) && j+1 < length(minPeaksVal)
+                peaksAmplitude(j) = abs(abs(maxPeaksVal(j))-abs(minPeaksVal(j+1)));
             end
         end
     end

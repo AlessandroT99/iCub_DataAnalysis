@@ -18,7 +18,7 @@
 % - find a way to save the two scrollable plots as image.
 % - start the further analysis on the force
 
-function dataPlotter(TELEGRAM_LOG)
+ function dataPlotter(TELEGRAM_LOG)
     tStart = tic;
     
     % Suppress the warning about creating folder that already exist
@@ -54,10 +54,10 @@ function dataPlotter(TELEGRAM_LOG)
     if NEW_BASELINES
         % Remember to create manually the folders for containing this outputs!
         BaselineMainDataFolder = "..\iCub_InputData\NewBaselines"; % Name of the main folder containing all baselines data
-        LbaseLinePath = "B_SX_Soft";  % Name of the folder containing the file of the L baseline
+        LbaseLinePath = "B_SX_Soft_NewSensor";  % Name of the folder containing the file of the L baseline
         RbaseLinePath = "B_DX_Soft_NewSensor";  % Name of the folder containing the file of the R baseline
-        BaseLineOutputName_L = "\NewBaselines\B_SX_Soft";   % The initial part of the name of the L baseline output
-        BaseLineOutputName_R = "\NewBaselines\B_DX_Soft_NewSensor";   % The initial part of the name of the R baseline output
+        BaseLineOutputName_L = "NewBaselines\B_SX_Soft_NewSensor";   % The initial part of the name of the L baseline output
+        BaseLineOutputName_R = "NewBaselines\B_DX_Soft_NewSensor";   % The initial part of the name of the R baseline output
     else
         BaselineMainDataFolder = "..\iCub_InputData"; % Name of the main folder containing all baselines data
         LbaseLinePath = "P0_L_Base";  % Name of the folder containing the file of the L baseline
@@ -72,7 +72,9 @@ function dataPlotter(TELEGRAM_LOG)
     numPeople = 32+BASELINE_NUMBER; 
     people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
     people = people(1:numPeople-BASELINE_NUMBER,:);
-    
+
+    FxLeftMean = -11.6261;
+
     % The following command is part of the robotic toolbox
     % Whilst the iCub model has been downloaded from
     % "https://github.com/robotology/icub-models"
@@ -128,7 +130,6 @@ function dataPlotter(TELEGRAM_LOG)
     upSlope = notConsideredValue.*ones(1,numPeople);
     peaksAmplitude = cell(1,numPeople);
     meanXforce = notConsideredValue.*ones(1,numPeople);
-    numP = 0;
     
     %% Usefull data to be saved
     fprintf("\nStarting the data analysis...\n")
@@ -184,6 +185,19 @@ function dataPlotter(TELEGRAM_LOG)
         % Before iterating check that the person has not an invalid dataset
         % which has to be skipped
         if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0 && sum(find(numP==NOT_ABLE_TO_GENERATE_FORCE)) == 0
+            % Adjusting the Fx mean value due to the hand used, so only if
+            % is a test with the robot hand R or if it is the baseline
+            % number 2, also made with the right hand of the robot
+            if i == 2
+                forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
+            else
+                if numP > 0
+                    if strcmp(people.Mano(numP), "L") == 1
+                        forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
+                    end
+                end
+            end
+
             personTime = tic;
             if BaseLineEvaluationDone == 0
                 if TELEGRAM_LOG
@@ -267,14 +281,12 @@ function dataPlotter(TELEGRAM_LOG)
             fprintf("                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
             
             % Force further analysis on left hand of the robot or the baseline with robot left hand
-            if or(strcmp(people.Mano(i),"R") == 1, i == 1) && i ~= 2 && sum(find(numP==NOT_ABLE_TO_GENERATE_FORCE)) == 0
-                tic
-                fprintf("   .Computing further analysis on the force...")
-                [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude{i}] ...
-                    = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
-                fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
-            end
-            
+            tic
+            fprintf("   .Computing further analysis on the force...")
+            [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude{i}] ...
+                = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
+            fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+
             % Output parameters collection
             if BaseLineEvaluationDone
                 totalMeanHtoR = totalMeanHtoR + meanHtoR_time(i);  
@@ -374,7 +386,6 @@ function dataPlotter(TELEGRAM_LOG)
     meanTrend = meanTrend(meanTrend~=notConsideredValue);
     lowSlope = lowSlope(lowSlope~=notConsideredValue);
     upSlope = upSlope(upSlope~=notConsideredValue);
-    peaksAmplitude = peaksAmplitude(peaksAmplitude~=notConsideredValue);
     meanXforce = meanXforce(meanXforce~=notConsideredValue);
     peaksAmplitude = peaksAmplitude(~cellfun('isempty',peaksAmplitude));
 
@@ -406,7 +417,7 @@ function dataPlotter(TELEGRAM_LOG)
     %% Force further analysis
     tic
     fprintf("\nPlotting force further analysis results...")
-    plotForceFurtherAnalysis(meanTrend, lowSlope, upSlope, peaksAmplitude);
+    plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, peaksAmplitude);
     fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
     %% Conclusion of the main
