@@ -619,10 +619,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
                     % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
                     finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
                     fprintf("\nThere was an error! This dataset will be skipped.")
-                    if ~isempty(e.identifier)
-                        fprintf(2,"\n%s\n\n",getReport(e))
+                    if ~isempty(forceErr.identifier)
+                        fprintf(2,"\n%s\n\n",getReport(forceErr))
                     else
-                        fprintf(2,'\nThe message was:\n%s',e.message);
+                        fprintf(2,'\nThe message was:\n%s',forceErr.message);
                     end
                     if TELEGRAM_LOG
                         outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");

@@ -82,10 +82,13 @@ function plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, pe
     fig3 = figure('Name','Slope of the force signal in the upper and lower peaks');
     fig3.WindowState = 'maximized';
     grid on, hold on
+    scatter(upSlope-lowSlope,1:length(upSlope),2*MarkerDimension,clearGreen,'filled');
+    h = lsline;
+    h.ColorVariable = clearGreen;
     scatter(lowSlope,1:length(lowSlope),MarkerDimension,clearRed,'filled')
     scatter(upSlope,1:length(upSlope),MarkerDimension,clearBlue,'filled')
     title("Slope of the force signal in the upper and lower peaks")
-    legend("Lower slope","Upper slope")
+    legend("Resultant slope","Trend of the resultant","Lower slope","Upper slope")
     xlabel("Slope"), ylabel("# Test")
     hold off
 

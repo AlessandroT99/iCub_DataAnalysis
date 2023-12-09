@@ -205,7 +205,12 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     fprintf("       .Evaluation of the rotation matrix of the first set of data...")
 
     errorsComputed = 0; % Number of errors computed which are admissibile in the iKin evaluation
+
+    h = waitbar(0, 'Force transformation execution...');
     for i = 1:height(cuttedSynchForceDataSet)
+        completion_percentage = i/height(cuttedSynchForceDataSet);
+        waitbar(completion_percentage, h, sprintf('Force transformation execution... %d%%', round(completion_percentage * 100)));
+
         %% 1. Rotation matrix from hand to OF
         if numPerson < JOINTS_ONLY_FOR_BASELINE
             armJoints = table2array(cuttedSynchJointDataSet(i,2:end));
@@ -329,6 +334,7 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         newCuttedSynchForceDataSet.Fy(i) = F(2);
         newCuttedSynchForceDataSet.Fz(i) = F(3);
     end
+    close(h);
 
     if NUMBER_OF_SAMPLES < height(newCuttedSynchForceDataSet) && I_KIN_ERROR_EVALUATION
         fprintf("     Completed in %s minutes\n",duration(0,0,toc(TMatrices),'Format','mm:ss.SS'))

@@ -2,7 +2,7 @@ function qOpts = iCubIK_RArm(eeTform, enforceJointLimits, sortByDistance, refere
 %iCubIK_RArm Function for generating closed-form inverse kinematics solutions to the DH robot given by the parameters specified below
 %   $Revision: $ $Date: $
 %
-%   Generated on 08-Dec-2023 17:58:02
+%   Generated on 08-Dec-2023 23:53:07
 
 
 dhParams = [4.33680999998575e-19 1.57079701358663 7.63437300840464e-31 0;0.0149999999999472 1.57079898038469 -0.152279999999894 0;0.0149999999998988 1.5707963267814 3.98038468933481e-08 0;3.08814636760865e-23 1.5707963267814 -0.137300055098077 0;0 1.5707963267949 -8.40722551803207e-18 0;0.0624999999999999 0 0.016 0];
