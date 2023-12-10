@@ -41,6 +41,8 @@ function plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, pe
     ConnectionLineWidthROM = 0.5;
     LineTypeROM = '-';
 
+    BASELINE_NUMBER = 2;
+
     % Folders and priority order of the subfolders
     mkdir ..\iCub_ProcessedData\Scatters\7.ForceAnalysis
 
@@ -84,7 +86,7 @@ function plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, pe
     grid on, hold on
     scatter(upSlope-lowSlope,1:length(upSlope),2*MarkerDimension,clearGreen,'filled');
     h = lsline;
-    h.ColorVariable = clearGreen;
+    h.Color = clearGreen;
     scatter(lowSlope,1:length(lowSlope),MarkerDimension,clearRed,'filled')
     scatter(upSlope,1:length(upSlope),MarkerDimension,clearBlue,'filled')
     title("Slope of the force signal in the upper and lower peaks")
@@ -99,7 +101,11 @@ function plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, pe
     end
 
     %% Save data
-    matx = table([testedPeople, upSlope-lowSlope, meanPeaksAmplitude]);
+    matx = table(testedPeople', (upSlope(BASELINE_NUMBER+1:end)-lowSlope(BASELINE_NUMBER+1:end))', meanPeaksAmplitude(BASELINE_NUMBER+1:end)');
     matx = renamevars(matx, 1:width(matx),["ID","Force Resultant slope","Peaks Mean amplitude"]);
+    if isfile("..\iCub_ProcessedData\PeaksForceData.xlsx")
+        delete("..\iCub_ProcessedData\PeaksForceData.xlsx");
+    end
     writetable(matx, "..\iCub_ProcessedData\PeaksForceData.xlsx");
+    
 end

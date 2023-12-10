@@ -18,7 +18,7 @@
 % - find a way to save the two scrollable plots as image.
 % - start the further analysis on the force
 
- function dataPlotter(TELEGRAM_LOG)
+ function dataPlotter(TELEGRAM_LOG, AVOIDING_TESTS)
     tStart = tic;
     
     % Suppress the warning about creating folder that already exist
@@ -34,15 +34,12 @@
     
     %% Simulation parameter
     BIG_PLOT_ENABLE = 0;        % Allows to the plotting of the two big gender plot 
-    PAUSE_PEOPLE = -5;          % Array containing number of people for which the synch 
-                                %   shall put in pause to handle graphs (-5 == noone pause)
+    PAUSE_PEOPLE = -5;          % Array containing number of people for which the synch shall put in pause to handle graphs (-5 == noone pause)
     AXIS_3PLOT = 1;             % Allows plotting all the 3 force and position components
     BASELINE_NUMBER = 2;        % Number of baseline in the simulation
     BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
     posBaseline = [];           % Variable where the pos baseline is saved
     baselineBoundaries = zeros(BASELINE_NUMBER,2); % Used to save the boundaries of the baseline and print them into the positions [Rmax,Lmax;Rmin,Lmin]
-    
-    NOT_ABLE_TO_GENERATE_FORCE = [9,17];
 
     % Logging instants in telegram
     if TELEGRAM_LOG
@@ -88,7 +85,7 @@
     opts = showdetails(aik);
     % % Code use to identify the unusefull warning
     % [msg,warnID] = lastwarn
-    % show(iCub);BaselineMainDataFolder
+    % show(iCub);
     
     %% Output initialization
     totalMeanHtoR = 0;
@@ -184,7 +181,7 @@
     
         % Before iterating check that the person has not an invalid dataset
         % which has to be skipped
-        if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0 && sum(find(numP==NOT_ABLE_TO_GENERATE_FORCE)) == 0
+        if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0 && sum(find(numP==AVOIDING_TESTS)) == 0
             % Adjusting the Fx mean value due to the hand used, so only if
             % is a test with the robot hand R or if it is the baseline
             % number 2, also made with the right hand of the robot
@@ -231,7 +228,7 @@
             % Synchronizing the two dataset to show them in a single plot
             [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i), meanXforce(i)] = ...
               synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
-                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, NOT_ABLE_TO_GENERATE_FORCE);   
+                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, AVOIDING_TESTS);   
     
             if BIG_PLOT_ENABLE && BaseLineEvaluationDone
                 if strcmp(people.Genere(i),"M") == 1

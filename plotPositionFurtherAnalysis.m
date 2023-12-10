@@ -58,6 +58,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     IMAGE_SAVING = 1; % Put to 1 in order to save the main plots
     PAUSE_TIME = 2; % Used to let the window of the plot get the full resolution size before saving
     nTest = length(experimentDuration); % Number of test analyzed
+    TIME_CONVERSION_CONSTANT = 0.01;
     clearGreen = [119,221,119]./255;
     clearRed = [1,0.4,0];
     clearBlue = [0,0.6,1];
@@ -116,11 +117,12 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2aa = figure('Name','Human phases duration scatter');
     fig2aa.WindowState = 'maximized';
     grid on, hold on
-    scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks]))./100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanRtoH_time(logical([0,0,logicalIntervalPeaks])),1/100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    scatter(meanRtoH_time(logical([0,0,logicalIntervalPeaks])).*TIME_CONVERSION_CONSTANT,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    xline(1.5,'k--')
+    plot_mean_stdError(meanRtoH_time(logical([0,0,logicalIntervalPeaks])),TIME_CONVERSION_CONSTANT,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase time duration")
     xlabel("Elapsed Time [ s ]"), ylabel("Near-Hand Effect [ ms ]")
-    legend('Human Pulling phase','Mean','Trend','Standard Error')
+    legend('Human Pulling phase',"Ideal value",'Mean','Trend','Standard Error')
     set(gca, 'YDir','reverse')
     hold off
 
@@ -133,11 +135,12 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2ab = figure('Name','Robot phases duration scatter');
     fig2ab.WindowState = 'maximized';
     grid on, hold on
-    scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks]))./100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(meanHtoR_time(logical([0,0,logicalIntervalPeaks])),1/100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    scatter(meanHtoR_time(logical([0,0,logicalIntervalPeaks])).*TIME_CONVERSION_CONSTANT,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    xline(1.5,'k--')
+    plot_mean_stdError(meanHtoR_time(logical([0,0,logicalIntervalPeaks])),TIME_CONVERSION_CONSTANT,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phase time duration")
     xlabel("Elapsed Time [ s ]"), ylabel("Near-Hand Effect [ ms ]")
-    legend('Robot Pulling phase','Mean','Trend','Standard Error')
+    legend('Robot Pulling phase',"Ideal value",'Mean','Trend','Standard Error')
     set(gca, 'YDir','reverse')
     hold off
 
@@ -152,10 +155,11 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2ba.WindowState = 'maximized';
     grid on, hold on
     scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    xline(8.75,'k--')
     plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
-    legend('Human Pulling phase','Mean','Trend','Standard Error')
+    legend('Human Pulling phase',"Ideal value",'Mean','Trend','Standard Error')
     set(gca, 'YDir','reverse')
     hold off
 
@@ -169,10 +173,11 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2bb.WindowState = 'maximized';
     grid on, hold on
     scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    xline(8.75,'k--')
     plot_mean_stdError(meanHtoR_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phases space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
-    legend('Human Pulling phase','Mean','Trend','Standard Error')
+    legend('Human Pulling phase',"Ideal value",'Mean','Trend','Standard Error')
     set(gca, 'YDir','reverse')
     hold off
 
@@ -188,8 +193,8 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     grid on, hold on
     xScat = phaseTimeDifference(logical([0,0,logicalIntervalPeaks]));
     yScat = nearHand(logicalIntervalPeaks);
-    scatter(xScat./100,yScat,MarkerDimension,'red','LineWidth',EmptyPointLine)    
-    plot_mean_stdError(xScat,1/100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    scatter(xScat.*TIME_CONVERSION_CONSTANT,yScat,MarkerDimension,'red','LineWidth',EmptyPointLine)    
+    plot_mean_stdError(xScat,TIME_CONVERSION_CONSTANT,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Duration Difference of the Pulling Phases")
     xlabel("Pulling Phases Time Difference (H-R) [ s ]"), ylabel("Near-end Effect [ ms ]")
     legend("Subject",'Mean','Trend','Standard Error')
@@ -205,21 +210,21 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     % Evaluate mean of the values
     HtoR_relativeVelocityMean = zeros(1,length(meanHtoR_space));
     for i = 1:length(HtoR_relativeVelocity)
-        HtoR_relativeVelocityMean(i) = mean(HtoR_relativeVelocity{i});
+        HtoR_relativeVelocityMean(i) = abs(mean(HtoR_relativeVelocity{i}));
     end
     RtoH_relativeVelocityMean = zeros(1,length(meanHtoR_space));
     for i = 1:length(RtoH_relativeVelocity)
-        RtoH_relativeVelocityMean(i) = mean(RtoH_relativeVelocity{i});
+        RtoH_relativeVelocityMean(i) = abs(mean(RtoH_relativeVelocity{i}));
     end
     
     % Plot results
     fig2va = figure('Name','Human phases relative velocity scatter');
     fig2va.WindowState = 'maximized';
     grid on, hold on
-    scatter(RtoH_relativeVelocityMean(logical([0,0,logicalIntervalPeaks]))./0.01,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    plot_mean_stdError(RtoH_relativeVelocityMean(logical([0,0,logicalIntervalPeaks])),1/0.01,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    scatter(RtoH_relativeVelocityMean(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
+    plot_mean_stdError(RtoH_relativeVelocityMean(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase relative velocity")
-    xlabel("Relative Velocity [ m/s ]"), ylabel("Near-Hand Effect [ ms ]")
+    xlabel("Relative Velocity [ cm/s ]"), ylabel("Near-Hand Effect [ ms ]")
     legend('Human Pulling phase','Mean','Trend','Standard Error')
     set(gca, 'YDir','reverse')
     hold off
@@ -233,10 +238,10 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2vb = figure('Name','Robot phases relative velocity scatter');
     fig2vb.WindowState = 'maximized';
     grid on, hold on
-    scatter(HtoR_relativeVelocityMean(logical([0,0,logicalIntervalPeaks]))./0.01,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    plot_mean_stdError(HtoR_relativeVelocityMean(logical([0,0,logicalIntervalPeaks])),1/0.01,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
+    scatter(HtoR_relativeVelocityMean(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
+    plot_mean_stdError(HtoR_relativeVelocityMean(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phase relative velocity")
-    xlabel("Relative Velocity [ m/s ]"), ylabel("Near-Hand Effect [ ms ]")
+    xlabel("Relative Velocity [ cm/s ]"), ylabel("Near-Hand Effect [ ms ]")
     legend('Robot Pulling phase','Mean','Trend','Standard Error')
     set(gca, 'YDir','reverse')
     hold off
@@ -486,19 +491,22 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     ROMdeviationCenterFromBaseline = zeros(length(posAidx),1);
     ROMdeviationCenterFromBaseline(leftHandTests(2:end)) = (posAidx(leftHandTests(3:end))+posBidx(leftHandTests(3:end)))./2-abs(posAPeaksmean(1)+posBPeaksmean(1))/2;
     ROMdeviationCenterFromBaseline(rightHandTests(2:end)) = (posAidx(rightHandTests(3:end))+posBidx(rightHandTests(3:end)))./2-abs(posAPeaksmean(BASELINE_NUMBER)+posBPeaksmean(BASELINE_NUMBER))/2;
-    %ROMdeviationCenterFromBaseline_old = (posAidx+posBidx)./2-(posAidx(1)+posBidx(1))/2;
 
     matx = table([-1;testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, [mean(ROM(1:BASELINE_NUMBER));ROM(BASELINE_NUMBER+1:end)'], ROMdeviationCenterFromBaseline, ...
-                 [mean(phaseTimeDifference(1:BASELINE_NUMBER)./0.01);phaseTimeDifference(BASELINE_NUMBER+1:end)'./0.01], [0,nearHand]', ...
-                 [mean(meanRtoH_time(1:BASELINE_NUMBER)./0.01);meanRtoH_time(BASELINE_NUMBER+1:end)'./0.01],[mean(meanHtoR_time(1:BASELINE_NUMBER)./0.01);meanHtoR_time(BASELINE_NUMBER+1:end)'./0.01], ...
+                 [mean(phaseTimeDifference(1:BASELINE_NUMBER));phaseTimeDifference(BASELINE_NUMBER+1:end)'].*TIME_CONVERSION_CONSTANT, [0,nearHand]', ...
+                 [mean(meanRtoH_time(1:BASELINE_NUMBER));meanRtoH_time(BASELINE_NUMBER+1:end)'].*TIME_CONVERSION_CONSTANT,[mean(meanHtoR_time(1:BASELINE_NUMBER));meanHtoR_time(BASELINE_NUMBER+1:end)'].*TIME_CONVERSION_CONSTANT, ...
                  [mean(meanRtoH_space(1:BASELINE_NUMBER).*100);meanRtoH_space(BASELINE_NUMBER+1:end)'.*100],[mean(meanHtoR_space(1:BASELINE_NUMBER).*100);meanHtoR_space(BASELINE_NUMBER+1:end)'.*100], ...
+                 [mean(HtoR_relativeVelocityMean(1:BASELINE_NUMBER));HtoR_relativeVelocityMean(BASELINE_NUMBER+1:end)'].*100, [mean(RtoH_relativeVelocityMean(1:BASELINE_NUMBER));RtoH_relativeVelocityMean(BASELINE_NUMBER+1:end)'].*100, ...
                  [mean(posBPeaksStd(1:BASELINE_NUMBER));posBPeaksStd(BASELINE_NUMBER+1:end)'], [mean(posAPeaksStd(1:BASELINE_NUMBER));posAPeaksStd(BASELINE_NUMBER+1:end)']);
 
     matx = renamevars(matx, 1:width(matx), ["ID","posB [cm]","posA [cm]", "Deviation from B [cm]","Deviation from A [cm]", ...
                                             "ROM [cm]", "Simmetry [cm]", "Phase Delay [s]", "Near-Hand [ms]", ...
                                             "Human-Phase TimeDomain [s]", "Robot-Phase TimeDomain [s]", "Human-Phase SpaceDomain [cm]", "Robot-Phase SpaceDomain [cm]", ...
-                                            "std(posB) [cm]","std(posA) [cm]"]);
+                                            "Robot-Phase RelativeVelocity [cm/s]", "Human-Phase RelativeVelocity [cm/s]", "std(posB) [cm]","std(posA) [cm]"]);
 
+    if isfile("..\iCub_ProcessedData\PeaksPositionData.xlsx")
+        delete("..\iCub_ProcessedData\PeaksPositionData.xlsx");
+    end
     writetable(matx, "..\iCub_ProcessedData\PeaksPositionData.xlsx");
 
     %% Difference between ROM centers - 1. NEAR END
@@ -724,22 +732,22 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
         close(fig13);
     end
 
-    %% Velocity analysis - 5. OTHERS
+    %% Velocity analysis - 1. NEAR HAND
     fig14 = figure('Name','Velocity middle peaks trend analysis');
     fig14.WindowState = 'maximized';
     grid on, hold on
-    scatter(midVelocityMean(1:BASELINE_NUMBER), midVelocityStd(1:BASELINE_NUMBER), MarkerDimension, clearRed, 'filled','DisplayName','Baselines')
-    scatter(midVelocityMean(BASELINE_NUMBER+1:end), midVelocityStd(BASELINE_NUMBER+1:end), MarkerDimension, 'red', 'LineWidth', 1.8, 'DisplayName','Experiments values');
-    plot_mean_stdError(midVelocityMean(BASELINE_NUMBER+1:end),1,midVelocityStd(BASELINE_NUMBER+1:end),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
+    scatter(abs(midVelocityMean(logical([0,0,logicalIntervalPeaks]))).*100, nearHand(logicalIntervalPeaks), MarkerDimension, 'red', 'LineWidth', 1.8, 'DisplayName','Experiments values');
+    plot_mean_stdError(abs(midVelocityMean(logical([0,0,logicalIntervalPeaks]))),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Velocity middle peaks trend analysis")
-    legend('Baseline','Subjects','Mean','Trend','Standard Error','Location','eastoutside')
-    xlabel("Mean [ m/s ]")
-    ylabel("Standar deviation [ m/s ]")
+    legend('Subjects','Mean','Trend','Standard Error','Location','eastoutside')
+    xlabel("Mean [ cm/s ]")
+    ylabel("Near Hand Effect [ ms ]")
+    set(gca, 'YDir','reverse')
     hold off    
 
     if IMAGE_SAVING
         pause(PAUSE_TIME);
-        exportgraphics(fig14,"..\iCub_ProcessedData\Scatters\5.Others\VelocityAnalysis.png")
+        exportgraphics(fig14,"..\iCub_ProcessedData\Scatters\1.NearHand\NearHand-VelocityMiddleAnalysis.png")
         close(fig14);
     end
 

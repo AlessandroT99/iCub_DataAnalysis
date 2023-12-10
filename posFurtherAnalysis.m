@@ -181,8 +181,8 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         end
     end
     
-    RtoH_relativeVelocity = RtoH_space./RtoH_time;
-    HtoR_relativeVelocity = HtoR_space./HtoR_time;
+    RtoH_relativeVelocity = RtoH_space./(RtoH_time./100);
+    HtoR_relativeVelocity = HtoR_space./(HtoR_time./100);
 
     %% Evaluation of phase time difference
     timePhasesNumber = min(length(HtoR_time),length(RtoH_time));
@@ -301,6 +301,33 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     close(fig1);
     close(fig2);
     close(fig3);
+
+    %% Plot results for relative velocity
+    fig4 = figure('Name','Phases relative velocity');
+    fig4.WindowState = 'maximized';
+    hold on, grid on
+    plot(HtoR_relativeVelocity.*100,'ro','DisplayName','Human to Robot phase')
+    plot(RtoH_relativeVelocity.*100,'bo','DisplayName','Robot to Human phase')
+    yline(mean(HtoR_relativeVelocity).*100,'r--','DisplayName',"HtoR_{mean}",'LineWidth',2)
+    yline(mean(RtoH_relativeVelocity).*100,'b--','DisplayName',"RtoH_{mean}",'LineWidth',2)
+    title("Relative velocity of phases",defaultTitleName)
+    xlabel("Phase number")
+    ylabel("Velocity [ cm/s ]")
+    legend('show','Location','east')
+    hold off
+
+    % Figure saving for phase time duration
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        mkdir ..\iCub_ProcessedData\RelativeVelocity;
+        if numPerson < 0
+            path = strjoin(["..\iCub_ProcessedData\RelativeVelocity\",BaselineFilesParameters(3),".png"],"");
+        else    
+            path = strjoin(["..\iCub_ProcessedData\RelativeVelocity\P",num2str(numPerson),".png"],"");
+        end
+        exportgraphics(fig4,path)
+        close(fig4);
+    end
 
     %% Peaks values
     nMaxPeaks = length(maxPeaksVal);

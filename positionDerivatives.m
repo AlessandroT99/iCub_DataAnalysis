@@ -18,6 +18,7 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     PAUSE_TIME = 2;
     frequency = 100;
     posDataSet = table2array(cuttedPosDataSet(:,4));
+    TIME_CONVERSION_CONSTANT = 0.01;
 
     %% Plot position signal
     fig1 = figure('Name','Velocity and acceleration evaluation');
@@ -36,7 +37,7 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     %% Velocity evaluation
     velocity = zeros(1,length(posDataSet)-1);
     for i = 2:length(posDataSet)
-        velocity(i) = (posDataSet(i)-posDataSet(i-1))/(0.01);
+        velocity(i) = (posDataSet(i)-posDataSet(i-1))/TIME_CONVERSION_CONSTANT;
     end
     
     fc = 5;
@@ -76,7 +77,7 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     %% Acceleration evaluation
     acceleration = zeros(1,length(filteredVelocity)-1);
     for i = 2:length(filteredVelocity)
-        acceleration(i) = (filteredVelocity(i)-filteredVelocity(i-1))/(0.01);
+        acceleration(i) = (filteredVelocity(i)-filteredVelocity(i-1))/TIME_CONVERSION_CONSTANT;
     end
 
     fc = 2;

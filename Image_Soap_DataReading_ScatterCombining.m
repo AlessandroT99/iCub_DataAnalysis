@@ -52,23 +52,24 @@ load ..\iCub_ProcessedData\ImageProcessing\ImageProcessingData.mat;
 soap = readtable("..\iCub_ProcessedData\SoapData.xlsx");
 
 % DATA PROCESSING USEFULL PARAMETERS
-dataProcessing = readtable("..\iCub_ProcessedData\PeaksPositionData.xlsx");
-dataProcessing = dataProcessing(2:end,:);
+positionDataProcessing = readtable("..\iCub_ProcessedData\PeaksPositionData.xlsx");
+positionDataProcessing = positionDataProcessing(2:end,:);
+forceDataProcessing = readtable("..\iCub_ProcessedData\PeaksForceData.xlsx");
 
 %% Data adjusting
 soap4image = soap;
 soap4dataProcessing = soap;
 cnt = 1;
-nearHandLogic = zeros(height(dataProcessing),1);
+nearHandLogic = zeros(height(positionDataProcessing),1);
 for i = 1:NUM_PEOPLE
     if isnan(RobotLength(i))
         soap4image(i,:) = array2table(nan.*ones(1,width(soap4image)));
     end
 
-    if sum(find(i==dataProcessing.ID)) == 0
+    if sum(find(i==positionDataProcessing.ID)) == 0
         soap4dataProcessing(cnt,:) = [];
     else
-        if ~isnan(dataProcessing.Near_Hand_ms_(cnt))
+        if ~isnan(positionDataProcessing.Near_Hand_ms_(cnt))
             nearHandLogic(cnt) = 1;
         end
         cnt = cnt + 1;
@@ -84,6 +85,7 @@ plot_scatterProcedure(soap4image.PercentageOfRemovedMaterial___,1,TensedWirePerc
 xlabel("Removed material [ % ]"), ylabel("Tensed wire time [ % ]")
 title("Removed material vs. tensed wire time")
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 fig2 = figure('Name','Image Angle vs. Soap Indentation Angle');
 fig2.WindowState = 'maximized';
@@ -92,65 +94,149 @@ plot_scatterProcedure(soap4image.AngleHumanSide_deg_,1,HumanAngle)
 xlabel("Image Angle [ deg ]"), ylabel("Soap Indentation Angle [ deg ]")
 title("Image Angle vs. Soap Indentation Angle")
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 fig3 = figure('Name','Asimmetry of posA vs. Removed material');
 fig3.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(-dataProcessing.DeviationFromA_cm_,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
+plot_scatterProcedure(-positionDataProcessing.DeviationFromA_cm_,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
 xlabel("Asimmetry of posA [ cm ]"), ylabel("Removed material [ % ]")
 title("Asimmetry of posA vs. Removed material")
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 fig4 = figure('Name','Human pulling phase time vs. Removed material');
 fig4.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(dataProcessing.Human_PhaseTimeDomain_s_,100,soap4dataProcessing.PercentageOfRemovedMaterial___)
-xlabel("Human pulling phase time [ ms ]"), ylabel("Removed material [ % ]")
+plot_scatterProcedure(positionDataProcessing.Human_PhaseTimeDomain_s_,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
+xlabel("Human pulling phase time [ s ]"), ylabel("Removed material [ % ]")
 title("Human pulling phase time vs. Removed material")
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 fig5 = figure('Name','Near Hand effect vs. Removed material');
 fig5.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(dataProcessing.Near_Hand_ms_(nearHandLogic),1,soap4dataProcessing.PercentageOfRemovedMaterial___(nearHandLogic))
+plot_scatterProcedure(positionDataProcessing.Near_Hand_ms_(nearHandLogic),1,soap4dataProcessing.PercentageOfRemovedMaterial___(nearHandLogic))
 xlabel("Near Hand effect [ ms ]"), ylabel("Removed material [ % ]")
 title("Near Hand effect vs. Removed material")
 set(gca, 'XDir','reverse')
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 fig6 = figure('Name','ROM vs. Removed material');
 fig6.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(dataProcessing.ROM_cm_,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
+plot_scatterProcedure(positionDataProcessing.ROM_cm_,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
 xlabel("ROM [ cm ]"), ylabel("Removed material [ % ]")
 title("ROM vs. Removed material")
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 fig7 = figure('Name','Pulling phase time difference vs. Removed material');
 fig7.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(abs(dataProcessing.Human_PhaseTimeDomain_s_-dataProcessing.Robot_PhaseTimeDomain_s_),100,soap4dataProcessing.PercentageOfRemovedMaterial___)
-xlabel("Pulling phase time difference [ ms ]"), ylabel("Removed material [ % ]")
+plot_scatterProcedure(abs(positionDataProcessing.PhaseDelay_s_),1,soap4dataProcessing.PercentageOfRemovedMaterial___)
+xlabel("Absolute Pulling phase time difference [ s ]"), ylabel("Removed material [ % ]")
 title("Pulling phase time difference vs. Removed material")
 legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig8 = figure('Name','ROM vs. Force applied');
+fig8.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.ROM_cm_,1,forceDataProcessing.PeaksMeanAmplitude)
+xlabel("ROM [ cm ]"), ylabel("Force Applied [ N ]")
+title("ROM vs. Force applied")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig9 = figure('Name','Force slope vs. Near Hand effect');
+fig9.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(forceDataProcessing.ForceResultantSlope(nearHandLogic),1,positionDataProcessing.Near_Hand_ms_(nearHandLogic))
+xlabel("Force slope"), ylabel("Near Hand effect [ ms ]")
+title("Force slope vs. Near Hand effect")
+set(gca, 'YDir','reverse')
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig10 = figure('Name','Force slope vs. Removed material');
+fig10.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(forceDataProcessing.ForceResultantSlope,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
+xlabel("Force slope"), ylabel("Removed material [ % ]")
+title("Force slope vs. Removed material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig11 = figure('Name','Force applied vs. Removed material');
+fig11.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(forceDataProcessing.PeaksMeanAmplitude,1,soap4dataProcessing.PercentageOfRemovedMaterial___)
+xlabel("Force applied [ N ]"), ylabel("Removed material [ % ]")
+title("Force applied vs. Removed material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig12 = figure('Name','Force slope vs. Force applied');
+fig12.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(forceDataProcessing.ForceResultantSlope,1,forceDataProcessing.PeaksMeanAmplitude)
+xlabel("Force slope"), ylabel("Force applied [ N ]")
+title("Force slope vs. Force applied")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig13 = figure('Name','Relative Velocity Difference (H-R) vs. Removed Material');
+fig13.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.Human_PhaseRelativeVelocity_cm_s_-positionDataProcessing.Robot_PhaseRelativeVelocity_cm_s_,100,soap4dataProcessing.PercentageOfRemovedMaterial___)
+xlabel("Relative velocity difference [ cm/s ]"), ylabel("Removed Material [ % ]")
+title("Relative Velocity Difference (H-R) vs. Removed Material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+
+fig14 = figure('Name','Human Relative Velocity vs. Removed Material');
+fig14.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.Human_PhaseRelativeVelocity_cm_s_,100,soap4dataProcessing.PercentageOfRemovedMaterial___)
+xlabel("Relative velocity [ cm/s ]"), ylabel("Removed Material [ % ]")
+title("Human Relative Velocity vs. Removed Material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
 
 %% Saving results
 if IMAGE_SAVING
     pause(PAUSE_TIME); 
-    exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\TensedWire-RemovedMaterial.png")
+    exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\1_TensedWire-RemovedMaterial.png")
     close(fig1);
-    exportgraphics(fig2,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\ImageAngle-SoapIndentationAngle.png")
+    exportgraphics(fig2,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\2_ImageAngle-SoapIndentationAngle.png")
     close(fig2);
-    exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\AsimmetryPosA-RemovedMaterial.png")
+    exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\3_AsimmetryPosA-RemovedMaterial.png")
     close(fig3);
-    exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\HumanPullingPhaseTime-RemovedMaterial.png")
+    exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\4_HumanPullingPhaseTime-RemovedMaterial.png")
     close(fig4);
-    exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\NearHand-RemovedMaterial.png")
+    exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\5_NearHand-RemovedMaterial.png")
     close(fig5);
-    exportgraphics(fig6,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\ROM-RemovedMaterial.png")
+    exportgraphics(fig6,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\6_ROM-RemovedMaterial.png")
     close(fig6);
-    exportgraphics(fig7,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\PullingPhaseTimeDifference-RemovedMaterial.png")
+    exportgraphics(fig7,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\7_PullingPhaseTimeDifference-RemovedMaterial.png")
     close(fig7);
+    exportgraphics(fig8,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\8_ROM-MeanForceApplied.png")
+    close(fig8);
+    exportgraphics(fig9,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\9_ForceSlope-NearHand.png")
+    close(fig9);
+    exportgraphics(fig10,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\10_ForceSlope-RemovedMaterial.png")
+    close(fig10);
+    exportgraphics(fig11,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\11_MeanForceApplied-RemovedMaterial.png")
+    close(fig11);
+    exportgraphics(fig12,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\12_ForceSlope-MeanForceApplied.png")
+    close(fig12);
+    exportgraphics(fig13,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\13_RelativeVelocityDifference-RemovedMaterial.png")
+    close(fig13);
+    exportgraphics(fig14,"..\iCub_ProcessedData\Scatters\6.CorrelationResearch\14_HumanRelativeVelocity-RemovedMaterial.png")
+    close(fig14);
 end
 
 %% End of the simulation
