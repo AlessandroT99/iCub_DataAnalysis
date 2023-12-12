@@ -185,7 +185,7 @@
             % Adjusting the Fx mean value due to the hand used, so only if
             % is a test with the robot hand R or if it is the baseline
             % number 2, also made with the right hand of the robot
-            if i == 2
+            if i == 2 && strcmp(RbaseLinePath, "P0_R_Base") == 1
                 forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
             else
                 if numP > 0

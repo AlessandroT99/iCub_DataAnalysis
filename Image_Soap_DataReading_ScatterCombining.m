@@ -265,7 +265,52 @@ hold off
 savingFigure(gcf,"18_HumanRelativeVelocity-MeanForceApplied");
 
 %% End of the simulation
-fprintf("\nAnalysis completed.\n\n");
+fprintf("\nAnalysis completed.\n");
+
+%% Saving data
+outputTable = array2table(zeros(NUM_PEOPLE+1,1+width(positionDataProcessing)-1+width(forceDataProcessing)-1+width(soap)-1+2));
+posCnt = 1;
+forceCnt = 1;
+soapCnt = 1;
+for id = 1:NUM_PEOPLE
+    if positionDataProcessing.ID(posCnt) == id
+        outputTable(id+1,2:width(positionDataProcessing)) = positionDataProcessing(posCnt,2:end); 
+        posCnt = posCnt + 1;
+    else
+        outputTable(id+1,2:width(positionDataProcessing)) = array2table(nan(1,width(positionDataProcessing)-1));
+    end
+    
+    if forceDataProcessing.ID(forceCnt) == id
+        outputTable(id,1+width(positionDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)-1) = forceDataProcessing(forceCnt,2:end);
+        forceCnt = forceCnt + 1;
+    else
+        outputTable(id+1,1+width(positionDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)-1) = array2table(nan(1,width(forceDataProcessing)-1));
+    end
+
+    if soap.ID(soapCnt) == id
+        outputTable(id+1, width(positionDataProcessing)+width(forceDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)+width(soap)-2) = soap(soapCnt, 2:end);
+        soapCnt = soapCnt + 1;
+    else 
+        outputTable(id+1, width(positionDataProcessing)+width(forceDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)+width(soap)-2) = arrray2table(nan(1,width(soap)-1));
+    end
+end
+outputTable(2:end,1) = array2table((1:NUM_PEOPLE)');
+outputTable(2:end,end-1:end) = array2table([HumanAngle, RobotAngle]);
+NONE = -1;
+POSITION = 0;
+FORCE = 1;
+SOAP = 2;
+IMAGE = 3;
+outputTable(1,:) = array2table([NONE,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION, ...
+                    FORCE,FORCE,FORCE,SOAP,SOAP,SOAP,IMAGE,IMAGE]);
+outputTable = renamevars(outputTable,1:width(outputTable),["ID",positionDataProcessing.Properties.VariableNames(2:end),forceDataProcessing.Properties.VariableNames(2:end),soap.Properties.VariableNames(2:end),"Image Human Angle", "Image Robot Angle"]);
+
+if isfile("..\iCub_ProcessedData\CompleteAnalysis.xlsx")
+        delete("..\iCub_ProcessedData\CompleteAnalysis.xlsx");
+end
+writetable(outputTable, "..\iCub_ProcessedData\CompleteAnalysis.xlsx");
+
+fprintf("\nAll data saved.\n\n")
 
 %% Function
 function plot_scatterProcedure(x,xMultiplier,y)
