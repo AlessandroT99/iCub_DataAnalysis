@@ -264,6 +264,26 @@ legend("Participants","Trend","Mean","Standard Deviation")
 hold off
 savingFigure(gcf,"18_HumanRelativeVelocity-MeanForceApplied");
 
+fig19 = figure('Name','Mean Angle Human Side vs. Human Relative Velocity');
+fig19.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(HumanAngle(sensorDatalogic4images),1,positionDataProcessing.Human_PhaseRelativeVelocity_cm_s_)
+xlabel("Mean Angle Human Side [ deg ]"), ylabel("Relative Velocity [ cm/s ]")
+title("Mean Angle Human Side vs. Human Relative Velocity")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"19_MeanAngleHumanSide-HumanRelativeVelocity");
+
+fig20 = figure('Name','Near Hand Effect vs. Human Relative Velocity');
+fig20.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.Near_Hand_ms_(nearHandLogic),1,positionDataProcessing.Human_PhaseRelativeVelocity_cm_s_(nearHandLogic))
+xlabel("Near Hand Effect [ ms ]"), ylabel("Relative Velocity [ cm/s ]")
+title("Near Hand Effect vs. Human Relative Velocity")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"20_NearHand-HumanRelativeVelocity");
+
 %% End of the simulation
 fprintf("\nAnalysis completed.\n");
 
