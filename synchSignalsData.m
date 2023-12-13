@@ -376,6 +376,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         if IMAGE_SAVING
             mkdir ..\iCub_ProcessedData\HandTrajectory;
             if numPerson < 0
+                splitted = strsplit(BaselineFilesParameters(3),'\');
+                if length(splitted) > 1
+                    mkdir(strjoin(["..\iCub_ProcessedData\HandTrajectory",splitted(1:end-1)],'\'));
+                end
                 path = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),".png"],"");
                 path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),"_3D.fig"],"");
             else
@@ -449,6 +453,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\PositionVisualizing;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PositionVisualizing",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\PositionVisualizing\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\PositionVisualizing\P",num2str(numPerson),".png"],"");
@@ -458,6 +466,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
 
         mkdir ..\iCub_ProcessedData\PositionProcessing;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PositionProcessing",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\PositionProcessing\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\PositionProcessing\P",num2str(numPerson),".png"],"");
@@ -736,6 +748,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\ForceSynchronization;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\ForceSynchronization",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");

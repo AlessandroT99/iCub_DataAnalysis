@@ -100,6 +100,10 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     %% Figure saving
     mkdir ..\iCub_ProcessedData\PositionDerivatives;
     if numPerson < 0
+        splitted = strsplit(BaselineFilesParameters(3),'\');
+        if length(splitted) > 1
+            mkdir(strjoin(["..\iCub_ProcessedData\PositionDerivatives",splitted(1:end-1)],'\'));
+        end
         path = strjoin(["..\iCub_ProcessedData\PositionDerivatives\",BaselineFilesParameters(3),".png"],"");
     else
         path = strjoin(["..\iCub_ProcessedData\PositionDerivatives\P",num2str(numPerson),".png"],"");

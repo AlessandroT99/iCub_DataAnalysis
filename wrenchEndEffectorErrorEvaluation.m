@@ -57,6 +57,10 @@ function [phaseError, moduleError, transformationError] = wrenchEndEffectorError
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\ForceTranformationError;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\ForceTranformationError",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\ForceTranformationError\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\ForceTranformationError\P",num2str(numPerson),".png"],"");

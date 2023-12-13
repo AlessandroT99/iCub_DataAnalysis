@@ -149,6 +149,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
         if IMAGE_SAVING
             mkdir ..\iCub_ProcessedData\ShoulderPitchJointPositionRelation;
             if numPerson < 0
+                splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\ShoulderPitchJointPositionRelation",splitted(1:end-1)],'\'));
+            end
                 path = strjoin(["..\iCub_ProcessedData\ShoulderPitchJointPositionRelation\",BaselineFilesParameters(3),".png"],"");
             else
                 path = strjoin(["..\iCub_ProcessedData\ShoulderPitchJointPositionRelation\P",num2str(numPerson),".png"],"");
@@ -374,6 +378,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\ForceTransformation;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\ForceTransformation",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\ForceTransformation\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\ForceTransformation\P",num2str(numPerson),".png"],"");
@@ -408,6 +416,10 @@ function [newCuttedSynchForceDataSet, finalJointsDataSet] = forceTransformation(
             if IMAGE_SAVING
                 mkdir ..\iCub_ProcessedData\iKinJointsError;
                 if numPerson < 0
+                    splitted = strsplit(BaselineFilesParameters(3),'\');
+                    if length(splitted) > 1
+                        mkdir(strjoin(["..\iCub_ProcessedData\iKinJointsError",splitted(1:end-1)],'\'));
+                    end
                     path = strjoin(["..\iCub_ProcessedData\iKinJointsError\",BaselineFilesParameters(3),".png"],"");
                 else
                     path = strjoin(["..\iCub_ProcessedData\iKinJointsError\P",num2str(numPerson),".png"],"");

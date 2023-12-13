@@ -131,6 +131,10 @@ function [time_lag, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSe
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\DirectKinematicsError;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\DirectKinematicsError",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\DirectKinematicsError\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\DirectKinematicsError\P",num2str(numPerson),".png"],"");
@@ -237,6 +241,10 @@ function [time_lag, dirKinError] = dirKinErrorEvaluation(robot, jointSynchDataSe
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\DirectKinematicsError;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\DirectKinematicsError",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\DirectKinematicsError\",BaselineFilesParameters(3),"_Corrected.png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\DirectKinematicsError\P",num2str(numPerson),"_Corrected.png"],"");

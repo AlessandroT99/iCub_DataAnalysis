@@ -119,6 +119,10 @@ function combinePosForcePlots(synchedPosSet, synchedForceSet, numPerson, personP
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\ForcePositionComparison;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\ForcePositionComparison",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\ForcePositionComparison\",BaselineFilesParameters(3),".png"],"");
         else
             path = strjoin(["..\iCub_ProcessedData\ForcePositionComparison\P",num2str(numPerson),".png"],"");

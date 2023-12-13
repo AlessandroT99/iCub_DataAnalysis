@@ -105,6 +105,10 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
         pause(PAUSE_TIME);
         mkdir ..\iCub_ProcessedData\ForceFurtherAnalysis;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\ForceFurtherAnalysis",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\ForceFurtherAnalysis\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\iCub_ProcessedData\ForceFurtherAnalysis\P",num2str(numPerson),".png"],"");

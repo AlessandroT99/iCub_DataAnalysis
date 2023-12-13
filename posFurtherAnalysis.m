@@ -205,6 +205,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\iCub_ProcessedData\PhaseTimeDifference;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PhaseTimeDifference",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\PhaseTimeDifference\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\iCub_ProcessedData\PhaseTimeDifference\P",num2str(numPerson),".png"],"");
@@ -236,6 +240,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\iCub_ProcessedData\PhaseTimeDuration;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PhaseTimeDuration",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\PhaseTimeDuration\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\iCub_ProcessedData\PhaseTimeDuration\P",num2str(numPerson),".png"],"");
@@ -265,6 +273,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\iCub_ProcessedData\PhaseSpaceDuration;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
@@ -291,6 +303,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\iCub_ProcessedData\PhaseSpaceDuration;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\iCub_ProcessedData\PhaseSpaceDuration\P",num2str(numPerson),".png"],"");
@@ -321,6 +337,10 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         pause(PAUSE_TIME);
         mkdir ..\iCub_ProcessedData\RelativeVelocity;
         if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\RelativeVelocity",splitted(1:end-1)],'\'));
+            end
             path = strjoin(["..\iCub_ProcessedData\RelativeVelocity\",BaselineFilesParameters(3),".png"],"");
         else    
             path = strjoin(["..\iCub_ProcessedData\RelativeVelocity\P",num2str(numPerson),".png"],"");

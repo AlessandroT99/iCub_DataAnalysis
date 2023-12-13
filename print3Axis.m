@@ -38,6 +38,10 @@ function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters
     mkdir ..\iCub_ProcessedData;
     mkdir ..\iCub_ProcessedData\3AxisPosition;
     if numPerson < 0
+        splitted = strsplit(BaselineFilesParameters(3),'\');
+        if length(splitted) > 1
+            mkdir(strjoin(["..\iCub_ProcessedData\3AxisPosition",splitted(1:end-1)],'\'));
+        end
         path = strjoin(["..\iCub_ProcessedData\3AxisPosition\",BaselineFilesParameters(3),".png"],"");
     else
         path = strjoin(["..\iCub_ProcessedData\3AxisPosition\P",num2str(numPerson),".png"],"");
@@ -65,6 +69,10 @@ function print3Axis(posDataSet, forceDataSet, numPerson, BaselineFilesParameters
 
     mkdir ..\iCub_ProcessedData\3AxisForce;
     if numPerson < 0
+        splitted = strsplit(BaselineFilesParameters(3),'\');
+        if length(splitted) > 1
+            mkdir(strjoin(["..\iCub_ProcessedData\3AxisForce",splitted(1:end-1)],'\'));
+        end
         path = strjoin(["..\iCub_ProcessedData\3AxisForce\",BaselineFilesParameters(3),".png"],"");
     else
         path = strjoin(["..\iCub_ProcessedData\3AxisForce\P",num2str(numPerson),".png"],"");
