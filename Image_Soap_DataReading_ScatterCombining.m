@@ -53,6 +53,8 @@ positionDataProcessing = readtable("..\iCub_ProcessedData\PeaksPositionData.xlsx
 positionDataProcessing = positionDataProcessing(2:end,:);
 forceDataProcessing = readtable("..\iCub_ProcessedData\PeaksForceData.xlsx");
 
+mind = readtable("..\iCub_ProcessedData\MindAttribution.xlsx");
+
 %% Data adjusting
 soap4image = soap;
 soap4dataProcessing = soap;
@@ -283,6 +285,66 @@ title("Near Hand Effect vs. Human Relative Velocity")
 legend("Participants","Trend","Mean","Standard Deviation")
 hold off
 savingFigure(gcf,"20_NearHand-HumanRelativeVelocity");
+
+fig21 = figure('Name','Asymmetry from A vs. Mean Angle Human Side');
+fig21.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.DeviationFromA_cm_,1,HumanAngle(sensorDatalogic4images))
+xlabel("Asymmetry from A [ cm ]"), ylabel("Angle [ deg ]")
+title("Asymmetry from A vs. Mean Angle Human Side")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"21_AsymmetryfromA-MeanAngleHumanSide");
+
+fig22 = figure('Name','Mind attribution');
+fig22.WindowState = 'maximized';
+hold on, grid on
+clearRed = [1,0.4,0];
+clearBlue = [0,0.6,1];
+MarkerDimension = 80;
+scatter(1:height(mind), mind.mind, MarkerDimension, clearRed, "filled")
+p = polyfit(1:height(mind), mind.mind,1);
+ymean = polyval(p, linspace(0,height(mind)));
+plot(linspace(0,height(mind)),ymean,'-',"Color",clearRed)
+scatter(1:height(mind), mind.MIND, MarkerDimension, clearBlue, "filled")
+p = polyfit(1:height(mind), mind.MIND,1);
+ymean = polyval(p, linspace(0,height(mind)));
+plot(linspace(0,height(mind)),ymean,'-',"Color",clearBlue)
+xlabel("Mind attribution"), ylabel("# of participant")
+title("Mind attribution pre&post")
+legend("Before","Before trend","After","After trend")
+hold off
+savingFigure(gcf,"22_MindAttribution");
+
+fig23 = figure('Name','ROM vs. Mean Angle Human Side');
+fig23.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.ROM_cm_,1,HumanAngle(sensorDatalogic4images))
+xlabel("ROM [ cm ]"), ylabel("Angle [ deg ]")
+title("ROM vs. Mean Angle Human Side")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"23_ROM-MeanAngleHumanSide");
+
+fig24 = figure('Name','Mind attribution vs. Mean Force Applied');
+fig24.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(forceDataProcessing.PeaksMeanAmplitude,1,mind.MIND(sensorDatalogic4images))
+ylabel("Mind Attribution"), xlabel("Force Applied [ N ]")
+title("Mind attribution vs. Mean Force Applied")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"24_MindAttribution-MeanForceApplied");
+
+fig25 = figure('Name','Mind attribution vs. Removed material');
+fig25.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(soap.PercentageOfRemovedMaterial___,1,mind.MIND)
+ylabel("Mind Attribution"), xlabel("Removed material [ % ]")
+title("Mind attribution vs. Removed material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"25_MindAttribution-RemovedMaterial");
 
 %% End of the simulation
 fprintf("\nAnalysis completed.\n");
