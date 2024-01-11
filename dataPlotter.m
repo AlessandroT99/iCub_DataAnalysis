@@ -18,7 +18,7 @@
 % - find a way to save the two scrollable plots as image.
 % - start the further analysis on the force
 
- function dataPlotter(TELEGRAM_LOG, AVOIDING_TESTS)
+ function dataPlotter(TELEGRAM_LOG, POS_AVOIDING_TESTS, FORCE_AVOIDING_TESTS)
     tStart = tic;
     
     % Suppress the warning about creating folder that already exist
@@ -181,7 +181,7 @@
     
         % Before iterating check that the person has not an invalid dataset
         % which has to be skipped
-        if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0 && sum(find(numP==AVOIDING_TESTS)) == 0
+        if isempty(posDataSet) == 0 && isempty(forceDataSet) == 0 && sum(find(numP==POS_AVOIDING_TESTS)) == 0
             % Adjusting the Fx mean value due to the hand used, so only if
             % is a test with the robot hand R or if it is the baseline
             % number 2, also made with the right hand of the robot
@@ -228,7 +228,7 @@
             % Synchronizing the two dataset to show them in a single plot
             [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i), meanXforce(i)] = ...
               synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
-                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, AVOIDING_TESTS);   
+                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, FORCE_AVOIDING_TESTS);   
     
             if BIG_PLOT_ENABLE && BaseLineEvaluationDone
                 if strcmp(people.Genere(i),"M") == 1
@@ -279,9 +279,13 @@
             
             % Force further analysis on left hand of the robot or the baseline with robot left hand
             tic
-            fprintf("   .Computing further analysis on the force...")
-            [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude{i}] ...
-                = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
+            if sum(find(numP == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
+                fprintf("   .Skipping further analysis on the force... ")
+            else
+                fprintf("   .Computing further analysis on the force...")
+                [meanTrend(i), lowSlope(i), upSlope(i), peaksAmplitude{i}] ...
+                    = forceFurtherAnalysis(synchForceDataSet, numP, personParam, BaselineFilesParameters);
+            end
             fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
             % Output parameters collection

@@ -497,287 +497,293 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     save(path,"cuttedPosDataSet","minLocalization","minPeaksVal","maxLocalization","maxPeaksVal","cuttedElapsedTime");
 
     %% FORCE ANALYSIS
-    tic
-    fprintf("   .Computing force signal cutting and synching...")
+    if sum(find(numPerson == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
+        % Skip force analysis
 
-    % Interpolating the force data, 
-    % Notice that the force only need to find the initial point, the last will
-    % be the same of the position
-    forceElapsedTime = minutesDataPointsConverter(forceDataSet);
+    else
+        tic
+        fprintf("   .Computing force signal cutting and synching...")
     
-    % Plot results
-    fig3 = figure('Name','Force synchronization');
-    fig3.WindowState = 'maximized';
-    subplot(3,1,1), grid on, hold on
-    plot(forceElapsedTime,forceDataSet.Fy,'k-')
-    title("Original force")
-    hold off
-    
-    %% Low pass filter
-    % Removing noise in the force signal implies the use of a lowpass filter,
-    % which introduce a phase shift to the signal. In order to avoid this
-    % shift, a chebyshev filter is designed, and then its coefficient are
-    % re-elaborated in order to remove the shift using a zero phase digital
-    % filter funct (filtfilt())
-    fc = 5;
-    gain = 1;
-    
-    % Design of the chebyshev filter of third order
-    [a,b,c,d] = cheby1(3,gain,fc/(frequency/2));
-    % Groups the filter coefficients
-    sos = ss2sos(a,b,c,d);
-    % Plot the filter properties
-%     fvtool(sos,'Fs',fs)
-    % Remove the pahse shifting and compute the output
-    filteredForce = filtfilt(sos,gain,forceDataSet.Fy);
-    
-    
-    % Use the following just for debugging using break points after the end
-    if DEBUG
-        % Design of a classic chebyshev filter of third order, in order to
-        % compare its output with the zero phase one.
-        [b,a] = cheby1(3,gain,fc/(frequency/2));
-        % Plot the filter properties
-%         freqz(b,a,[],fs);
-        % Evaluate the filtered output
-        Y = filter(b,a,forceDataSet.Fy);
+        % Interpolating the force data, 
+        % Notice that the force only need to find the initial point, the last will
+        % be the same of the position
+        forceElapsedTime = minutesDataPointsConverter(forceDataSet);
         
-        % Plot comparison results
-        subplot(3,1,2), hold on, grid on
-        plot(forceElapsedTime,forceDataSet.Fy,'k-','DisplayName','Original force')
-        plot(forceElapsedTime,Y,'b-','DisplayName','Filtered chebyshev')
-        plot(forceElapsedTime,filteredForce,'g-','DisplayName','Filtered zero phase')
+        % Plot results
+        fig3 = figure('Name','Force synchronization');
+        fig3.WindowState = 'maximized';
+        subplot(3,1,1), grid on, hold on
+        plot(forceElapsedTime,forceDataSet.Fy,'k-')
+        title("Original force")
+        hold off
+        
+        %% Low pass filter
+        % Removing noise in the force signal implies the use of a lowpass filter,
+        % which introduce a phase shift to the signal. In order to avoid this
+        % shift, a chebyshev filter is designed, and then its coefficient are
+        % re-elaborated in order to remove the shift using a zero phase digital
+        % filter funct (filtfilt())
+        fc = 5;
+        gain = 1;
+        
+        % Design of the chebyshev filter of third order
+        [a,b,c,d] = cheby1(3,gain,fc/(frequency/2));
+        % Groups the filter coefficients
+        sos = ss2sos(a,b,c,d);
+        % Plot the filter properties
+    %     fvtool(sos,'Fs',fs)
+        % Remove the pahse shifting and compute the output
+        filteredForce = filtfilt(sos,gain,forceDataSet.Fy);
+        
+        
+        % Use the following just for debugging using break points after the end
+        if DEBUG
+            % Design of a classic chebyshev filter of third order, in order to
+            % compare its output with the zero phase one.
+            [b,a] = cheby1(3,gain,fc/(frequency/2));
+            % Plot the filter properties
+    %         freqz(b,a,[],fs);
+            % Evaluate the filtered output
+            Y = filter(b,a,forceDataSet.Fy);
+            
+            % Plot comparison results
+            subplot(3,1,2), hold on, grid on
+            plot(forceElapsedTime,forceDataSet.Fy,'k-','DisplayName','Original force')
+            plot(forceElapsedTime,Y,'b-','DisplayName','Filtered chebyshev')
+            plot(forceElapsedTime,filteredForce,'g-','DisplayName','Filtered zero phase')
+            xlabel("Elapsed time [ min ]")
+            ylabel("Force [ N ]")
+            title("Filtered force")
+            legend('show','Location','eastoutside')
+            hold off
+        end
+        
+        % Save the evaluated filtered signal into the older container, in order to
+        % mantain time stamp data and other properties of the signal
+        forceDataSet.Fy = filteredForce;
+        
+        %% Synchronizing force signal with position
+        % Find the initial delay between the two sampled signals
+        initialTimeDelay = posDataSet.Time(1)-forceDataSet.Time(1);
+        
+        if initialTimeDelay >= 0
+            % If the force has more samples than position, than it has smaller starting time,
+            % and a positive difference with the position one, so it needs to be back-shifted
+            synchForceDataSet = forceDataSet(forceDataSet.Time>=posDataSet.Time(1),:);
+        else
+            % The opposite situation, so it will be forward-shifted using some zeros
+            zeroMatrix = array2table(zeros(sum(forceDataSet.Time(1)>posDataSet.Time),size(forceDataSet,2)));
+            zeroMatrix = renamevars(zeroMatrix,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
+                                                 ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
+            synchForceDataSet = [zeroMatrix;forceDataSet];
+        end
+        
+        forceStart = posStart+derivativePosStart;
+        forceEnd = posEnd+derivativePosStart;
+    
+        % Now the force has to be interpolated in the position time stamp in order
+        % to set the same start and stop point
+        FxSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fx,1:height(posDataSet));
+        FySynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fy,1:height(posDataSet));
+        FzSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fz,1:height(posDataSet));
+    
+    
+        % Plot results
+        subplot(3,1,2), grid on, hold on
+        plot(elapsedTime,FySynchForceDataSet,'DisplayName','Filtered force')
+        plot(elapsedTime(forceStart),FySynchForceDataSet(forceStart),'ro','DisplayName','Starting point')
+        plot(elapsedTime(forceEnd),FySynchForceDataSet(forceEnd),'bo','DisplayName','Ending point')
         xlabel("Elapsed time [ min ]")
         ylabel("Force [ N ]")
-        title("Filtered force")
+        title("Definition of starting and ending points")
         legend('show','Location','eastoutside')
         hold off
-    end
+        
+        %% Remove greetings and closing
+        FxCuttedSynchForceDataSet = FxSynchForceDataSet(forceStart:forceEnd);
+        FyCuttedSynchForceDataSet = FySynchForceDataSet(forceStart:forceEnd);
+        FzCuttedSynchForceDataSet = FzSynchForceDataSet(forceStart:forceEnd);
+        cuttedSynchForceDataSet = table(cuttedElapsedTime',FxCuttedSynchForceDataSet',FyCuttedSynchForceDataSet',FzCuttedSynchForceDataSet', ...
+                                        'VariableNames',["Time","Fx","Fy","Fz"]);
+        % Reference "tic" in the "Force analysis" section 
+        fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
-    % Save the evaluated filtered signal into the older container, in order to
-    % mantain time stamp data and other properties of the signal
-    forceDataSet.Fy = filteredForce;
-    
-    %% Synchronizing force signal with position
-    % Find the initial delay between the two sampled signals
-    initialTimeDelay = posDataSet.Time(1)-forceDataSet.Time(1);
-    
-    if initialTimeDelay >= 0
-        % If the force has more samples than position, than it has smaller starting time,
-        % and a positive difference with the position one, so it needs to be back-shifted
-        synchForceDataSet = forceDataSet(forceDataSet.Time>=posDataSet.Time(1),:);
-    else
-        % The opposite situation, so it will be forward-shifted using some zeros
-        zeroMatrix = array2table(zeros(sum(forceDataSet.Time(1)>posDataSet.Time),size(forceDataSet,2)));
-        zeroMatrix = renamevars(zeroMatrix,["Var1","Var2","Var3","Var4","Var5","Var6","Var7","Var8"], ...
-                                             ["Counter","Time","Fx","Fy","Fz","Tx","Ty","Tz"]);
-        synchForceDataSet = [zeroMatrix;forceDataSet];
-    end
-    
-    forceStart = posStart+derivativePosStart;
-    forceEnd = posEnd+derivativePosStart;
-
-    % Now the force has to be interpolated in the position time stamp in order
-    % to set the same start and stop point
-    FxSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fx,1:height(posDataSet));
-    FySynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fy,1:height(posDataSet));
-    FzSynchForceDataSet = interp1(1:height(synchForceDataSet),synchForceDataSet.Fz,1:height(posDataSet));
-
-
-    % Plot results
-    subplot(3,1,2), grid on, hold on
-    plot(elapsedTime,FySynchForceDataSet,'DisplayName','Filtered force')
-    plot(elapsedTime(forceStart),FySynchForceDataSet(forceStart),'ro','DisplayName','Starting point')
-    plot(elapsedTime(forceEnd),FySynchForceDataSet(forceEnd),'bo','DisplayName','Ending point')
-    xlabel("Elapsed time [ min ]")
-    ylabel("Force [ N ]")
-    title("Definition of starting and ending points")
-    legend('show','Location','eastoutside')
-    hold off
-    
-    %% Remove greetings and closing
-    FxCuttedSynchForceDataSet = FxSynchForceDataSet(forceStart:forceEnd);
-    FyCuttedSynchForceDataSet = FySynchForceDataSet(forceStart:forceEnd);
-    FzCuttedSynchForceDataSet = FzSynchForceDataSet(forceStart:forceEnd);
-    cuttedSynchForceDataSet = table(cuttedElapsedTime',FxCuttedSynchForceDataSet',FyCuttedSynchForceDataSet',FzCuttedSynchForceDataSet', ...
-                                    'VariableNames',["Time","Fx","Fy","Fz"]);
-    % Reference "tic" in the "Force analysis" section 
-    fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
-
-    meanXforce = mean(cuttedSynchForceDataSet.Fx); 
-    
-    %% Force transformation
-    if FORCE_TRANSFORMATION_EVALUATION
-        if numPerson < 0
-            path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
-        else
-            path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
-        end
-        if exist(path,'file')
-            load(path);
-            finalCuttedSynchForceDataSet = newCuttedSynchForceDataSet;
-        else
-            if sum(find(numPerson == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
-                finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+        meanXforce = mean(cuttedSynchForceDataSet.Fx); 
+        
+        %% Force transformation
+        if FORCE_TRANSFORMATION_EVALUATION
+            if numPerson < 0
+                path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
             else
-                % Has been evaluated that the force RS has to be rotated and translated
-                % into the EF RS with respect to the OF
-                forceTransformTime = tic;
-                fprintf("   .Computing force transformation...")
-                try
-                    [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
-                        cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG);
-                catch forceErr
-                    % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
-                    finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
-                    fprintf("\nThere was an error! This dataset will be skipped.")
-                    if ~isempty(forceErr.identifier)
-                        fprintf(2,"\n%s\n\n",getReport(forceErr))
-                    else
-                        fprintf(2,'\nThe message was:\n%s',forceErr.message);
+                path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
+            end
+            if exist(path,'file')
+                load(path);
+                finalCuttedSynchForceDataSet = newCuttedSynchForceDataSet;
+            else
+                if sum(find(numPerson == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
+                    fprintf("   .Skipping force transformation... ")
+%                     finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
+                else
+                    % Has been evaluated that the force RS has to be rotated and translated
+                    % into the EF RS with respect to the OF
+                    forceTransformTime = tic;
+                    fprintf("   .Computing force transformation...")
+                    try
+                        [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
+                            cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG);
+                    catch forceErr
+                        % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
+                        finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
+                        fprintf("\nThere was an error! This dataset will be skipped.")
+                        if ~isempty(forceErr.identifier)
+                            fprintf(2,"\n%s\n\n",getReport(forceErr))
+                        else
+                            fprintf(2,'\nThe message was:\n%s',forceErr.message);
+                        end
+                        if TELEGRAM_LOG
+                            outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
+                            pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
+                        end
                     end
-                    if TELEGRAM_LOG
-                        outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
-                        pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
-                    end
+                    fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
                 end
-                fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
+            end
+        else
+            if numPerson < 0
+                finalCuttedSynchForceDataSet = wrenchForceReader(numPerson, posDataSet, forceStart, forceEnd, personParameters(5),BaselineFilesParameters);
+            else
+                finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
             end
         end
-    else
-        if numPerson < 0
-            finalCuttedSynchForceDataSet = wrenchForceReader(numPerson, posDataSet, forceStart, forceEnd, personParameters(5),BaselineFilesParameters);
-        else
-            finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
-        end
-    end
-
-    %% Remove the mean to the force signal
-    % Due to the evaluation error of the force signal, its real module
-    % value will not be taken in consideration and it will be evaluated
-    % with zero mean
-    finalCuttedSynchForceDataSet.Fx = finalCuttedSynchForceDataSet.Fx - mean(finalCuttedSynchForceDataSet.Fx);
-    finalCuttedSynchForceDataSet.Fy = finalCuttedSynchForceDataSet.Fy - mean(finalCuttedSynchForceDataSet.Fy);
-    finalCuttedSynchForceDataSet.Fz = finalCuttedSynchForceDataSet.Fz - mean(finalCuttedSynchForceDataSet.Fz);
-
-    %% Finding min e MAX peaks of the force
-    tic
-    fprintf("   .Concluding computation of usefull parameters of the force...")
     
-    maximumMovementTime = 0.1;
-    [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
-    averageEnv = (envLow+envHigh)/2;
+        %% Remove the mean to the force signal
+        % Due to the evaluation error of the force signal, its real module
+        % value will not be taken in consideration and it will be evaluated
+        % with zero mean
+        finalCuttedSynchForceDataSet.Fx = finalCuttedSynchForceDataSet.Fx - mean(finalCuttedSynchForceDataSet.Fx);
+        finalCuttedSynchForceDataSet.Fy = finalCuttedSynchForceDataSet.Fy - mean(finalCuttedSynchForceDataSet.Fy);
+        finalCuttedSynchForceDataSet.Fz = finalCuttedSynchForceDataSet.Fz - mean(finalCuttedSynchForceDataSet.Fz);
     
-    [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
-    [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
-    minPeaksVal = -minPeaksVal;
-    upperPeaksBound = mean(maxPeaksVal);
-    lowerPeaksBound = mean(minPeaksVal);
+        %% Finding min e MAX peaks of the force
+        tic
+        fprintf("   .Concluding computation of usefull parameters of the force...")
+        
+        maximumMovementTime = 0.1;
+        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
+        averageEnv = (envLow+envHigh)/2;
+        
+        [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
+        [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
+        minPeaksVal = -minPeaksVal;
+        upperPeaksBound = mean(maxPeaksVal);
+        lowerPeaksBound = mean(minPeaksVal);
+        
+        % Resizing minimum and maximum values
+        maxLocalization = (maxLocalization)/(100*60);
+        minLocalization = (minLocalization)/(100*60);
     
-    % Resizing minimum and maximum values
-    maxLocalization = (maxLocalization)/(100*60);
-    minLocalization = (minLocalization)/(100*60);
-
-    highestValue = max(finalCuttedSynchForceDataSet.Fy); 
-    lowestValue = min(finalCuttedSynchForceDataSet.Fy);
-    
-    % Plot results
-    figure(fig3);
-    subplot(3,1,3), grid on, hold on
-    plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Transformed synched force')
-    xlabel("Elapsed time [ min ]")
-    ylabel("Force [ N ]")
-    ylim([lowestValue,highestValue])
-    title("Final processed force signal")
-    legend('show','Location','eastoutside')
-    hold off
-    sgtitle(defaultTitleName)
-    
-    %% Phase number evaluation
-    posUpperPhase = length(maxPeaksVal);
-    posLowerPhase = length(minPeaksVal);
-    
-    if DEBUG
-        fprintf("\nFirst registered force peaks:\n")
-        fprintf("\t- N. MAX: %d\n",posUpperPhase)
-        fprintf("\t- N. min: %d\n",posLowerPhase)
-    end
-    
-    % The resulting peaks are around the double of the expected ones, this
-    % because each moving phase finds at least a first higher force peaks, and
-    % then a lower one. This is a recursive behavior which has to be analyzed
-    % further on.
-    % So to count the correct number of phases another envelop is done,
-    % rounding each phase to almost a single peak.
-    maximumMovementTime = 1;
-    [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
-    averageEnv = (envLow+envHigh)/2;
-    
-    [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
-    [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
-    minPeaksVal = -minPeaksVal;
-    
-    % Resizing minimum and maximum values
-    maxLocalization = (maxLocalization)/(100*60);
-    minLocalization = (minLocalization)/(100*60);
-
-    posUpperPhase = length(maxPeaksVal);
-    posLowerPhase = length(minPeaksVal);
-    
-    % Use the following just for debugging using break points after the end
-    if DEBUG
-        fprintf("\nRe-processed force peaks:\n")
-        fprintf("\t- N. MAX: %d\n",posUpperPhase)
-        fprintf("\t- N. min: %d\n",posLowerPhase)
-    
-        figure, hold on, grid on
-        plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'DisplayName','Synched force')
-        plot(cuttedElapsedTime,averageEnv,'r--','DisplayName','Average behavior')
-        plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'go',cuttedElapsedTime(minLocalization),minPeaksVal,'go')
-        yline(upperPeaksBound,'k--','Higher bound')
-        yline(lowerPeaksBound,'k--','Lower bound')
+        highestValue = max(finalCuttedSynchForceDataSet.Fy); 
+        lowestValue = min(finalCuttedSynchForceDataSet.Fy);
+        
+        % Plot results
+        figure(fig3);
+        subplot(3,1,3), grid on, hold on
+        plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'k-','DisplayName','Transformed synched force')
         xlabel("Elapsed time [ min ]")
         ylabel("Force [ N ]")
         ylim([lowestValue,highestValue])
-        title("Phase number determination")
-        legend("Synched force", "Average behavior",'Location','eastoutside')
+        title("Final processed force signal")
+        legend('show','Location','eastoutside')
         hold off
-    end
-    
-    % Figure saving for force
-    if IMAGE_SAVING
-        mkdir ..\iCub_ProcessedData\ForceSynchronization;
-        if numPerson < 0
-            splitted = strsplit(BaselineFilesParameters(3),'\');
-            if length(splitted) > 1
-                mkdir(strjoin(["..\iCub_ProcessedData\ForceSynchronization",splitted(1:end-1)],'\'));
-            end
-            path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
-        else
-            path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
+        sgtitle(defaultTitleName)
+        
+        %% Phase number evaluation
+        posUpperPhase = length(maxPeaksVal);
+        posLowerPhase = length(minPeaksVal);
+        
+        if DEBUG
+            fprintf("\nFirst registered force peaks:\n")
+            fprintf("\t- N. MAX: %d\n",posUpperPhase)
+            fprintf("\t- N. min: %d\n",posLowerPhase)
         end
-        pause(PAUSE_TIME);
-        exportgraphics(fig3,path)
-    end
-
-    % Reference "tic" at the beginning in the "Finding min e MAX peaks of the force" section 
-    fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+        
+        % The resulting peaks are around the double of the expected ones, this
+        % because each moving phase finds at least a first higher force peaks, and
+        % then a lower one. This is a recursive behavior which has to be analyzed
+        % further on.
+        % So to count the correct number of phases another envelop is done,
+        % rounding each phase to almost a single peak.
+        maximumMovementTime = 1;
+        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
+        averageEnv = (envLow+envHigh)/2;
+        
+        [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
+        [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
+        minPeaksVal = -minPeaksVal;
+        
+        % Resizing minimum and maximum values
+        maxLocalization = (maxLocalization)/(100*60);
+        minLocalization = (minLocalization)/(100*60);
     
-    %% Ultimate synched data set saving
-    ultimateSynchPosDataSet = [minutesDataPointsConverter(cuttedPosDataSet)',cuttedPosDataSet.yPos];
-    ultimateSynchForceDataSet = [minutesDataPointsConverter(finalCuttedSynchForceDataSet)',finalCuttedSynchForceDataSet.Fy];
-
-    %% Force pause for online evaluation
-    if sum(find(pausePeople == numPerson)) > 0
-        % If a person number is found in the pausePeople array, the pause.
-        fprintf("\nPause requested, press enter on the command window to continue...\n")
-        pause;
-    end
-
-    %% Closing all the saved figures
-    if  IMAGE_SAVING
-        close(fig1);
-        close(fig2);
-        close(fig3); 
+        posUpperPhase = length(maxPeaksVal);
+        posLowerPhase = length(minPeaksVal);
+        
+        % Use the following just for debugging using break points after the end
+        if DEBUG
+            fprintf("\nRe-processed force peaks:\n")
+            fprintf("\t- N. MAX: %d\n",posUpperPhase)
+            fprintf("\t- N. min: %d\n",posLowerPhase)
+        
+            figure, hold on, grid on
+            plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'DisplayName','Synched force')
+            plot(cuttedElapsedTime,averageEnv,'r--','DisplayName','Average behavior')
+            plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'go',cuttedElapsedTime(minLocalization),minPeaksVal,'go')
+            yline(upperPeaksBound,'k--','Higher bound')
+            yline(lowerPeaksBound,'k--','Lower bound')
+            xlabel("Elapsed time [ min ]")
+            ylabel("Force [ N ]")
+            ylim([lowestValue,highestValue])
+            title("Phase number determination")
+            legend("Synched force", "Average behavior",'Location','eastoutside')
+            hold off
+        end
+        
+        % Figure saving for force
+        if IMAGE_SAVING
+            mkdir ..\iCub_ProcessedData\ForceSynchronization;
+            if numPerson < 0
+                splitted = strsplit(BaselineFilesParameters(3),'\');
+                if length(splitted) > 1
+                    mkdir(strjoin(["..\iCub_ProcessedData\ForceSynchronization",splitted(1:end-1)],'\'));
+                end
+                path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
+            else
+                path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
+            end
+            pause(PAUSE_TIME);
+            exportgraphics(fig3,path)
+        end
+    
+        % Reference "tic" at the beginning in the "Finding min e MAX peaks of the force" section 
+        fprintf("   Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
+        
+        %% Ultimate synched data set saving
+        ultimateSynchPosDataSet = [minutesDataPointsConverter(cuttedPosDataSet)',cuttedPosDataSet.yPos];
+        ultimateSynchForceDataSet = [minutesDataPointsConverter(finalCuttedSynchForceDataSet)',finalCuttedSynchForceDataSet.Fy];
+    
+        %% Force pause for online evaluation
+        if sum(find(pausePeople == numPerson)) > 0
+            % If a person number is found in the pausePeople array, the pause.
+            fprintf("\nPause requested, press enter on the command window to continue...\n")
+            pause;
+        end
+    
+        %% Closing all the saved figures
+        if  IMAGE_SAVING
+            close(fig1);
+            close(fig2);
+            close(fig3); 
+        end
     end
 end

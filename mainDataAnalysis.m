@@ -18,12 +18,12 @@ clear all, close all,  clc
 format compact
 
 TELEGRAM_LOG = 0; % Goes to 0 if no messages on telegram are wanted        
-STRANGE_POSITION_DATA = [19,26]; % Dataset where the participant tries to stop robot movement
+STRANGE_POSITION_DATA = [26]; % Dataset where the participant tries to stop robot movement
 NOT_ABLE_TO_GENERATE_FORCE = [9,17]; % Dataset where the iKin algorithm is not able to reconstruct the data
 AVOIDING_TESTS = [STRANGE_POSITION_DATA, NOT_ABLE_TO_GENERATE_FORCE]; % Union of all the tests to be skipped
 
 try
-    dataPlotter(TELEGRAM_LOG, AVOIDING_TESTS);
+    dataPlotter(TELEGRAM_LOG, STRANGE_POSITION_DATA, NOT_ABLE_TO_GENERATE_FORCE);
 catch e
     fprintf("\n\nThere was an error!")
     if ~isempty(e.identifier)

@@ -155,7 +155,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2ba.WindowState = 'maximized';
     grid on, hold on
     scatter(meanRtoH_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'blue','LineWidth',EmptyPointLine)
-    xline(8.75,'k--')
+    xline(15,'k--')
     plot_mean_stdError(meanRtoH_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'b--')
     title("Human pulling phase space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
@@ -173,7 +173,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     fig2bb.WindowState = 'maximized';
     grid on, hold on
     scatter(meanHtoR_space(logical([0,0,logicalIntervalPeaks])).*100,nearHand(logicalIntervalPeaks),MarkerDimension,'red','LineWidth',EmptyPointLine)
-    xline(8.75,'k--')
+    xline(15,'k--')
     plot_mean_stdError(meanHtoR_space(logical([0,0,logicalIntervalPeaks])),100,nearHand(logicalIntervalPeaks),MarkerDimension,ErrorBarCapSize,ErrorBarLineWidth,'r--')
     title("Robot pulling phases space duration")
     xlabel("Space distance [ cm ]"), ylabel("Near-Hand Effect[ ms ]")
@@ -327,7 +327,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
         close(fig5);
     end
 
-     %% Another alternative - ROM INTO NEAR END ZERO POS B - 1. NEAR END
+    %% Another alternative - ROM INTO NEAR END ZERO POS B - 1. NEAR END
     fig5e = figure('Name','Range of Motion (ROM)');
     fig5e.WindowState = 'maximized';
     hold on
@@ -384,6 +384,60 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
         pause(PAUSE_TIME);
         exportgraphics(fig5e,"..\iCub_ProcessedData\Scatters\1.NearHand\ROM-NearHand_AlignedPosB.png")
         close(fig5e);
+    end
+
+     %% Another alternative - ROM INTO NEAR END ZERO POS B FITTING LINES - 1. NEAR END
+    save ..\iCub_ProcessedData\data4ROM-AlignedB;
+
+    fig5f = figure('Name','Range of Motion (ROM)');
+    fig5f.WindowState = 'maximized';
+    hold on
+    
+    [sorted_NearHand_4_PosB, indicesB] = sort([nearHand(logical(newRightHandTests(3:end))),nearHand(logical(newLeftHandTests(3:end)))]);
+    sorted_PosB = [tmpMaxPeaksAverage(newRightHandTests),tmpMinPeaksAverage(newLeftHandTests)].*100;
+    sorted_PosB = sorted_PosB(indicesB);
+    % iCub max (posB)
+    scatter(sorted_PosB, sorted_NearHand_4_PosB, MarkerDimension, 'red','filled')
+    p = polyfit(sorted_NearHand_4_PosB, sorted_PosB, 1);
+    newYB = polyval(p, linspace(min(nearHand)-3,max(nearHand)+3));
+    plot(newYB, linspace(min(nearHand)-3,max(nearHand)+3), 'r-')
+
+    [sorted_NearHand_4_PosA, indicesA] = sort([nearHand(logical(newLeftHandTests(3:end))),nearHand(logical(newRightHandTests(3:end)))]);
+    sorted_PosA = [tmpMaxPeaksAverage(newLeftHandTests),tmpMinPeaksAverage(newRightHandTests)].*100;
+    sorted_PosA = sorted_PosA(indicesA);
+    % iCub min (posA)
+    scatter(sorted_PosA, sorted_NearHand_4_PosA, MarkerDimension, 'blue','filled')
+    p = polyfit(sorted_NearHand_4_PosA, sorted_PosA, 1);
+    newYA = polyval(p, linspace(min(nearHand)-3,max(nearHand)+3));
+    plot(newYA, linspace(min(nearHand)-3,max(nearHand)+3), 'b-')
+
+    % Plot union lines between points to describe ROM
+    plot([tmpMaxPeaksAverage(newLeftHandTests).*100;tmpMinPeaksAverage(newLeftHandTests).*100], ...
+         [nearHand(logical(newLeftHandTests(3:end)));nearHand(logical(newLeftHandTests(3:end)))], ...
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color', clearGreen)
+
+    plot([tmpMaxPeaksAverage(newRightHandTests).*100;tmpMinPeaksAverage(newRightHandTests).*100], ...
+         [nearHand(logical(newRightHandTests(3:end)));nearHand(logical(newRightHandTests(3:end)))], ...
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color', clearGreen)
+
+    % Replot for graphycal issues
+    scatter(sorted_PosB, sorted_NearHand_4_PosB, MarkerDimension, 'red','filled')
+    scatter(sorted_PosA, sorted_NearHand_4_PosA, MarkerDimension, 'blue','filled')
+
+    xline(0,'k--','LineWidth',DottedLineWidth)
+
+    title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
+    legend('Max Position of Hand of iCub', 'Trend', 'Min Position of Hand of iCub', 'Trend', 'Range Of Motion (ROM)','Location','southwest')
+    xlabel("Distance from Baseline Max Point [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
+    xlim([-20,2]), ylim([min(nearHand)-3,max(nearHand)+3])
+    set(gca, 'YDir','reverse')
+
+    hold off
+    
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        exportgraphics(fig5f,"..\iCub_ProcessedData\Scatters\1.NearHand\ROM-NearHand_NewAlignedPosB.png")
+        close(fig5f);
     end
 
     %% Another alternative - ROM INTO NEAR END EFFECT ZERO MEAN CENTER - 1. NEAR END
