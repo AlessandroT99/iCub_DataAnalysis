@@ -252,9 +252,13 @@
             % Plot results obtained previosly in a single involved subplot
             % depending on the gender and save them separately for each test
             tic
-            fprintf("   .Plotting the combination of force and position...")
-            combinePosForcePlots(synchPosDataSet, synchForceDataSet, numP, ...
-                personParam,BIG_PLOT_ENABLE, BaselineFilesParameters);
+            if sum(find(numP == FORCE_AVOIDING_TESTS)) >= 1
+                fprintf("   .Skipping the combination of force and position...")
+            else
+                fprintf("   .Plotting the combination of force and position...")
+                combinePosForcePlots(synchPosDataSet, synchForceDataSet, numP, ...
+                    personParam,BIG_PLOT_ENABLE, BaselineFilesParameters);
+            end
             fprintf("              Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
             % Usefull data for further analysis
@@ -279,7 +283,7 @@
             
             % Force further analysis on left hand of the robot or the baseline with robot left hand
             tic
-            if sum(find(numP == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
+            if sum(find(numP == FORCE_AVOIDING_TESTS)) >= 1
                 fprintf("   .Skipping further analysis on the force... ")
             else
                 fprintf("   .Computing further analysis on the force...")
@@ -314,7 +318,9 @@
                     else
                         pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Participant n.",num2str(numP)," completed"],""),TEXT=1,filePath="");
                         pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\PositionVisualizing\P",num2str(numP),".png"],""))
-                        pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
+                        if sum(find(numP == FORCE_AVOIDING_TESTS)) == 0
+                            pyrunfile("telegramLogging.py",txtMsg="",TEXT=0,filePath=strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numP),".png"],""))
+                        end
                     end
                 end
             end

@@ -497,11 +497,15 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     save(path,"cuttedPosDataSet","minLocalization","minPeaksVal","maxLocalization","maxPeaksVal","cuttedElapsedTime");
 
     %% FORCE ANALYSIS
+    tic
     if sum(find(numPerson == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
         % Skip force analysis
-
+        fprintf("   .Skipping force signal cutting and synching... ")
+        % Ultimate synched data set saving
+        ultimateSynchPosDataSet = [minutesDataPointsConverter(cuttedPosDataSet)',cuttedPosDataSet.yPos];
+        ultimateSynchForceDataSet = [];
+        fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     else
-        tic
         fprintf("   .Computing force signal cutting and synching...")
     
         % Interpolating the force data, 
