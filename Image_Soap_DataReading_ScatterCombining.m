@@ -68,6 +68,11 @@ nearHandLogic4imagesForce = zeros(NUM_PEOPLE,1);
 sensorDatalogic4imagesPos = zeros(NUM_PEOPLE,1);
 sensorDatalogic4imagesForce = zeros(NUM_PEOPLE,1);
 
+forcePositionLogic = zeros(height(positionDataProcessing),1);
+for i = 1:height(positionDataProcessing)
+    forcePositionLogic(i) = logical(sum(forceDataProcessing.ID==positionDataProcessing.ID(i)));
+end
+
 for i = 1:NUM_PEOPLE
     if isnan(RobotLength(i))
         soap4image(i,:) = array2table(nan.*ones(1,width(soap4image)));
@@ -87,7 +92,7 @@ for i = 1:NUM_PEOPLE
     if sum(find(i==forceDataProcessing.ID)) == 0
         soap4dataForceProcessing(cntForce,:) = [];
     else
-        if ~isnan(forceDataProcessing.Near_Hand_ms_(cntForce))
+        if ~isnan(positionDataProcessing.Near_Hand_ms_(cntForce))
             nearHandLogicForce(cntForce) = 1;
             nearHandLogic4imagesForce(i) = 1;
         end
@@ -178,7 +183,7 @@ savingFigure(gcf,"7_PullingPhaseTimeDifference-RemovedMaterial");
 fig8 = figure('Name','ROM vs. Force applied');
 fig8.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(positionDataProcessing.ROM_cm_,1,forceDataProcessing.PeaksMeanAmplitude)
+plot_scatterProcedure(positionDataProcessing.ROM_cm_(logical(forcePositionLogic)),1,forceDataProcessing.PeaksMeanAmplitude)
 xlabel("ROM [ cm ]"), ylabel("Force Applied [ N ]")
 title("ROM vs. Force applied")
 legend("Participants","Trend","Mean","Standard Deviation")
@@ -259,7 +264,7 @@ savingFigure(gcf,"15_MeanAngleHuman-RemovedMaterial");
 fig16 = figure('Name','Mean angle of the human side vs. Force Applied');
 fig16.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(HumanAngle(sensorDatalogic4imagesPos),1,forceDataProcessing.PeaksMeanAmplitude)
+plot_scatterProcedure(HumanAngle(sensorDatalogic4imagesForce),1,forceDataProcessing.PeaksMeanAmplitude)
 xlabel("Angle [ deg ]"), ylabel("Force Applied [ N ]")
 title("Mean angle of the human side vs. Force Applied")
 legend("Participants","Trend","Mean","Standard Deviation")
@@ -280,7 +285,7 @@ savingFigure(gcf,"17_MeanAngleHuman-NearHand");
 fig18 = figure('Name','Human Relative Velocity vs. Mean Force Applied');
 fig18.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(positionDataProcessing.Human_PhaseRelativeVelocity_cm_s_,1,forceDataProcessing.PeaksMeanAmplitude)
+plot_scatterProcedure(positionDataProcessing.Human_PhaseRelativeVelocity_cm_s_(logical(forcePositionLogic)),1,forceDataProcessing.PeaksMeanAmplitude)
 xlabel("Relative Velocity [ cm/s ]"), ylabel("Force Applied [ N ]")
 title("Human Relative Velocity vs. Mean Force Applied")
 legend("Participants","Trend","Mean","Standard Deviation")
@@ -350,7 +355,7 @@ savingFigure(gcf,"23_ROM-MeanAngleHumanSide");
 fig24 = figure('Name','Mind attribution vs. Mean Force Applied');
 fig24.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(forceDataProcessing.PeaksMeanAmplitude,1,mind.MIND(sensorDatalogic4imagesPos))
+plot_scatterProcedure(forceDataProcessing.PeaksMeanAmplitude,1,mind.MIND(sensorDatalogic4imagesForce))
 ylabel("Mind Attribution"), xlabel("Force Applied [ N ]")
 title("Mind attribution vs. Mean Force Applied")
 legend("Participants","Trend","Mean","Standard Deviation")

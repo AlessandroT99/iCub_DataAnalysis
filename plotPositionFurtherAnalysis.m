@@ -806,23 +806,23 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     end
 
     %% Mean of the original force on x axis - 5. OTHERS
-    fig15 = figure('Name','Experiment duration scatter');
-    fig15.WindowState = 'maximized';
-    grid on, hold on
-    scatter(meanXforce(leftHandTests),1:length(meanXforce(leftHandTests)),MarkerDimension,clearBlue,'filled')
-    scatter(meanXforce(rightHandTests),1:length(meanXforce(rightHandTests)),MarkerDimension,clearRed,'filled')
-    leftFmean = mean(meanXforce(leftHandTests));
-    rightFmean = mean(meanXforce(rightHandTests));
-    xline(leftFmean,'k--')
-    xline(rightFmean,'k--')
-    legend("R Hand tests","L Hand tests",strjoin(["Left hand mean: ",num2str(leftFmean)],""),strjoin(["Right hand mean: ",num2str(rightFmean)],""))
-    title("Mean amplitude of the force signal")
-    xlabel("Force [ N ]"), ylabel("# Test")
-    hold off
-
-    if IMAGE_SAVING
-        pause(PAUSE_TIME);
-        exportgraphics(fig15,"..\iCub_ProcessedData\Scatters\5.Others\OriginalXForceMean.png")
-        close(fig15);
-    end
+    % fig15 = figure('Name','Experiment duration scatter');
+    % fig15.WindowState = 'maximized';
+    % grid on, hold on
+    % scatter(meanXforce(leftHandTests),1:length(meanXforce(leftHandTests)),MarkerDimension,clearBlue,'filled')
+    % scatter(meanXforce(rightHandTests),1:length(meanXforce(rightHandTests)),MarkerDimension,clearRed,'filled')
+    % leftFmean = mean(meanXforce(leftHandTests));
+    % rightFmean = mean(meanXforce(rightHandTests));
+    % xline(leftFmean,'k--')
+    % xline(rightFmean,'k--')
+    % legend("R Hand tests","L Hand tests",strjoin(["Left hand mean: ",num2str(leftFmean)],""),strjoin(["Right hand mean: ",num2str(rightFmean)],""))
+    % title("Mean amplitude of the force signal")
+    % xlabel("Force [ N ]"), ylabel("# Test")
+    % hold off
+    % 
+    % if IMAGE_SAVING
+    %     pause(PAUSE_TIME);
+    %     exportgraphics(fig15,"..\iCub_ProcessedData\Scatters\5.Others\OriginalXForceMean.png")
+    %     close(fig15);
+    % end
 end

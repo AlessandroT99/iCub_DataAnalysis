@@ -117,6 +117,7 @@
     posBPeaksmean = notConsideredValue.*ones(1,numPeople);
     ROM = notConsideredValue.*ones(1,numPeople);
     testedPeople = [];
+    forceTestedPeople = [];
     midVelocityMean = notConsideredValue.*ones(1,numPeople);
     midVelocityStd = notConsideredValue.*ones(1,numPeople);
     HtoR_relativeVelocity = cell(1,numPeople);
@@ -212,6 +213,9 @@
                     pyrunfile("telegramLogging.py",txtMsg=strjoin(["[INFO] Evaluation of participant n.",num2str(numP)],""),TEXT=1,filePath="");            
                 end
                 testedPeople = [testedPeople,i-BASELINE_NUMBER];
+                if sum(find(numP == FORCE_AVOIDING_TESTS)) == 0
+                    forceTestedPeople = [forceTestedPeople,i-BASELINE_NUMBER];
+                end
                 evaluatedPeople = evaluatedPeople + 1;
                 personParam = ["Gender: ", people.Genere(numP), "  -  ", "Human Hand: ", people.Mano(numP), "  -  ", "Age: ", people.Et_(i-BASELINE_NUMBER)];
                 fprintf("\n- Elaborating data from person N. %d...\n",numP);
@@ -424,7 +428,7 @@
     %% Force further analysis
     tic
     fprintf("\nPlotting force further analysis results...")
-    plotForceFurtherAnalysis(testedPeople, meanTrend, lowSlope, upSlope, peaksAmplitude);
+    plotForceFurtherAnalysis(forceTestedPeople, meanTrend, lowSlope, upSlope, peaksAmplitude);
     fprintf("                     Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
 
     %% Conclusion of the main
