@@ -386,8 +386,9 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
         close(fig5e);
     end
 
-     %% Another alternative - ROM INTO NEAR END ZERO POS B FITTING LINES - 1. NEAR END
+    %% Another alternative - ROM INTO NEAR END ZERO POS B FITTING LINES - 1. NEAR END
     save ..\iCub_ProcessedData\data4ROM-AlignedB;
+    save snippetOfPlot_4Giulia\data4ROM-AlignedB;
 
     fig5f = figure('Name','Range of Motion (ROM)');
     fig5f.WindowState = 'maximized';
@@ -414,22 +415,26 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     % Plot union lines between points to describe ROM
     plot([tmpMaxPeaksAverage(newLeftHandTests).*100;tmpMinPeaksAverage(newLeftHandTests).*100], ...
          [nearHand(logical(newLeftHandTests(3:end)));nearHand(logical(newLeftHandTests(3:end)))], ...
-         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color', clearGreen)
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color', [0,0,0])
 
     plot([tmpMaxPeaksAverage(newRightHandTests).*100;tmpMinPeaksAverage(newRightHandTests).*100], ...
          [nearHand(logical(newRightHandTests(3:end)));nearHand(logical(newRightHandTests(3:end)))], ...
-         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color', clearGreen)
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color', [0,0,0])
 
     % Replot for graphycal issues
     scatter(sorted_PosB, sorted_NearHand_4_PosB, MarkerDimension, 'red','filled')
     scatter(sorted_PosA, sorted_NearHand_4_PosA, MarkerDimension, 'blue','filled')
+    
+    xLineA = ((abs(maxPeaksAverage(1))-abs(minPeaksAverage(1)))+(minPeaksAverage(BASELINE_NUMBER)-maxPeaksAverage(BASELINE_NUMBER)))/2*100; 
+    xline(xLineA,'k--','LineWidth',1)
+    xline(0,'k--','LineWidth',1)
+    text(xLineA+0.2,31,"A*",'FontSize',12)
+    text(0.2,31,"B*",'FontSize',12)
 
-    xline(0,'k--','LineWidth',DottedLineWidth)
-
-    title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
-    legend('Max Position of Hand of iCub', 'Trend', 'Min Position of Hand of iCub', 'Trend', 'Range Of Motion (ROM)','Location','southwest')
-    xlabel("Distance from Baseline Max Point [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
-    xlim([-20,2]), ylim([min(nearHand)-3,max(nearHand)+3])
+    %title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
+    legend('Point B', 'Trend of Point B', 'Point A', 'Trend of point A', "iCub's Hand ROM", 'Location','southwest')
+    xlabel("Range of Motion (ROM) Of iCub's Hand [cm]"), ylabel("Near-Hand Effect [ms]")
+    xlim([-19,1]), ylim([min(nearHand)-5,max(nearHand)+5])
     set(gca, 'YDir','reverse')
 
     hold off
