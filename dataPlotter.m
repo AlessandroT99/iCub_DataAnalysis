@@ -228,7 +228,7 @@
             % Synchronizing the two dataset to show them in a single plot
             [synchPosDataSet, synchForceDataSet, baselineBoundaries, midVelocityMean(i), midVelocityStd(i), meanXforce(i)] = ...
               synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
-                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, FORCE_AVOIDING_TESTS);   
+                personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, FORCE_AVOIDING_TESTS, notConsideredValue);   
     
             if BIG_PLOT_ENABLE && BaseLineEvaluationDone
                 if strcmp(people.Genere(i),"M") == 1

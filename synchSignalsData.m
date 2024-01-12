@@ -15,7 +15,7 @@
 % Public License for more details
 
 function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundaries, midVelocityMean, midVelocityStd, meanXforce] = ...
-    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, NOT_ABLE_TO_GENERATE_FORCE)
+    synchSignalsData(robot, aik, opts, posDataSet, forceDataSet, numPerson, personParameters, pausePeople, baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, NOT_ABLE_TO_GENERATE_FORCE, notConsideredValue)
 % This function is responsible for detecting the initial point of each signal wave
 % and cut everything before that instant during the greetings, than knowing the experiment
 % duration, is evaluated the total signal wave and then cutted the excess
@@ -504,6 +504,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         % Ultimate synched data set saving
         ultimateSynchPosDataSet = [minutesDataPointsConverter(cuttedPosDataSet)',cuttedPosDataSet.yPos];
         ultimateSynchForceDataSet = [];
+        meanXforce = notConsideredValue;
         fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     else
         fprintf("   .Computing force signal cutting and synching...")
