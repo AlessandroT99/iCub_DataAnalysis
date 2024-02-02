@@ -30,7 +30,7 @@ Mx = [(tmpMaxPeaksAverage(newRightHandTests)+tmpMinPeaksAverage(newRightHandTest
 My = [nearHand(logical(newRightHandTests(3:end))),nearHand(logical(newLeftHandTests(3:end)))];
 
 % Plot a single marker and a single line just for legend purposes
-plot([tmpMaxPeaksAverage(3)*100;tmpMinPeaksAverage(3)*100], [nearHand(3);nearHand(3)], '-','LineWidth',1,'Color', [0,0,0])
+plot([tmpMaxPeaksAverage(3)*100;tmpMinPeaksAverage(3)*100], [nearHand(1);nearHand(1)], '-','LineWidth',1,'Color', [0,0,0])
 plot(Mx(1),My(1), '^','LineWidth',1,'Color', [0,1,0])
 
 % Trend Line for middle points

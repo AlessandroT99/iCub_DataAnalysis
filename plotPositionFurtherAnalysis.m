@@ -420,8 +420,8 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     My = [nearHand(logical(newRightHandTests(3:end))),nearHand(logical(newLeftHandTests(3:end)))];
 
     % Plot a single marker and a single line just for legend purposes
-    plot([tmpMaxPeaksAverage(3)*100;tmpMinPeaksAverage(3)*100], [nearHand(3);nearHand(3)], '-','LineWidth',1,'Color', [0,0,0])
-    plot(Mx(1),My(1), '^','LineWidth',1,'Color', [0,1,0])
+    plot([tmpMaxPeaksAverage(3).*100;tmpMinPeaksAverage(3).*100], [nearHand(1);nearHand(1)], '-','LineWidth',1,'Color', [0,0,0])
+%     plot(Mx(1),My(1), '^','LineWidth',1,'Color', [0,1,0])
 
     % Trend Line for middle points
     % [sorted_NearHand_4_PosM, indicesM] = sort(My);
@@ -443,18 +443,18 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     scatter(sorted_PosA, sorted_NearHand_4_PosA, MarkerDimension, 'blue','filled')
     
     % Plot triangles to indicate the mean of the ROM of each participant
-    plot(Mx, My, '^','LineWidth',1,'Color', [0,1,0])
+%     plot(Mx, My, '^','LineWidth',1,'Color', [0,1,0])
 
     xLineA = ((abs(maxPeaksAverage(1))-abs(minPeaksAverage(1)))+(minPeaksAverage(BASELINE_NUMBER)-maxPeaksAverage(BASELINE_NUMBER)))/2*100; 
     xline(xLineA,'k--','LineWidth',1)
     xline(0,'k--','LineWidth',1)
-    xline(xLineA/2,'g--','LineWidth',1)
+%     xline(xLineA/2,'g--','LineWidth',1)
     text(xLineA+0.2,31,"A*",'FontSize',12)
     text(0.2,31,"B*",'FontSize',12)
-    text(xLineA/2+0.2,31,"M*",'FontSize',12, 'Color',[0,1,0])
+%     text(xLineA/2+0.2,31,"M*",'FontSize',12, 'Color',[0,1,0])
 
     %title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
-    legend('Point A', 'Trend of Point A', 'Point B', 'Trend of point B', "iCub's Hand ROM", "ROM Middle Point", 'Location','southwest')
+    legend('Point A', 'Trend of Point A', 'Point B', 'Trend of point B', "iCub's Hand ROM", 'Location','southwest')
     % legend('Point A', 'Trend of Point A', 'Point B', 'Trend of point B', "iCub's Hand ROM", "ROM Middle Point", "Trend of ROM middle", 'Location','southwest')
     xlabel("Range of Motion (ROM) Of iCub's Hand [cm]"), ylabel("Near-Hand Effect [ms]")
     xlim([-19,1]), ylim([YLIM_min,YLIM_max])
@@ -571,8 +571,8 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     devPosAidx = [mean(deviationPosfromA(1:BASELINE_NUMBER)),deviationPosfromA(BASELINE_NUMBER+1:end)]';
     devPosBidx = [mean(deviationPosfromB(1:BASELINE_NUMBER)),deviationPosfromB(BASELINE_NUMBER+1:end)]';
     ROMdeviationCenterFromBaseline = zeros(length(posAidx),1);
-    ROMdeviationCenterFromBaseline(leftHandTests(2:end)) = (posAidx(leftHandTests(3:end))+posBidx(leftHandTests(3:end)))./2-abs(posAPeaksmean(1)+posBPeaksmean(1))/2;
-    ROMdeviationCenterFromBaseline(rightHandTests(2:end)) = (posAidx(rightHandTests(3:end))+posBidx(rightHandTests(3:end)))./2-abs(posAPeaksmean(BASELINE_NUMBER)+posBPeaksmean(BASELINE_NUMBER))/2;
+    ROMdeviationCenterFromBaseline(leftHandTests(2:end)) = (posAidx(leftHandTests(2:end))+posBidx(leftHandTests(2:end)))./2-abs(posAPeaksmean(1)+posBPeaksmean(1))/2;
+    ROMdeviationCenterFromBaseline(rightHandTests(2:end)) = (posAidx(rightHandTests(2:end))+posBidx(rightHandTests(2:end)))./2-abs(posAPeaksmean(BASELINE_NUMBER)+posBPeaksmean(BASELINE_NUMBER))/2;
 
     matx = table([-1;testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, [mean(ROM(1:BASELINE_NUMBER));ROM(BASELINE_NUMBER+1:end)'], ROMdeviationCenterFromBaseline, ...
                  [mean(phaseTimeDifference(1:BASELINE_NUMBER));phaseTimeDifference(BASELINE_NUMBER+1:end)'].*TIME_CONVERSION_CONSTANT, [0,nearHand]', ...
