@@ -446,14 +446,14 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
 %     plot(Mx, My, '^','LineWidth',1,'Color', [0,1,0])
 
     xLineA = ((abs(maxPeaksAverage(1))-abs(minPeaksAverage(1)))+(minPeaksAverage(BASELINE_NUMBER)-maxPeaksAverage(BASELINE_NUMBER)))/2*100; 
-    xline(xLineA,'k--','LineWidth',1)
-    xline(0,'k--','LineWidth',1)
+    xline(xLineA,'b--','LineWidth',1)
+    xline(0,'r--','LineWidth',1)
 %     xline(xLineA/2,'g--','LineWidth',1)
-    text(xLineA+0.2,31,"A*",'FontSize',12)
-    text(0.2,31,"B*",'FontSize',12)
+    text(xLineA+0.2,31,"A*",'FontSize',12, 'Color', [0,0,1])
+    text(0.2,31,"B*",'FontSize',12, 'Color',[1,0,0])
 %     text(xLineA/2+0.2,31,"M*",'FontSize',12, 'Color',[0,1,0])
 
-    %title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
+    title("Asymmetry of A position")
     legend('Point A', 'Trend of Point A', 'Point B', 'Trend of point B', "iCub's Hand ROM", 'Location','southwest')
     % legend('Point A', 'Trend of Point A', 'Point B', 'Trend of point B', "iCub's Hand ROM", "ROM Middle Point", "Trend of ROM middle", 'Location','southwest')
     xlabel("Range of Motion (ROM) Of iCub's Hand [cm]"), ylabel("Near-Hand Effect [ms]")
@@ -485,9 +485,29 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     scatter(maxPeaksAverage(BASELINE_NUMBER).*100,baselineYPos-baselineYPosAdded,MarkerDimension,clearRed,'filled')
     scatter(maxPeaksAverage(newRightHandTests).*100, nearHand(logical(newRightHandTests(3:end))), MarkerDimension,'red','filled')
 
+    % Copies for legend
+    plot([maxPeaksAverage(6).*100;minPeaksAverage(6).*100], [nearHand(4);nearHand(4)], ...
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color',[1,0,0])
+
     % iCub L hand - max
     scatter(maxPeaksAverage(1).*100,baselineYPos,MarkerDimension,clearBlue,'filled')
     scatter(maxPeaksAverage(newLeftHandTests).*100, nearHand(logical(newLeftHandTests(3:end))), MarkerDimension,'blue','filled')
+
+    % Copies for legend
+    plot([maxPeaksAverage(3).*100;minPeaksAverage(3).*100], [nearHand(1);nearHand(1)], ...
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color',[0,0,1])
+
+    [sorted_NH, idx] = sort([nearHand(newLeftHandTests(3:end)),nearHand(newRightHandTests(3:end))]);
+    sortedB = maxPeaksAverage(idx+BASELINE_NUMBER).*100;
+    p = polyfit(sorted_NH, sortedB, 1);
+    newYB = polyval(p, linspace(YLIM_min,40));
+    plot(newYB, linspace(YLIM_min,50), 'k-')
+
+    sortedA = minPeaksAverage(idx+BASELINE_NUMBER).*100;
+    p = polyfit(sorted_NH, sortedA, 1);
+    newYA = polyval(p, linspace(YLIM_min,50));
+    plot(newYA, linspace(YLIM_min,50), 'k-')
+    
 
     % Plot union lines between points to describe ROM
     plot([maxPeaksAverage(newLeftHandTests).*100;minPeaksAverage(newLeftHandTests).*100], ...
@@ -496,7 +516,8 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     plot([maxPeaksAverage(newRightHandTests).*100;minPeaksAverage(newRightHandTests).*100], ...
          [nearHand(logical(newRightHandTests(3:end)));nearHand(logical(newRightHandTests(3:end)))], ...
          LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color',[1,0,0])
-    plot([maxPeaksAverage(1).*100;minPeaksAverage(1).*100],[baselineYPos;baselineYPos],LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color',clearBlue)
+    plot([maxPeaksAverage(1).*100;minPeaksAverage(1).*100],[baselineYPos;baselineYPos], ...
+         LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color',clearBlue)
     plot([maxPeaksAverage(BASELINE_NUMBER).*100;minPeaksAverage(BASELINE_NUMBER).*100], ...
          [baselineYPos-baselineYPosAdded;baselineYPos-baselineYPosAdded], ...
          LineTypeROM,'LineWidth',ConnectionLineWidthROM,'Color',clearRed)
@@ -510,21 +531,23 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     scatter(minPeaksAverage(newLeftHandTests).*100, nearHand(newLeftHandTests(3:end)), MarkerDimension,'blue','filled')
 
     % Error bars
-    errorbar(minPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
-             -minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
-             'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-    errorbar(minPeaksAverage(1:BASELINE_NUMBER).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
-             -minPeaksStandardError(1:BASELINE_NUMBER)./2, minPeaksStandardError(1:BASELINE_NUMBER)./2, ...
-             'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-    errorbar(maxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
-             -maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
-             'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
-    errorbar(maxPeaksAverage(1:BASELINE_NUMBER).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
-             -maxPeaksStandardError(1:BASELINE_NUMBER)./2, maxPeaksStandardError(1:BASELINE_NUMBER)./2, ...
-             'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
+%     errorbar(minPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
+%              -minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, minPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
+%              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
+%     errorbar(minPeaksAverage(1:BASELINE_NUMBER).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
+%              -minPeaksStandardError(1:BASELINE_NUMBER)./2, minPeaksStandardError(1:BASELINE_NUMBER)./2, ...
+%              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
+%     errorbar(maxPeaksAverage(logical([0,0,logicalIntervalPeaks])).*100, nearHand(logicalIntervalPeaks), ...
+%              -maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, maxPeaksStandardError(logical([0,0,logicalIntervalPeaks]))./2, ...
+%              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
+%     errorbar(maxPeaksAverage(1:BASELINE_NUMBER).*100, [baselineYPos,baselineYPos-baselineYPosAdded], ...
+%              -maxPeaksStandardError(1:BASELINE_NUMBER)./2, maxPeaksStandardError(1:BASELINE_NUMBER)./2, ...
+%              'Horizontal', 'k', 'LineStyle','none','CapSize',ErrorBarCapSize,'LineWidth',ErrorBarLineWidth)
 
-    title("Range Of Motion (ROM) of iCub hand and Near-Hand Effect")
-    legend('R iCub Baseline','R iCub interaction', 'L iCub Baseline','L iCub interaction','Range Of Motion (ROM)','Location','eastoutside')
+    title("Range Of Motion (ROM) of iCub's hand")
+    legend('R iCub Baseline','R iCub interaction', 'R Range Of Motion (ROM)', ...
+           'L iCub Baseline','L iCub interaction', 'L Range Of Motion (ROM)', ...
+           'Participant Trend', 'Location','eastoutside')
     xlabel("Range of Motion (ROM) with aligned centers [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
     xSize = 1;
     ySize = xSize/0.75*10;
