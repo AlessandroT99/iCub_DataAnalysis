@@ -34,7 +34,7 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
 %     load ..\iCub_ProcessedData\ForceFurtherAnalysis;
     %% AVERAGE TREND ANALYSIS
     maximumMovementTime = 0.4;
-    [envHigh, envLow] = envelope(synchForceDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
+    [envHigh, envLow] = envelope(synchForceDataSet(~isnan(synchForceDataSet(:,2)),2),maximumMovementTime*frequency*0.8,'peak');
     averageEnv = (envLow+envHigh)/2;
 
     %% PEAKS ANALYSIS
@@ -88,7 +88,7 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
     xlabel("Time [ min ]"), ylabel("Force [ N ]")
 
     subplot(2,1,2), grid on, hold on
-    plot(cuttedElapsedTime, averageEnv, 'b-')
+    plot(cuttedElapsedTime(1:length(averageEnv)), averageEnv, 'b-')
     plot(linspace(cuttedElapsedTime(1),cuttedElapsedTime(end),length(meanTrend)), meanTrend,'k--')
     plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'ro')
     plot(cuttedElapsedTime(minLocalization),minPeaksVal,'go')

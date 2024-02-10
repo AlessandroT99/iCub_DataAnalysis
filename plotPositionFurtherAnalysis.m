@@ -547,7 +547,7 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     title("Range Of Motion (ROM) of iCub's hand")
     legend('R iCub Baseline','R iCub interaction', 'R Range Of Motion (ROM)', ...
            'L iCub Baseline','L iCub interaction', 'L Range Of Motion (ROM)', ...
-           'Participant Trend', 'Location','eastoutside')
+           'Participant Trend', 'Location','southeast')
     xlabel("Range of Motion (ROM) with aligned centers [ cm ]"), ylabel("Near-Hand Effect [ ms ]")
     xSize = 1;
     ySize = xSize/0.75*10;
@@ -596,6 +596,14 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     ROMdeviationCenterFromBaseline = zeros(length(posAidx),1);
     ROMdeviationCenterFromBaseline(leftHandTests(2:end)) = (posAidx(leftHandTests(2:end))+posBidx(leftHandTests(2:end)))./2-abs(posAPeaksmean(1)+posBPeaksmean(1))/2;
     ROMdeviationCenterFromBaseline(rightHandTests(2:end)) = (posAidx(rightHandTests(2:end))+posBidx(rightHandTests(2:end)))./2-abs(posAPeaksmean(BASELINE_NUMBER)+posBPeaksmean(BASELINE_NUMBER))/2;
+
+    % Just for debug
+%     tmpMatx = zeros(1,length(ROM));
+%     tmpMatx(rightHandTests) = ROM(rightHandTests)'-abs(devPosAidx(rightHandTests(2:end)))+abs(devPosBidx(rightHandTests(2:end)));
+%     tmpMatx(leftHandTests) = ROM(leftHandTests)'-abs(devPosAidx(leftHandTests(2:end)))+abs(devPosBidx(leftHandTests(2:end)));
+%     tmpBaseline = (abs(posBPeaksmean(1))-abs(posAPeaksmean(1)))*leftHandTests+(abs(posBPeaksmean(2))-abs(posAPeaksmean(2)))*rightHandTests;
+%     tmpTable = table(testedPeople',ROM(BASELINE_NUMBER+1:end)',abs(devPosAidx(2:end)),abs(devPosBidx(2:end)),tmpMatx(3:end)',tmpBaseline(3:end)','VariableNames',["ID","ROM","Deviation PosA","Deviation PosB","ROM-a+b","Baseline ROM"]);
+%     writetable(tmpTable, "..\iCub_ProcessedData\BaselineROM_checkQuestion.xlsx");
 
     matx = table([-1;testedPeople'],posBidx,posAidx,devPosBidx,devPosAidx, [mean(ROM(1:BASELINE_NUMBER));ROM(BASELINE_NUMBER+1:end)'], ROMdeviationCenterFromBaseline, ...
                  [mean(phaseTimeDifference(1:BASELINE_NUMBER));phaseTimeDifference(BASELINE_NUMBER+1:end)'].*TIME_CONVERSION_CONSTANT, [0,nearHand]', ...

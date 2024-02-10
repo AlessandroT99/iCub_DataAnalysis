@@ -35,8 +35,8 @@ function [nR, nL, nM, nF, plotPosM, plotPosF, personWhoFeelsFollowerOrLeader] = 
     nML = 0;                   % Number of L males which took the test 
     nFR = 0;                   % Number of R females which took the test
     nFL = 0;                   % Number of L females which took the test
-    even = 2:2:height(dataSet); % Array containing even numbers
-    odds = 1:2:height(dataSet); % Array containing odd numbers
+    even = 2:2:3*height(dataSet); % Array containing even numbers
+    odds = 1:2:3*height(dataSet); % Array containing odd numbers
     
     
     for numPerson = 1:height(dataSet)

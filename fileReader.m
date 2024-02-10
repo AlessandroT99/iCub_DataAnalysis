@@ -30,18 +30,18 @@ function [posDataSet, forceDataSet] = fileReader(peopleDataSet, personSubSet)
         if strcmp(peopleDataSet.Mano(personSubSet),"R") == 1
             if personSubSet < 10
                 posFilePath = join(["..\iCub_InputData\positions\leftHand\P_0000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\iCub_InputData\forces\leftArm\P_0000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\wrench\leftArm\P_0000",num2str(personSubSet),"\data.log"],'');
             else
                 posFilePath = join(["..\iCub_InputData\positions\leftHand\P_000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\iCub_InputData\forces\leftArm\P_000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\wrench\leftArm\P_000",num2str(personSubSet),"\data.log"],'');
             end
         else
             if personSubSet < 10
                 posFilePath = join(["..\iCub_InputData\positions\rightHand\P_0000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\iCub_InputData\forces\rightArm\P_0000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\wrench\rightArm\P_0000",num2str(personSubSet),"\data.log"],'');
             else
                 posFilePath = join(["..\iCub_InputData\positions\rightHand\P_000",num2str(personSubSet),"\data.log"],'');
-                forceFilePath = join(["..\iCub_InputData\forces\rightArm\P_000",num2str(personSubSet),"\data.log"],'');
+                forceFilePath = join(["..\iCub_InputData\wrench\rightArm\P_000",num2str(personSubSet),"\data.log"],'');
             end
         end
     

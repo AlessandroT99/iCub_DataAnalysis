@@ -38,7 +38,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     DEBUG = 0;                              % Debug binary variable, use it =1 to unlock some parts of the code, normally unusefull
     IMAGE_SAVING = 1;                       % Put to 1 in order to save the main plots
     PAUSE_TIME = 2;                         % Used to let the window of the plot get the full resolution size before saving
-    FORCE_TRANSFORMATION_EVALUATION = 1;    % Goes to 0 if the force transformation has to be skipped
+    FORCE_TRANSFORMATION_EVALUATION = 0;    % Goes to 0 if the force transformation has to be skipped
     PLOT_TRAJECTORIES = 1;                  % If equal to 0 does not plot hand trajectories
     axisYLimMultiplier = 1.5;               % Multiplies the chosen y limits for axis plotting
     defaultTitleName = strjoin(["Test N. ",num2str(numPerson), "  -  ", personParameters],"");
@@ -53,8 +53,13 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     %% A priori informations
     experimentDuration = 24000;
     frequency = 100;
+
+    origPosDataSet = posDataSet;
     
     %% POSITION ANALYSIS
+    % Firstly execute the norm in the y-z plane
+    posDataSet.yPos = sqrt(posDataSet.yPos.^2 + posDataSet.zPos.^2);
+
     % Firstly the signal is enveloped on the max and min, and the average is
     % evaluated
     elapsedTime = minutesDataPointsConverter(posDataSet);
@@ -187,7 +192,12 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     % "Middle peaks removal"
     safeThreshold = 0.5;
     shortSignalFirstEndPoint = 0; % Used for plot printing, if remains 0 will not be printed
-    if posStd(derivativePosEnd) < safeThreshold
+    
+    if derivativePosEnd >= length(posStd)
+        derivativePosEnd = length(posStd);
+    end
+
+    if posStd(derivativePosEnd-1) < safeThreshold
         shortSignalFirstEndPoint = derivativePosEnd;
         for i = derivativePosEnd:-1:derivativePosStart
             if posStd(i) > stdRequired
@@ -304,7 +314,6 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     posStart = min(minLocalization(1),maxLocalization(1));
     posEnd = max(minLocalization(end),maxLocalization(end));
 
-
     cuttedPosDataSet = firstCutPosDataSet(posStart:posEnd,:);
     cuttedElapsedTime = elapsedTime(posStart:posEnd)-elapsedTime(posStart);
     cuttedAverageBehavior = cutPosAverage(posStart:posEnd);
@@ -339,34 +348,35 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         fig3DTraj = figure('Name', 'Hand trajectory');
         fig3DTraj.WindowState = 'maximized';
         grid on, hold on
-        plot3(cuttedPosDataSet.xPos,cuttedPosDataSet.yPos,cuttedPosDataSet.zPos,'k-')
-        plot3(cuttedPosDataSet.xPos(1),cuttedPosDataSet.yPos(1),cuttedPosDataSet.zPos(1),'go','MarkerFaceColor','g')
-        plot3(cuttedPosDataSet.xPos(end),cuttedPosDataSet.yPos(end),cuttedPosDataSet.zPos(end),'ro','MarkerFaceColor','r')
+        tmpOrigPosDataSet = table2array(origPosDataSet(derivativePosStart+posStart:derivativePosStart+posEnd,:));
+        plot3(tmpOrigPosDataSet(:,3),tmpOrigPosDataSet(:,4),tmpOrigPosDataSet(:,5),'k-')
+        plot3(tmpOrigPosDataSet(1,3),tmpOrigPosDataSet(1,4),tmpOrigPosDataSet(1,5),'go','MarkerFaceColor','g')
+        plot3(tmpOrigPosDataSet(end,3),tmpOrigPosDataSet(end,4),tmpOrigPosDataSet(end,5),'ro','MarkerFaceColor','r')
         title('Hand Trajectory',defaultTitleName)
         legend("Signal","Start point","End point",'Location','eastoutside')
     
         fig2DTraj = figure('Name', 'Hand trajectory');
         fig2DTraj.WindowState = 'maximized';
         subplot(1,3,1), grid on, hold on
-        plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.yPos.*100,'k-')
-        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.yPos(1).*100,'go','MarkerFaceColor','g')
-        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.yPos(end).*100,'ro','MarkerFaceColor','r')
+        plot(tmpOrigPosDataSet(:,3).*100,tmpOrigPosDataSet(:,4).*100,'k-')
+        plot(tmpOrigPosDataSet(1,3).*100,tmpOrigPosDataSet(1,4).*100,'go','MarkerFaceColor','g')
+        plot(tmpOrigPosDataSet(end,3).*100,tmpOrigPosDataSet(end,4).*100,'ro','MarkerFaceColor','r')
         ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
         title('Hand Trajectory - Plane XY')
         legend("Signal","Start point","End point",'Location','southoutside')
     
         subplot(1,3,2), grid on, hold on
-        plot(cuttedPosDataSet.xPos.*100,cuttedPosDataSet.zPos.*100,'k-')
-        plot(cuttedPosDataSet.xPos(1).*100,cuttedPosDataSet.zPos(1).*100,'go','MarkerFaceColor','g')
-        plot(cuttedPosDataSet.xPos(end).*100,cuttedPosDataSet.zPos(end).*100,'ro','MarkerFaceColor','r')
+        plot(tmpOrigPosDataSet(:,3).*100,tmpOrigPosDataSet(:,5).*100,'k-')
+        plot(tmpOrigPosDataSet(1,3).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
+        plot(tmpOrigPosDataSet(end,3).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
         ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
         title('Hand Trajectory - Plane XZ')
         legend("Signal","Start point","End point",'Location','southoutside')
     
         subplot(1,3,3), grid on, hold on
-        plot(cuttedPosDataSet.yPos.*100,cuttedPosDataSet.zPos.*100,'k-')
-        plot(cuttedPosDataSet.yPos(1).*100,cuttedPosDataSet.zPos(1).*100,'go','MarkerFaceColor','g')
-        plot(cuttedPosDataSet.yPos(end).*100,cuttedPosDataSet.zPos(end).*100,'ro','MarkerFaceColor','r')
+        plot(tmpOrigPosDataSet(:,4).*100,tmpOrigPosDataSet(:,5).*100,'k-')
+        plot(tmpOrigPosDataSet(1,4).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
+        plot(tmpOrigPosDataSet(end,4).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
         ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
         title('Hand Trajectory - Plane YZ')
         legend("Signal","Start point","End point",'Location','southoutside')
@@ -666,16 +676,16 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         % Due to the evaluation error of the force signal, its real module
         % value will not be taken in consideration and it will be evaluated
         % with zero mean
-        finalCuttedSynchForceDataSet.Fx = finalCuttedSynchForceDataSet.Fx - mean(finalCuttedSynchForceDataSet.Fx);
-        finalCuttedSynchForceDataSet.Fy = finalCuttedSynchForceDataSet.Fy - mean(finalCuttedSynchForceDataSet.Fy);
-        finalCuttedSynchForceDataSet.Fz = finalCuttedSynchForceDataSet.Fz - mean(finalCuttedSynchForceDataSet.Fz);
+%         finalCuttedSynchForceDataSet.Fx = finalCuttedSynchForceDataSet.Fx - mean(finalCuttedSynchForceDataSet.Fx);
+%         finalCuttedSynchForceDataSet.Fy = finalCuttedSynchForceDataSet.Fy - mean(finalCuttedSynchForceDataSet.Fy);
+%         finalCuttedSynchForceDataSet.Fz = finalCuttedSynchForceDataSet.Fz - mean(finalCuttedSynchForceDataSet.Fz);
     
         %% Finding min e MAX peaks of the force
         tic
         fprintf("   .Concluding computation of usefull parameters of the force...")
         
         maximumMovementTime = 0.1;
-        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
+        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy(~isnan(finalCuttedSynchForceDataSet.Fy)),maximumMovementTime*frequency*0.8,'peak');
         averageEnv = (envLow+envHigh)/2;
         
         [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
@@ -720,7 +730,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         % So to count the correct number of phases another envelop is done,
         % rounding each phase to almost a single peak.
         maximumMovementTime = 1;
-        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy,maximumMovementTime*frequency*0.8,'peak');
+        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy(~isnan(finalCuttedSynchForceDataSet.Fy)),maximumMovementTime*frequency*0.8,'peak');
         averageEnv = (envLow+envHigh)/2;
         
         [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);

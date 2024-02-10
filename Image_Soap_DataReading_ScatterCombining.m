@@ -331,13 +331,13 @@ MarkerDimension = 80;
 scatter(1:height(mind), mind.mind, MarkerDimension, clearRed, "filled")
 p = polyfit(1:height(mind), mind.mind,1);
 ymean = polyval(p, linspace(0,height(mind)));
-plot(linspace(0,height(mind)),ymean,'-',"Color",clearRed)
+plot(linspace(0,height(mind)),ymean,'-',"Color",clearRed, 'LineWidth', 1.5)
 scatter(1:height(mind), mind.MIND, MarkerDimension, clearBlue, "filled")
 p = polyfit(1:height(mind), mind.MIND,1);
 ymean = polyval(p, linspace(0,height(mind)));
-plot(linspace(0,height(mind)),ymean,'-',"Color",clearBlue)
-xlabel("Mind attribution"), ylabel("# of participant")
-title("Mind attribution pre&post")
+plot(linspace(0,height(mind)),ymean,'-',"Color",clearBlue,'LineWidth',1.5)
+ylabel("Mind Attribution"), xlabel("Number of the Participant")
+title("Mind Attribution Pre and Post Experiment")
 legend("Before","Before trend","After","After trend")
 hold off
 savingFigure(gcf,"22_MindAttribution");

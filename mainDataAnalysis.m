@@ -18,8 +18,8 @@ clear all, close all,  clc
 format compact
 
 TELEGRAM_LOG = 0; % Goes to 0 if no messages on telegram are wanted        
-STRANGE_POSITION_DATA = [26]; % Dataset where the participant tries to stop robot movement
-NOT_ABLE_TO_GENERATE_FORCE = [9,17]; % Dataset where the iKin algorithm is not able to reconstruct the data
+STRANGE_POSITION_DATA = [3]; % Dataset where the participant tries to stop robot movement
+NOT_ABLE_TO_GENERATE_FORCE = []; % Dataset where the iKin algorithm is not able to reconstruct the data
 AVOIDING_TESTS = [STRANGE_POSITION_DATA, NOT_ABLE_TO_GENERATE_FORCE]; % Union of all the tests to be skipped
 
 try

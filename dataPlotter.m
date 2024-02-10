@@ -35,7 +35,7 @@
     %% Simulation parameter
     BIG_PLOT_ENABLE = 0;        % Allows to the plotting of the two big gender plot 
     PAUSE_PEOPLE = -5;          % Array containing number of people for which the synch shall put in pause to handle graphs (-5 == noone pause)
-    AXIS_3PLOT = 1;             % Allows plotting all the 3 force and position components
+    AXIS_3PLOT = 0;             % Allows plotting all the 3 force and position components
     BASELINE_NUMBER = 2;        % Number of baseline in the simulation
     BaseLineEvaluationDone = 0; % Goes to 1 when the base line has been evaluated
     posBaseline = [];           % Variable where the pos baseline is saved
@@ -66,8 +66,8 @@
     %% Input data
     fprintf("Simulation starting up...\n")
     
-    numPeople = 32+BASELINE_NUMBER; 
-    people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
+    numPeople = 8+BASELINE_NUMBER; 
+    people = readtable("..\iCub_InputData\Dati Personali EXP3.xlsx");
     people = people(1:numPeople-BASELINE_NUMBER,:);
 
     FxLeftMean = -11.6261;
@@ -186,15 +186,15 @@
             % Adjusting the Fx mean value due to the hand used, so only if
             % is a test with the robot hand R or if it is the baseline
             % number 2, also made with the right hand of the robot
-            if i == 2 && strcmp(RbaseLinePath, "P0_R_Base") == 1
-                forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
-            else
-                if numP > 0
-                    if strcmp(people.Mano(numP), "L") == 1
-                        forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
-                    end
-                end
-            end
+%             if i == 2 && strcmp(RbaseLinePath, "P0_R_Base") == 1
+%                 forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
+%             else
+%                 if numP > 0
+%                     if strcmp(people.Mano(numP), "L") == 1
+%                         forceDataSet.Fx = forceDataSet.Fx - mean(forceDataSet.Fx) + FxLeftMean;
+%                     end
+%                 end
+%             end
 
             personTime = tic;
             if BaseLineEvaluationDone == 0
