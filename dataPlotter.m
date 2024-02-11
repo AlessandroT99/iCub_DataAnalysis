@@ -234,25 +234,6 @@
               synchSignalsData(iCub, aik, opts, posDataSet, forceDataSet, numP, ...
                 personParam,PAUSE_PEOPLE,baselineBoundaries, BaselineFilesParameters, TELEGRAM_LOG, FORCE_AVOIDING_TESTS, notConsideredValue);   
     
-            if BIG_PLOT_ENABLE && BaseLineEvaluationDone
-                if strcmp(people.Genere(i),"M") == 1
-                    % Defining the subplot in the males figure
-                    actualNM = actualNM + 1;
-                    figure(figM);
-                    h = scrollsubplot(2,2,plotPosM(actualNM));
-                else 
-                    % Defining the subplot in the females figure
-                    actualNF = actualNF + 1;
-                    figure(figF);    
-                    h = scrollsubplot(2,2,plotPosF(actualNF));
-                end
-        
-                p = get(gca, 'Position');
-                rowH = 0.58/nRow;
-                set(gca, 'Color', 'None', 'XColor', 'None', 'YColor', 'None');
-                axes('Position', [p(1:3), rowH]);
-            end
-    
             % Plot results obtained previosly in a single involved subplot
             % depending on the gender and save them separately for each test
             tic
@@ -329,39 +310,6 @@
                 end
             end
         end
-    end
-    
-    %% Gender plots last touch
-    if BIG_PLOT_ENABLE
-        figure(figM);
-        % Add legend for males figure
-        Lgnd = legend('show');
-        Lgnd.Position(1) = 0.01;
-        Lgnd.Position(2) = 0.4;
-        % Add a general title to the figure
-        axes('Position', [0, 0.95, 1, 0.05] ) ;
-        set(gca, 'Color', 'None', 'XColor', 'None', 'YColor', 'None' ) ;
-        text(0.5, 0, 'Male data analysis', 'FontSize', 14', 'FontWeight', 'Bold', ...
-             'HorizontalAlignment', 'Center', 'VerticalAlignment', 'Bottom' ) ;
-        
-        
-        figure(figF);  
-        % Add legend for females figure
-        Lgnd = legend('show');
-        Lgnd.Position(1) = 0.01;
-        Lgnd.Position(2) = 0.4;
-        % Add a general title to the figure
-        axes('Position', [0, 0.95, 1, 0.05]);
-        set(gca, 'Color', 'None', 'XColor', 'None', 'YColor', 'None');
-        text(0.5, 0, 'Female data analysis', 'FontSize', 14', 'FontWeight', 'Bold', ...
-             'HorizontalAlignment', 'Center', 'VerticalAlignment', 'Bottom');
-        
-        % Print the images in order to see them more easily
-        % fprintf("\n\nStart image saving...\n")
-        % exportgraphics(figM,'iCub_ProcessedData\Male analysis output.png')
-        % exportgraphics(figF,'iCub_ProcessedData\Female analysis output.png') 
-        % fprintf("Image saving done\n")
-        % close all
     end
     
     %% Output parameters evaluation

@@ -63,8 +63,9 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     % Firstly the signal is enveloped on the max and min, and the average is
     % evaluated
     elapsedTime = minutesDataPointsConverter(posDataSet);
-    maximumMovementTime = 0.1;
-    [envHigh, envLow] = envelope(posDataSet.yPos,maximumMovementTime*frequency*0.8,'peak');
+    maximumMovementTime = 0.5;
+
+    [envHigh, envLow] = envelope(posDataSet.yPos,round(maximumMovementTime*frequency*0.8),'peak');
     firstAverageEnv = (envLow+envHigh)/2;
     
     % Plot results
@@ -72,14 +73,14 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     fig1.WindowState = 'maximized';
     subplot(2,1,1), hold on, grid on
     plot(elapsedTime,posDataSet.yPos,'k-','DisplayName', 'y position')
-    plot(elapsedTime,firstAverageEnv,'r--','DisplayName','Average signal')
+%     plot(elapsedTime,firstAverageEnv,'r--','DisplayName','Average signal')
     xlabel("Elapsed time [ min ]")
     ylabel("Position [ m ]")
     title("Original signal")
     legend('show','Location','eastoutside')
     hold off
     
-    % The signal derivative is evaluated
+    % The signal derivative is evaluated on the envelop
     posDerivative = zeros(1,length(firstAverageEnv)-1);
     for i = 2:length(firstAverageEnv)
         posDerivative(i) = (firstAverageEnv(i)-firstAverageEnv(i-1))/(0.01/60);
@@ -100,7 +101,30 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     % shift, a chebyshev filter is designed, and then its coefficient are
     % re-elaborated in order to remove the shift using a zero phase digital
     % filter funct (filtfilt())
-    fc = 2;
+    fig2a = figure("Name",'Spectral density');
+    fig2a.WindowState = 'maximized';
+    [pot, freq] = pwelch(posDataSet.yPos-mean(posDataSet.yPos), rectwin(100), 0, 100, 100);
+    plot(freq, pot)
+    xlabel("Frequency [Hz]"), ylabel('Power [W]')
+    title("Spectral power density", defaultTitleName)
+    
+    if IMAGE_SAVING
+        mkdir ..\iCub_ProcessedData\PositionSpectralDensity;
+        if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\PositionSpectralDensity",splitted(1:end-1)],'\'));
+            end
+            path = strjoin(["..\iCub_ProcessedData\PositionSpectralDensity\",BaselineFilesParameters(3),".png"],"");
+        else
+            path = strjoin(["..\iCub_ProcessedData\PositionSpectralDensity\P",num2str(numPerson),".png"],"");
+        end
+        pause(PAUSE_TIME);
+        exportgraphics(fig2a,path)
+        close(fig2a);
+    end
+    
+    fc = 3;
     gain = 1;
     
     % Design of the chebyshev filter of third order
@@ -113,6 +137,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     filteredPosDerivative = filtfilt(sos,gain,posDerivative);
     
     % Plot results
+    figure(fig2)
     subplot(4,1,2), hold on, grid on
     plot(elapsedTime,filteredPosDerivative)
     title("Filtered signal")
@@ -205,13 +230,6 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
                 break;
             end
         end
-        if newDerivativePosEnd == derivativePosEnd
-            % Then in this case the shortening did not work or something bad happend, 
-            % and makes no sense to continue to evaluate this signal. So an error is thrown,
-            % choice of who is analyzing this data to decide if remove the
-            % test from the list of "analyzable" or find a new code fix
-            error('The signal N. %d is shorter than 4 minutes and the end position shortening went wrong.',numPerson);
-        end
 
         cuttedFilteredPosDerivative = []; % Cleaning the vector before re-use it
         cuttedFilteredPosDerivative = filteredPosDerivative(derivativePosStart:newDerivativePosEnd);
@@ -300,16 +318,16 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     %% Adjust starting and ending position
     % In order to cut data which are not complete, the starting and ending
     % position are shifted to the nearest peak, in the just cutted signal.
-    cutPosAverage = firstAverageEnv(derivativePosStart:derivativePosEnd);
+    cutPosAverage = posDataSet.yPos(derivativePosStart:derivativePosEnd);
     firstCutPosDataSet = posDataSet(derivativePosStart:derivativePosEnd,:);
-    [maxPeaksVal, maxLocalization] = findpeaks(cutPosAverage,'MinPeakHeight',mean(cutPosAverage));
-    [minPeaksVal, minLocalization] = findpeaks(-cutPosAverage,'MinPeakHeight',-mean(cutPosAverage));
+    [maxPeaksVal, maxLocalization] = findpeaks(cutPosAverage,'MinPeakHeight',mean(cutPosAverage), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015); %70 ms
+    [minPeaksVal, minLocalization] = findpeaks(-cutPosAverage,'MinPeakHeight',-mean(cutPosAverage), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015);
     minPeaksVal = -minPeaksVal;
     upperPeaksBound = mean(maxPeaksVal);
     lowerPeaksBound = mean(minPeaksVal);
 
-    % Cleaning the peaks from doubles
-    [minPeaksVal,minLocalization,maxPeaksVal,maxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization);
+%     % Cleaning the peaks from doubles
+%     [minPeaksVal,minLocalization,maxPeaksVal,maxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization);
 
     posStart = min(minLocalization(1),maxLocalization(1));
     posEnd = max(minLocalization(end),maxLocalization(end));
@@ -331,6 +349,51 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     minLocalization = minLocalization(minLocalization<=length(cuttedElapsedTime));
     minPeaksVal = minPeaksVal(1:length(minLocalization));
 
+    % If occurs that two or more maximums/minimums are not separated from
+    % the opposite, it will be taken the average of them, both temporarly
+    % and position value
+    % firstly find the higher density of peaks
+    if length(minLocalization) < length(maxLocalization)
+        HtmpLocalization = [maxLocalization,maxPeaksVal];
+        LtmpLocalization = [minLocalization,minPeaksVal];
+    else
+        HtmpLocalization = [minLocalization,minPeaksVal];
+        LtmpLocalization = [maxLocalization,maxPeaksVal];
+    end
+
+    % then with the found maximum analyze all the peaks looking for
+    % sovrappositions
+    cnt = 1;
+    checkCnt = 0;
+    newHLocalization = [];
+    for i = 1:(size(HtmpLocalization,1)-1)
+        if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+            checkCnt = checkCnt + 1;
+        else
+            if checkCnt > 0
+                newHLocalization = [newHLocalization;round(mean(HtmpLocalization(i-checkCnt:i,1))),mean(HtmpLocalization(i-checkCnt:i,2))];
+                checkCnt = 0;
+            else
+                newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+            end
+            cnt = cnt + 1;
+        end
+    end
+
+    if ~isempty(newHLocalization)
+        if LtmpLocalization(1,1) == minLocalization(1)
+            maxLocalization = []; % be sure to clear all the old values in the vector
+            maxPeaksVal = []; % be sure to clear all the old values in the vector
+            maxLocalization = newHLocalization(:,1);
+            maxPeaksVal = newHLocalization(:,2);
+        else
+            minLocalization = []; % be sure to clear all the old values in the vector
+            minPeaksVal = []; % be sure to clear all the old values in the vector
+            minLocalization = newHLocalization(:,1);
+            minPeaksVal = newHLocalization(:,2);
+        end
+    end
+
     timeDelayFromOriginalPos = derivativePosStart;
     
     %% Phases number evaluation
@@ -343,73 +406,12 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         fprintf("\t- N. min: %d\n",posLowerPhase)
     end
 
-    %% Robot hand trajectory plotting
-    if PLOT_TRAJECTORIES
-        fig3DTraj = figure('Name', 'Hand trajectory');
-        fig3DTraj.WindowState = 'maximized';
-        grid on, hold on
-        tmpOrigPosDataSet = table2array(origPosDataSet(derivativePosStart+posStart:derivativePosStart+posEnd,:));
-        plot3(tmpOrigPosDataSet(:,3),tmpOrigPosDataSet(:,4),tmpOrigPosDataSet(:,5),'k-')
-        plot3(tmpOrigPosDataSet(1,3),tmpOrigPosDataSet(1,4),tmpOrigPosDataSet(1,5),'go','MarkerFaceColor','g')
-        plot3(tmpOrigPosDataSet(end,3),tmpOrigPosDataSet(end,4),tmpOrigPosDataSet(end,5),'ro','MarkerFaceColor','r')
-        title('Hand Trajectory',defaultTitleName)
-        legend("Signal","Start point","End point",'Location','eastoutside')
-    
-        fig2DTraj = figure('Name', 'Hand trajectory');
-        fig2DTraj.WindowState = 'maximized';
-        subplot(1,3,1), grid on, hold on
-        plot(tmpOrigPosDataSet(:,3).*100,tmpOrigPosDataSet(:,4).*100,'k-')
-        plot(tmpOrigPosDataSet(1,3).*100,tmpOrigPosDataSet(1,4).*100,'go','MarkerFaceColor','g')
-        plot(tmpOrigPosDataSet(end,3).*100,tmpOrigPosDataSet(end,4).*100,'ro','MarkerFaceColor','r')
-        ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
-        title('Hand Trajectory - Plane XY')
-        legend("Signal","Start point","End point",'Location','southoutside')
-    
-        subplot(1,3,2), grid on, hold on
-        plot(tmpOrigPosDataSet(:,3).*100,tmpOrigPosDataSet(:,5).*100,'k-')
-        plot(tmpOrigPosDataSet(1,3).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
-        plot(tmpOrigPosDataSet(end,3).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
-        ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
-        title('Hand Trajectory - Plane XZ')
-        legend("Signal","Start point","End point",'Location','southoutside')
-    
-        subplot(1,3,3), grid on, hold on
-        plot(tmpOrigPosDataSet(:,4).*100,tmpOrigPosDataSet(:,5).*100,'k-')
-        plot(tmpOrigPosDataSet(1,4).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
-        plot(tmpOrigPosDataSet(end,4).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
-        ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
-        title('Hand Trajectory - Plane YZ')
-        legend("Signal","Start point","End point",'Location','southoutside')
-        
-        sgtitle(defaultTitleName)
-    
-        if IMAGE_SAVING
-            mkdir ..\iCub_ProcessedData\HandTrajectory;
-            if numPerson < 0
-                splitted = strsplit(BaselineFilesParameters(3),'\');
-                if length(splitted) > 1
-                    mkdir(strjoin(["..\iCub_ProcessedData\HandTrajectory",splitted(1:end-1)],'\'));
-                end
-                path = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),".png"],"");
-                path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),"_3D.fig"],"");
-            else
-                path = strjoin(["..\iCub_ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
-                path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
-            end
-            pause(PAUSE_TIME);
-            savefig(fig3DTraj,path2);
-            exportgraphics(fig2DTraj,path)
-            close(fig2DTraj);
-            close(fig3DTraj);
-        end
-    end
-
     %% Plot results
     figure(fig1)
     subplot(2,1,1)
     plot(elapsedTime,posDataSet.yPos,'k-','DisplayName', 'y position')
     hold on, grid on
-    plot(elapsedTime,firstAverageEnv,'r--','DisplayName','Average signal')
+%     plot(elapsedTime,firstAverageEnv,'r--','DisplayName','Average signal')
     plot(elapsedTime(derivativePosStart),posDataSet.yPos(derivativePosStart),'ro','DisplayName','Derivative starting point')
     plot(elapsedTime(derivativePosEnd),posDataSet.yPos(derivativePosEnd),'bo','DisplayName','Derivative ending point')
     plot(elapsedTime(posStart+timeDelayFromOriginalPos),posDataSet.yPos(posStart+timeDelayFromOriginalPos),'ro','DisplayName','Position starting point','MarkerSize',10)
@@ -488,6 +490,67 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         exportgraphics(fig2,path)
     end
 
+    %% Robot hand trajectory plotting
+    if PLOT_TRAJECTORIES
+        fig3DTraj = figure('Name', 'Hand trajectory');
+        fig3DTraj.WindowState = 'maximized';
+        grid on, hold on
+        tmpOrigPosDataSet = table2array(origPosDataSet(derivativePosStart+posStart:derivativePosStart+posEnd,:));
+        plot3(tmpOrigPosDataSet(:,3),tmpOrigPosDataSet(:,4),tmpOrigPosDataSet(:,5),'k-')
+        plot3(tmpOrigPosDataSet(1,3),tmpOrigPosDataSet(1,4),tmpOrigPosDataSet(1,5),'go','MarkerFaceColor','g')
+        plot3(tmpOrigPosDataSet(end,3),tmpOrigPosDataSet(end,4),tmpOrigPosDataSet(end,5),'ro','MarkerFaceColor','r')
+        title('Hand Trajectory',defaultTitleName)
+        legend("Signal","Start point","End point",'Location','eastoutside')
+    
+        fig2DTraj = figure('Name', 'Hand trajectory');
+        fig2DTraj.WindowState = 'maximized';
+        subplot(1,3,1), grid on, hold on
+        plot(tmpOrigPosDataSet(:,3).*100,tmpOrigPosDataSet(:,4).*100,'k-')
+        plot(tmpOrigPosDataSet(1,3).*100,tmpOrigPosDataSet(1,4).*100,'go','MarkerFaceColor','g')
+        plot(tmpOrigPosDataSet(end,3).*100,tmpOrigPosDataSet(end,4).*100,'ro','MarkerFaceColor','r')
+        ylabel("Y position [ cm ]"), xlabel("X position [ cm ]")
+        title('Hand Trajectory - Plane XY')
+        legend("Signal","Start point","End point",'Location','southoutside')
+    
+        subplot(1,3,2), grid on, hold on
+        plot(tmpOrigPosDataSet(:,3).*100,tmpOrigPosDataSet(:,5).*100,'k-')
+        plot(tmpOrigPosDataSet(1,3).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
+        plot(tmpOrigPosDataSet(end,3).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
+        ylabel("Z position [ cm ]"), xlabel("X position [ cm ]")
+        title('Hand Trajectory - Plane XZ')
+        legend("Signal","Start point","End point",'Location','southoutside')
+    
+        subplot(1,3,3), grid on, hold on
+        plot(tmpOrigPosDataSet(:,4).*100,tmpOrigPosDataSet(:,5).*100,'k-')
+        plot(tmpOrigPosDataSet(1,4).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
+        plot(tmpOrigPosDataSet(end,4).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
+        ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
+        title('Hand Trajectory - Plane YZ')
+        legend("Signal","Start point","End point",'Location','southoutside')
+        
+        sgtitle(defaultTitleName)
+    
+        if IMAGE_SAVING
+            mkdir ..\iCub_ProcessedData\HandTrajectory;
+            if numPerson < 0
+                splitted = strsplit(BaselineFilesParameters(3),'\');
+                if length(splitted) > 1
+                    mkdir(strjoin(["..\iCub_ProcessedData\HandTrajectory",splitted(1:end-1)],'\'));
+                end
+                path = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),".png"],"");
+                path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\",BaselineFilesParameters(3),"_3D.fig"],"");
+            else
+                path = strjoin(["..\iCub_ProcessedData\HandTrajectory\P",num2str(numPerson),".png"],"");
+                path2 = strjoin(["..\iCub_ProcessedData\HandTrajectory\3D_P",num2str(numPerson),".fig"],"");
+            end
+            pause(PAUSE_TIME);
+            savefig(fig3DTraj,path2);
+            exportgraphics(fig2DTraj,path)
+            close(fig2DTraj);
+            close(fig3DTraj);
+        end
+    end
+
     % Reference "tic" at the beginning in the "Parameters for the simulation" section 
     fprintf("                                  Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS')) 
 
@@ -538,7 +601,30 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         % shift, a chebyshev filter is designed, and then its coefficient are
         % re-elaborated in order to remove the shift using a zero phase digital
         % filter funct (filtfilt())
-        fc = 5;
+        fig3a = figure("Name",'Spectral density');
+        fig3a.WindowState = 'maximized';
+        [pot, freq] = pwelch(forceDataSet.Fy-mean(forceDataSet.Fy), rectwin(100), 0, 100, 100);
+        plot(freq, pot)
+        xlabel("Frequency [Hz]"), ylabel('Power [W]')
+        title("Spectral power density", defaultTitleName)
+        
+        if IMAGE_SAVING
+            mkdir ..\iCub_ProcessedData\ForceSpectralDensity;
+            if numPerson < 0
+                splitted = strsplit(BaselineFilesParameters(3),'\');
+                if length(splitted) > 1
+                    mkdir(strjoin(["..\iCub_ProcessedData\ForceSpectralDensity",splitted(1:end-1)],'\'));
+                end
+                path = strjoin(["..\iCub_ProcessedData\ForceSpectralDensity\",BaselineFilesParameters(3),".png"],"");
+            else
+                path = strjoin(["..\iCub_ProcessedData\ForceSpectralDensity\P",num2str(numPerson),".png"],"");
+            end
+            pause(PAUSE_TIME);
+            exportgraphics(fig3a,path)
+            close(fig3a);
+        end
+        
+        fc = 15;
         gain = 1;
         
         % Design of the chebyshev filter of third order
@@ -624,72 +710,18 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         fprintf("                 Completed in %s minutes\n",duration(0,0,toc,'Format','mm:ss.SS'))
     
         meanXforce = mean(cuttedSynchForceDataSet.Fx); 
+        finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
         
-        %% Force transformation
-        if FORCE_TRANSFORMATION_EVALUATION
-            if numPerson < 0
-                path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\",BaselineFilesParameters(3),".mat"],"");
-            else
-                path = strjoin(["..\iCub_ProcessedData\ForceTransformationData\P",num2str(numPerson),".mat"],"");
-            end
-            if exist(path,'file')
-                load(path);
-                finalCuttedSynchForceDataSet = newCuttedSynchForceDataSet;
-            else
-                if sum(find(numPerson == NOT_ABLE_TO_GENERATE_FORCE)) >= 1
-                    fprintf("   .Skipping force transformation... ")
-%                     finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
-                else
-                    % Has been evaluated that the force RS has to be rotated and translated
-                    % into the EF RS with respect to the OF
-                    forceTransformTime = tic;
-                    fprintf("   .Computing force transformation...")
-                    try
-                        [finalCuttedSynchForceDataSet, ~] = forceTransformation(robot, aik, opts, posDataSet, cuttedPosDataSet, ...
-                            cuttedSynchForceDataSet, forceStart, forceEnd, personParameters, defaultTitleName, numPerson, BaselineFilesParameters, cuttedElapsedTime, TELEGRAM_LOG);
-                    catch forceErr
-                        % If any error occurs, it is better to avoid the dataset and do not stop the overral simulation
-                        finalCuttedSynchForceDataSet = cuttedSynchForceDataSet; % Use the wrong force set to end the dataset
-                        fprintf("\nThere was an error! This dataset will be skipped.")
-                        if ~isempty(forceErr.identifier)
-                            fprintf(2,"\n%s\n\n",getReport(forceErr))
-                        else
-                            fprintf(2,'\nThe message was:\n%s',forceErr.message);
-                        end
-                        if TELEGRAM_LOG
-                            outputText = strjoin(["[WARNING] An error occurred! The simulation will not be interrupted, only the dataset ", num2str(numPerson), " skipped.",newline,newline,"The error output was: ",forceErr.message],"");
-                            pyrunfile("telegramLogging.py",txtMsg=outputText,TEXT=1,filePath="");
-                        end
-                    end
-                    fprintf("\n       .Whole process completed in %s minutes\n",duration(0,0,toc(forceTransformTime),'Format','mm:ss.SS'))
-                end
-            end
-        else
-            if numPerson < 0
-                finalCuttedSynchForceDataSet = wrenchForceReader(numPerson, posDataSet, forceStart, forceEnd, personParameters(5),BaselineFilesParameters);
-            else
-                finalCuttedSynchForceDataSet = cuttedSynchForceDataSet;
-            end
-        end
-    
-        %% Remove the mean to the force signal
-        % Due to the evaluation error of the force signal, its real module
-        % value will not be taken in consideration and it will be evaluated
-        % with zero mean
-%         finalCuttedSynchForceDataSet.Fx = finalCuttedSynchForceDataSet.Fx - mean(finalCuttedSynchForceDataSet.Fx);
-%         finalCuttedSynchForceDataSet.Fy = finalCuttedSynchForceDataSet.Fy - mean(finalCuttedSynchForceDataSet.Fy);
-%         finalCuttedSynchForceDataSet.Fz = finalCuttedSynchForceDataSet.Fz - mean(finalCuttedSynchForceDataSet.Fz);
-    
         %% Finding min e MAX peaks of the force
         tic
         fprintf("   .Concluding computation of usefull parameters of the force...")
         
         maximumMovementTime = 0.1;
-        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy(~isnan(finalCuttedSynchForceDataSet.Fy)),maximumMovementTime*frequency*0.8,'peak');
+        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy(~isnan(finalCuttedSynchForceDataSet.Fy)),round(maximumMovementTime*frequency*0.8),'peak');
         averageEnv = (envLow+envHigh)/2;
         
-        [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
-        [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
+        [maxPeaksVal, maxLocalization] = findpeaks(averageEnv, 'MinPeakDistance', 6);
+        [minPeaksVal, minLocalization] = findpeaks(-averageEnv, 'MinPeakDistance', 6);
         minPeaksVal = -minPeaksVal;
         upperPeaksBound = mean(maxPeaksVal);
         lowerPeaksBound = mean(minPeaksVal);
@@ -721,63 +753,6 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
             fprintf("\nFirst registered force peaks:\n")
             fprintf("\t- N. MAX: %d\n",posUpperPhase)
             fprintf("\t- N. min: %d\n",posLowerPhase)
-        end
-        
-        % The resulting peaks are around the double of the expected ones, this
-        % because each moving phase finds at least a first higher force peaks, and
-        % then a lower one. This is a recursive behavior which has to be analyzed
-        % further on.
-        % So to count the correct number of phases another envelop is done,
-        % rounding each phase to almost a single peak.
-        maximumMovementTime = 1;
-        [envHigh, envLow] = envelope(finalCuttedSynchForceDataSet.Fy(~isnan(finalCuttedSynchForceDataSet.Fy)),maximumMovementTime*frequency*0.8,'peak');
-        averageEnv = (envLow+envHigh)/2;
-        
-        [maxPeaksVal, maxLocalization] = findpeaks(averageEnv);
-        [minPeaksVal, minLocalization] = findpeaks(-averageEnv);
-        minPeaksVal = -minPeaksVal;
-        
-        % Resizing minimum and maximum values
-        maxLocalization = (maxLocalization)/(100*60);
-        minLocalization = (minLocalization)/(100*60);
-    
-        posUpperPhase = length(maxPeaksVal);
-        posLowerPhase = length(minPeaksVal);
-        
-        % Use the following just for debugging using break points after the end
-        if DEBUG
-            fprintf("\nRe-processed force peaks:\n")
-            fprintf("\t- N. MAX: %d\n",posUpperPhase)
-            fprintf("\t- N. min: %d\n",posLowerPhase)
-        
-            figure, hold on, grid on
-            plot(cuttedElapsedTime,finalCuttedSynchForceDataSet.Fy,'DisplayName','Synched force')
-            plot(cuttedElapsedTime,averageEnv,'r--','DisplayName','Average behavior')
-            plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'go',cuttedElapsedTime(minLocalization),minPeaksVal,'go')
-            yline(upperPeaksBound,'k--','Higher bound')
-            yline(lowerPeaksBound,'k--','Lower bound')
-            xlabel("Elapsed time [ min ]")
-            ylabel("Force [ N ]")
-            ylim([lowestValue,highestValue])
-            title("Phase number determination")
-            legend("Synched force", "Average behavior",'Location','eastoutside')
-            hold off
-        end
-        
-        % Figure saving for force
-        if IMAGE_SAVING
-            mkdir ..\iCub_ProcessedData\ForceSynchronization;
-            if numPerson < 0
-                splitted = strsplit(BaselineFilesParameters(3),'\');
-                if length(splitted) > 1
-                    mkdir(strjoin(["..\iCub_ProcessedData\ForceSynchronization",splitted(1:end-1)],'\'));
-                end
-                path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\",BaselineFilesParameters(3),".png"],"");
-            else
-                path = strjoin(["..\iCub_ProcessedData\ForceSynchronization\P",num2str(numPerson),".png"],"");
-            end
-            pause(PAUSE_TIME);
-            exportgraphics(fig3,path)
         end
     
         % Reference "tic" at the beginning in the "Finding min e MAX peaks of the force" section 

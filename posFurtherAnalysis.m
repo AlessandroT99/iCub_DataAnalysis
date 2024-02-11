@@ -59,16 +59,61 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     PAUSE_TIME = 2;
 
     %% Phase duration evaluation
-    maximumMovementTime = 0.5;
-    [envHigh, envLow] = envelope(synchPosDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
-    averageEnv = (envLow+envHigh)/2;
+%     maximumMovementTime = 0.1;
+%     [envHigh, envLow] = envelope(synchPosDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
+%     averageEnv = (envLow+envHigh)/2;
     
-    [maxPeaksVal, maxLocalization] = findpeaks(averageEnv,"MinPeakHeight",mean(averageEnv));
-    [minPeaksVal, minLocalization] = findpeaks(-averageEnv,"MinPeakHeight",-mean(averageEnv));
+    [maxPeaksVal, maxLocalization] = findpeaks(synchPosDataSet(:,2),'MinPeakHeight',mean(synchPosDataSet(:,2)), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015); %70 ms
+    [minPeaksVal, minLocalization] = findpeaks(-synchPosDataSet(:,2),'MinPeakHeight',-mean(synchPosDataSet(:,2)), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015);
     minPeaksVal = -minPeaksVal;
     
-    % Cleaning the peaks from doubles
-    [minPeaksVal,minLocalization,maxPeaksVal,maxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization);
+    % If occurs that two or more maximums/minimums are not separated from
+    % the opposite, it will be taken the average of them, both temporarly
+    % and position value
+    % firstly find the higher density of peaks
+    if length(minLocalization) < length(maxLocalization)
+        HtmpLocalization = [maxLocalization,maxPeaksVal];
+        LtmpLocalization = [minLocalization,minPeaksVal];
+    else
+        HtmpLocalization = [minLocalization,minPeaksVal];
+        LtmpLocalization = [maxLocalization,maxPeaksVal];
+    end
+
+    % then with the found maximum analyze all the peaks looking for
+    % sovrappositions
+    cnt = 1;
+    checkCnt = 0;
+    newHLocalization = [];
+    for i = 1:(size(HtmpLocalization,1)-1)
+        if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+            checkCnt = checkCnt + 1;
+        else
+            if checkCnt > 0
+                newHLocalization = [newHLocalization;mean(HtmpLocalization(i-checkCnt:i,1)),mean(HtmpLocalization(i-checkCnt:i,2))];
+                checkCnt = 0;
+            else
+                newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+            end
+            cnt = cnt + 1;
+        end
+    end
+
+    if ~isempty(newHLocalization)
+        if LtmpLocalization(1,1) == minLocalization(1)
+            maxLocalization = []; % be sure to clear all the old values in the vector
+            maxPeaksVal = []; % be sure to clear all the old values in the vector
+            maxLocalization = newHLocalization(:,1);
+            maxPeaksVal = newHLocalization(:,2);
+        else
+            minLocalization = []; % be sure to clear all the old values in the vector
+            minPeaksVal = []; % be sure to clear all the old values in the vector
+            minLocalization = newHLocalization(:,1);
+            minPeaksVal = newHLocalization(:,2);
+        end
+    end
+
+%     % Cleaning the peaks from doubles
+%     [minPeaksVal,minLocalization,maxPeaksVal,maxLocalization] = maxMinCleaning(minPeaksVal,minLocalization,maxPeaksVal,maxLocalization);
 
     if minLocalization(1) < maxLocalization(1)
         % So start before the min to max phase

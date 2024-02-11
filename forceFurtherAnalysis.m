@@ -32,10 +32,6 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
 
     save ("..\iCub_ProcessedData\ForceFurtherAnalysis");
 %     load ..\iCub_ProcessedData\ForceFurtherAnalysis;
-    %% AVERAGE TREND ANALYSIS
-    maximumMovementTime = 0.4;
-    [envHigh, envLow] = envelope(synchForceDataSet(~isnan(synchForceDataSet(:,2)),2),maximumMovementTime*frequency*0.8,'peak');
-    averageEnv = (envLow+envHigh)/2;
 
     %% PEAKS ANALYSIS
     percentageMean = 5;
@@ -43,17 +39,19 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
     while processComplete == 0
         try
             meanTrend = behavior(synchForceDataSet(:,2),percentageMean);
-            [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder(meanTrend,percentageMean,averageEnv);
+            [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder(meanTrend,percentageMean,synchForceDataSet(:,2),numPerson);
             processComplete = 1;
         catch err
             fprintf("\n\nSolving the issue: \n%s\n",getReport(err))
             percentageMean = percentageMean + 5;
-            fprintf("\nAdded 5 percent in the range of mean evaluation, now it is solved for each %d percent of the signal.\n",percentageMean)
-            processComplete = 0;
+            if percentageMean > 100
+                error("Neither the mean on the whole signal found a correct solution");
+            else
+                fprintf("\nAdded 5 percent in the range of mean evaluation, now it is solved for each %d percent of the signal.\n",percentageMean)
+                processComplete = 0;
+            end
         end
     end
-
-    [minPeaksVal, minLocalization, maxPeaksVal, maxLocalization] = maxMinCleaning(minPeaksVal, minLocalization, maxPeaksVal, maxLocalization);
 
     peaksAmplitude = zeros(1,min(length(minLocalization),length(maxLocalization)));
     for j = 1:min(length(minLocalization),length(maxLocalization))
@@ -83,20 +81,22 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
     plot(cuttedElapsedTime, synchForceDataSet(:,2), 'k-')
     plot(cuttedElapsedTime, upAmplitudeTrend, 'r-')
     plot(cuttedElapsedTime, lowAmplitudeTrend, 'g-')
-    legend("Signal zero mean","Upper envelope trend","Lower envelope trend")
+    legend("Force signal","Upper envelope trend","Lower envelope trend")
     title("Reconstructed force signal")
     xlabel("Time [ min ]"), ylabel("Force [ N ]")
 
     subplot(2,1,2), grid on, hold on
-    plot(cuttedElapsedTime(1:length(averageEnv)), averageEnv, 'b-')
-    plot(linspace(cuttedElapsedTime(1),cuttedElapsedTime(end),length(meanTrend)), meanTrend,'k--')
-    plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'ro')
-    plot(cuttedElapsedTime(minLocalization),minPeaksVal,'go')
-    legend("Signal behavior","Signal Mean Trend", ...
+    plot(cuttedElapsedTime(1:height(synchForceDataSet)), synchForceDataSet(:,2), 'k:','LineWidth',0.6)
+    plot(linspace(cuttedElapsedTime(1),cuttedElapsedTime(end),length(meanTrend)), meanTrend,'b--','LineWidth',1.75)
+    plot(cuttedElapsedTime(maxLocalization),maxPeaksVal,'ro','MarkerSize',3,'LineWidth', 1.5)
+    plot(cuttedElapsedTime(minLocalization),minPeaksVal,'go','MarkerSize',3, 'LineWidth', 1.5)
+    plot(linspace(cuttedElapsedTime(1),cuttedElapsedTime(end),length(meanTrend)), meanTrend,'b--','LineWidth',1.5)
+    legend("Force signal","Signal Mean Trend", ...
         strjoin([num2str(length(maxLocalization))," maximum peaks"],""), ...
         strjoin([num2str(length(minLocalization))," minimum peaks"],""))
     title("Force signal analysis")
     xlabel("Time [ min ]"), ylabel("Force [ N ]")
+    hold off
 
     sgtitle(defaultTitleName)
 
@@ -129,21 +129,21 @@ function [signalBehavior] = behavior(signal, percentageMean)
    end
 end
 
-function [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder(meanTrend,percentageMean,averageEnv)
+function [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder(meanTrend,percentageMean,signal,numPerson)
     percentageMean = 100/percentageMean;
     maxPeaksVal = [];
     maxLocalization = [];
     minPeaksVal = [];
     minLocalization = [];
     idxMean = round(length(meanTrend)/percentageMean);
-    idxSignal = round(length(averageEnv)/percentageMean);
+    idxSignal = round(length(signal)/percentageMean);
     lastSignalIdx = 0;
     cnt = 0;
-    while lastSignalIdx < length(averageEnv)
+    while lastSignalIdx < length(signal)
         cnt = cnt + 1;
         lastSignalIdx = idxSignal*cnt;
-        if lastSignalIdx > length(averageEnv)
-            lastSignalIdx = length(averageEnv);
+        if lastSignalIdx > length(signal)
+            lastSignalIdx = length(signal);
         end
         lastMeanIdx = idxMean*cnt;
         if lastMeanIdx > length(meanTrend)
@@ -151,7 +151,11 @@ function [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder
         end
         maxPeak = [];
         maxLoc = [];
-        [maxPeaks, maxLoc] = findpeaks(averageEnv((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",meanTrend(lastMeanIdx));
+        if numPerson < 0
+            [maxPeaks, maxLoc] = findpeaks(signal((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",meanTrend(lastMeanIdx), 'MinPeakDistance', 5, 'MinPeakProminence', 0.35);
+        else
+            [maxPeaks, maxLoc] = findpeaks(signal((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",meanTrend(lastMeanIdx), 'MinPeakDistance', 5, 'MinPeakProminence', 3.5);
+        end
         idxToRemove = find(maxPeaks<=meanTrend(lastMeanIdx));
         maxLoc(idxToRemove) = [];
         maxPeaks(idxToRemove) = [];
@@ -159,12 +163,61 @@ function [minPeaksVal,maxPeaksVal,minLocalization,maxLocalization] = peaksFinder
         maxLocalization = [maxLocalization; maxLoc+(cnt-1)*idxSignal+1];
         minPeaks = [];
         minLoc = [];
-        [minPeaks, minLoc] = findpeaks(-averageEnv((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",-meanTrend(lastMeanIdx));
+        if numPerson < 0
+            [minPeaks, minLoc] = findpeaks(-signal((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",-meanTrend(lastMeanIdx),'MinPeakDistance', 5, 'MinPeakProminence', 0.35);
+        else
+            [minPeaks, minLoc] = findpeaks(-signal((cnt-1)*idxSignal+1:lastSignalIdx),"MinPeakHeight",-meanTrend(lastMeanIdx),'MinPeakDistance', 5, 'MinPeakProminence', 3.5);
+        end
         idxToRemove = find(minPeaks<=-meanTrend(lastMeanIdx));
         minLoc(idxToRemove) = [];
         minPeaks(idxToRemove) = [];
         minPeaks = -minPeaks;
         minPeaksVal = [minPeaksVal; minPeaks];
         minLocalization = [minLocalization; minLoc+(cnt-1)*idxSignal+1];
+    end
+
+     % If occurs that two or more maximums/minimums are not separated from
+    % the opposite, it will be taken the average of them, both temporarly
+    % and position value
+    % firstly find the higher density of peaks
+    if length(minLocalization) < length(maxLocalization)
+        HtmpLocalization = [maxLocalization,maxPeaksVal];
+        LtmpLocalization = [minLocalization,minPeaksVal];
+    else
+        HtmpLocalization = [minLocalization,minPeaksVal];
+        LtmpLocalization = [maxLocalization,maxPeaksVal];
+    end
+
+    % then with the found maximum analyze all the peaks looking for
+    % sovrappositions
+    cnt = 1;
+    checkCnt = 0;
+    newHLocalization = [];
+    for i = 1:(size(HtmpLocalization,1)-1)
+        if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+            checkCnt = checkCnt + 1;
+        else
+            if checkCnt > 0
+                newHLocalization = [newHLocalization;round(mean(HtmpLocalization(i-checkCnt:i,1))),mean(HtmpLocalization(i-checkCnt:i,2))];
+                checkCnt = 0;
+            else
+                newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+            end
+            cnt = cnt + 1;
+        end
+    end
+
+    if ~isempty(newHLocalization)
+        if LtmpLocalization(1,1) == minLocalization(1)
+            maxLocalization = []; % be sure to clear all the old values in the vector
+            maxPeaksVal = []; % be sure to clear all the old values in the vector
+            maxLocalization = newHLocalization(:,1);
+            maxPeaksVal = newHLocalization(:,2);
+        else
+            minLocalization = []; % be sure to clear all the old values in the vector
+            minPeaksVal = []; % be sure to clear all the old values in the vector
+            minLocalization = newHLocalization(:,1);
+            minPeaksVal = newHLocalization(:,2);
+        end
     end
 end
