@@ -146,7 +146,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     
     %% Identification of starting
     % Average slope of the position signal in the first robot phase
-    stdRequired = 0.9; % Estimated graphycally looking at the plots into \iCub_ProcessedData\PositionDerivativeSTD
+    stdRequired = 0.5; % Estimated graphycally looking at the plots into \iCub_ProcessedData\PositionDerivativeSTD
     subSetDimension = 25;
 
     findedFlag = 0;
@@ -156,7 +156,7 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     for i = subSetDimension+1:subSetDimension:length(firstAverageEnv)
         posStd(i) = std(filteredPosDerivative(i-subSetDimension:i));
         if (posStd(i) > stdRequired && findedFlag == 0)
-            derivativePosStart = i-25;
+            derivativePosStart = i-subSetDimension;
             findedFlag = 1;
         end
     end

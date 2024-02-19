@@ -49,7 +49,7 @@ people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
 people = people(1:NUM_PEOPLE,:);
 
 imageDataSetParam = readtable("..\iCub_InputData\imageProcessing\UsefullData.xlsx");
-TEST_TO_AVOID = [2,7,13,18,20,22,26,27,28];
+TEST_TO_AVOID = [];
 
 totalLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables used to contain mean and std for each test
 HumanAngle = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),3);   % General variables used to contain mean, max value and std for each test

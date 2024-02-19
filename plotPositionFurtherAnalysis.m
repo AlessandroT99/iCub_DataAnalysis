@@ -387,8 +387,8 @@ function plotPositionFurtherAnalysis(experimentDuration, meanHtoR_time, meanRtoH
     end
 
     %% Another alternative - ROM INTO NEAR END ZERO POS B FITTING LINES - 1. NEAR END
-    save ..\iCub_ProcessedData\data4ROM-AlignedB;
-    save snippetOfPlot_4Giulia\data4ROM-AlignedB;
+%     save ..\iCub_ProcessedData\data4ROM-AlignedB;
+%     save snippetOfPlot_4Giulia\data4ROM-AlignedB;
 
     fig5f = figure('Name','Range of Motion (ROM)');
     fig5f.WindowState = 'maximized';
