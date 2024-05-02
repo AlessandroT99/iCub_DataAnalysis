@@ -100,6 +100,10 @@ function [meanTrend, lowSlope, upSlope, peaksAmplitude] ...
 
     sgtitle(defaultTitleName)
 
+    if numPerson == 26
+        pause(1);
+    end
+
     % Figure saving for phase time duration
     if IMAGE_SAVING
         pause(PAUSE_TIME);

@@ -29,9 +29,14 @@ warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
 mkdir ..\iCub_ProcessedData\Scatters\0.SoapEvaluation
 
 %% Input Data
-numPeople = 20; 
+numPeople = 30; 
 people = readtable("..\iCub_InputData\Dati Personali EXP3.xlsx");
 people = people(1:numPeople,:);
+
+load ..\iCub_ProcessedData\PeaksNumber.mat;
+nMaxPeaks = nMaxPeaks(3:end);
+nMinPeaks = nMinPeaks(3:end);
+data = readtable("..\iCub_ProcessedData\PeaksPositionData.xlsx");
 
 soapWidth = people.WidthSoap;               % mm
 soapHeight = people.HeightSoap;          % mm
@@ -55,71 +60,93 @@ angle = acos(c./b).*180./pi; % DEGREES
 
 %% Plot results
 fig1 = figure('Name','Right hand soap indentation');
-sgtitle('Soap Indentation - Right Hand tests'), hold on
 fig2 = figure('Name','Left hand soap indentation');
-sgtitle('Soap Indentation - Left Hand tests'), hold on
+
 rPeople = 0;
 lPeople = 0;
-removedArea = zeros(1,numPeople);
-maxCutArea = zeros(1,numPeople);
-totalArea = zeros(1,numPeople);
-removedAreaPercentage = zeros(1,numPeople);
+removedArea = zeros(1,sum(~isnan(people.ID)));
+maxCutArea = zeros(1,sum(~isnan(people.ID)));
+totalArea = zeros(1,sum(~isnan(people.ID)));
+removedAreaPercentage = zeros(1,sum(~isnan(people.ID)));
+
 for i = 1:numPeople
     if people.RobotSide(i) < people.HumanSide(i)
         angle(i) = -angle(i);
     end
     
-    if strcmp(people.Mano(i),"R") == 1
-        rPeople = rPeople + 1;
-        figure(fig1)
-        subplot(5,3,rPeople), hold on
-        plot([0,people.CutWidth(i)],[people.RobotSide(i),people.HumanSide(i)],'r-')
-        plot([0,soapWidth(i)],[soapHeight(i),soapHeight(i)], 'k-')
-        plot([0,0],[0,soapHeight(i)], 'k-')
-        plot([soapWidth(i),soapWidth(i)],[0,soapHeight(i)], 'k-')
-        text(5,5,"R")
-        text(soapWidth(i)-5,5,"H",'HorizontalAlignment','right')
-        xlim([0, soapWidth(i)+2])
-    else
-        lPeople = lPeople + 1;
-        figure(fig2)
-        subplot(5,3,lPeople), hold on
-        plot([-people.CutWidth(i),0],[people.HumanSide(i),people.RobotSide(i)],'b-')
-        plot([-soapWidth(i),0],[soapHeight(i),soapHeight(i)], 'k-')
-        plot([0,0],[0,soapHeight(i)], 'k-')
-        plot([-soapWidth(i),-soapWidth(i)],[0,soapHeight(i)], 'k-')
-        text(5,5,"H")
-        text(soapWidth(i)-5,5,"R",'HorizontalAlignment','right')
-        xlim([-soapWidth(i)-2,0+2])
-    end
-    ylim([0-2, soapHeight(i)+2])
-    titleName = strjoin(["Test N. ", num2str(i), " - Indentation angle: ", sprintf("%.2f", angle(i)), " [deg]"],"");
-    title(titleName)
-    
-    %% Evaluation of the removed area
-    if people.HumanSide(i) == 0
-        removedArea(i) = trapz([0,people.cutWidth(i),soapWidth(i)],[soapHeight(i)-people.RobotSide(i),0,0]);
-    else
+    if ~isnan(people.ID(i))
+        %% Evaluation of the removed area
         removedArea(i) = trapz([0,soapWidth(i)],[soapHeight(i)-people.RobotSide(i),soapHeight(i)-people.HumanSide(i)]);
+        totalArea(i) = soapHeight(i)*soapWidth(i);
+        removedAreaPercentage(i) = removedArea(i)/totalArea(i)*100;
+    
+        % Plot results
+        if strcmp(people.Mano(i),"R") == 1
+            rPeople = rPeople + 1;
+            figure(fig1)
+            subplot(4,4,rPeople), hold on
+            plot([0,people.CutWidth(i)],[people.RobotSide(i),people.HumanSide(i)],'r-')
+            yline(max(people.HumanSide(i),people.RobotSide(i)),'k--')
+            plot([0,0],[0,soapHeight(i)], 'k-')
+            if (abs(people.CutWidth(i)) > abs(soapWidth(i)))
+                plot([people.CutWidth(i),0],[soapHeight(i),soapHeight(i)], 'k-')
+                plot([people.CutWidth(i),people.CutWidth(i)],[0,soapHeight(i)], 'k-')
+                text(people.CutWidth(i)-5,5,"H",'HorizontalAlignment','right')
+                xlim([-2, people.CutWidth(i)+2])
+            else
+                plot([0,soapWidth(i)],[soapHeight(i),soapHeight(i)], 'k-')
+                plot([soapWidth(i),soapWidth(i)],[0,soapHeight(i)], 'k-')
+                text(soapWidth(i)-5,5,"H",'HorizontalAlignment','right')
+                xlim([-2, soapWidth(i)+2])
+            end
+            text(5,5,"R")
+        else
+            lPeople = lPeople + 1;
+            figure(fig2)
+            subplot(4,4,lPeople), hold on
+            plot([-people.CutWidth(i),0],[people.HumanSide(i),people.RobotSide(i)],'b-')
+            yline(max(people.HumanSide(i),people.RobotSide(i)),'k--')
+            plot([0,0],[0,soapHeight(i)], 'k-')
+            if (abs(people.CutWidth(i)) > abs(soapWidth(i)))
+                plot([-people.CutWidth(i),0],[soapHeight(i),soapHeight(i)], 'k-')
+                plot([-people.CutWidth(i),-people.CutWidth(i)],[0,soapHeight(i)], 'k-')
+                text(-people.CutWidth(i)+5,5,"R",'HorizontalAlignment','right')
+                xlim([-people.CutWidth(i)-2,2])
+            else
+                plot([-soapWidth(i),0],[soapHeight(i),soapHeight(i)], 'k-')
+                plot([-soapWidth(i),-soapWidth(i)],[0,soapHeight(i)], 'k-')
+                text(-soapWidth(i)+5,5,"R",'HorizontalAlignment','right')
+                xlim([-soapWidth(i)-2,2])
+            end
+            text(-5,5,"H")
+        end
+        ylim([0, soapHeight(i)+5])
+        titleName = strjoin(["Test N. ", num2str(i), " - Removed material: ", sprintf("%.2f", removedAreaPercentage(i)), " %"],"");
+        title(titleName,strjoin(["Indentation angle: ", sprintf("%.2f", angle(i)), " [deg]"],""))
+        hold off
     end
-    totalArea(i) = soapHeight(i)*soapWidth(i)/2;
-    hold off
-    removedAreaPercentage(i) = (removedArea(i))/totalArea(i)*100;
 end
 
 figure(fig1), hold off
 fig1.Position(3) = fig1.Position(3) + 300;
-Lgnd = legend("Cutting Line");
-Lgnd.Position(1) = 0;
-Lgnd.Position(2) = 0.5;
+Lgnd = legend("Cutting Line","Horizontal reference");
 fig1.WindowState = 'maximized';
+Lgnd.Position(1) = 0.535;
+Lgnd.Position(2) = 0.15;
+sgtitle('Soap Indentation - Right Hand tests')
 
 figure(fig2), hold off
 fig2.Position(3) = fig2.Position(3) + 300;
-Lgnd = legend("Cutting Line");
-Lgnd.Position(1) = 0;
-Lgnd.Position(2) = 0.5;
+Lgnd = legend("Cutting Line","Horizontal reference");
 fig2.WindowState = 'maximized';
+Lgnd.Position(1) = 0.535;
+Lgnd.Position(2) = 0.15;
+sgtitle('Soap Indentation - Left Hand tests')
+
+angle = angle(~isnan(people.ID));
+removedArea = removedArea(removedArea~=0);
+removedAreaPercentage = removedAreaPercentage(removedAreaPercentage~=0);
+numPeople = sum(~isnan(people.ID));
 
 fig3 = figure('Name','Trend of removed material');
 fig3.WindowState = 'maximized';
@@ -157,16 +184,27 @@ title("Comparison between indentation angle and removed material from soap bars"
 
 %% Save and close all the plot
 mkdir ..\iCub_ProcessedData\Scatters
-pause(2);
+pause(5);
 exportgraphics(fig1,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\RightHandSoapIndentation.png")
 exportgraphics(fig2,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\LeftHandSoapIndentation.png")
 exportgraphics(fig3,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\SoapRemovedMaterial.png")
 exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\MeanAngleSoapIndentation.png")
 exportgraphics(fig5,"..\iCub_ProcessedData\Scatters\0.SoapEvaluation\SoapIndentationParameters.png")
 
-matx = table((1:32)',angle,removedArea',removedAreaPercentage');
+matx = table(people.ID(~isnan(people.ID)),angle,removedArea',removedAreaPercentage');
 matx = renamevars(matx, 1:width(matx), ["ID","Angle Human Side [deg]","Removed Surface [mm^2]","Percentage of removed material [%]"]);
 
 writetable(matx, "..\iCub_ProcessedData\SoapData.xlsx");
 
+
+disp("Posterior Data analysis on new experiment.")
+meanRemovedAreaPercentage = mean(removedAreaPercentage);
+stdRemovedAreaPercentage = std(removedAreaPercentage);
+fprintf("The average removed area percentage is %.2f with a std of %.4f\n", meanRemovedAreaPercentage, stdRemovedAreaPercentage)
+for i = 1:sum(~isnan(people.ID))
+    angleContribution(i) = removedAreaPercentage(i)/(mean(mean(nMaxPeaks(i)),mean(nMinPeaks(i)))*data.ROM_cm_(i));
+end
+fprintf("The dependency on cutting the angle is: %.4f\n",mean(angleContribution))
+removedAreaPercentage2 = removedAreaPercentage;
+save("../iCub_ProcessedData/Scatters/0.SoapEvaluation/removedAreaPercentage","removedAreaPercentage2","meanRemovedAreaPercentage","stdRemovedAreaPercentage","angleContribution");
 close all

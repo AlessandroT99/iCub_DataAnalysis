@@ -66,7 +66,7 @@
     %% Input data
     fprintf("Simulation starting up...\n")
     
-    numPeople = 21+BASELINE_NUMBER; 
+    numPeople = 30+BASELINE_NUMBER; 
     people = readtable("..\iCub_InputData\Dati Personali EXP3.xlsx");
     people = people(1:numPeople-BASELINE_NUMBER,:);
 

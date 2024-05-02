@@ -58,7 +58,19 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     
     %% POSITION ANALYSIS
     % Firstly execute the norm in the y-z plane
-    posDataSet.yPos = sqrt(posDataSet.yPos.^2 + posDataSet.zPos.^2);
+    if numPerson < 0
+        if strcmp(personParameters(5),"L") == 1
+            posDataSet.yPos = -sqrt(posDataSet.yPos.^2 + posDataSet.zPos.^2);
+        else
+            posDataSet.yPos = sqrt(posDataSet.yPos.^2 + posDataSet.zPos.^2);
+        end
+    else
+        if strcmp(personParameters(5),"R") == 1
+            posDataSet.yPos = -sqrt(posDataSet.yPos.^2 + posDataSet.zPos.^2);
+        else
+            posDataSet.yPos = sqrt(posDataSet.yPos.^2 + posDataSet.zPos.^2);
+        end
+    end
 
     % Firstly the signal is enveloped on the max and min, and the average is
     % evaluated
@@ -320,8 +332,8 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     % position are shifted to the nearest peak, in the just cutted signal.
     cutPosAverage = posDataSet.yPos(derivativePosStart:derivativePosEnd);
     firstCutPosDataSet = posDataSet(derivativePosStart:derivativePosEnd,:);
-    [maxPeaksVal, maxLocalization] = findpeaks(cutPosAverage,'MinPeakHeight',mean(cutPosAverage), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015); %70 ms
-    [minPeaksVal, minLocalization] = findpeaks(-cutPosAverage,'MinPeakHeight',-mean(cutPosAverage), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015);
+    [maxPeaksVal, maxLocalization] = findpeaks(cutPosAverage,'MinPeakHeight',mean(cutPosAverage)-mean(cutPosAverage)*0.05, 'MinPeakDistance', 40, 'MinPeakProminence', 0.01);
+    [minPeaksVal, minLocalization] = findpeaks(-cutPosAverage,'MinPeakHeight',-mean(cutPosAverage)+mean(cutPosAverage)*0.05, 'MinPeakDistance', 40, 'MinPeakProminence', 0.01);
     minPeaksVal = -minPeaksVal;
     upperPeaksBound = mean(maxPeaksVal);
     lowerPeaksBound = mean(minPeaksVal);
@@ -353,32 +365,42 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     % the opposite, it will be taken the average of them, both temporarly
     % and position value
     % firstly find the higher density of peaks
+    
+    maxFlag = 0;
     if length(minLocalization) < length(maxLocalization)
         HtmpLocalization = [maxLocalization,maxPeaksVal];
         LtmpLocalization = [minLocalization,minPeaksVal];
+        maxFlag = 1;
     else
         HtmpLocalization = [minLocalization,minPeaksVal];
         LtmpLocalization = [maxLocalization,maxPeaksVal];
+        maxFlag = 0;
     end
 
     % then with the found maximum analyze all the peaks looking for
     % sovrappositions
     cnt = 1;
+    if HtmpLocalization(1,1) > LtmpLocalization(1,1)
+        cnt = cnt + 1;
+    end
     checkCnt = 0;
     newHLocalization = [];
     for i = 1:(size(HtmpLocalization,1)-1)
-        if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
-            checkCnt = checkCnt + 1;
-        else
-            if checkCnt > 0
-                newHLocalization = [newHLocalization;round(mean(HtmpLocalization(i-checkCnt:i,1))),mean(HtmpLocalization(i-checkCnt:i,2))];
-                checkCnt = 0;
+        if size(LtmpLocalization,1) >= cnt
+            if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+                checkCnt = checkCnt + 1;
             else
-                newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+                if checkCnt > 0
+                    newHLocalization = [newHLocalization;mean(HtmpLocalization(i-checkCnt:i,1)),mean(HtmpLocalization(i-checkCnt:i,2))];
+                    checkCnt = 0;
+                else
+                    newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+                end
+                cnt = cnt + 1;
             end
-            cnt = cnt + 1;
         end
     end
+    newHLocalization = [newHLocalization;HtmpLocalization(end,1),HtmpLocalization(end,2)];
 
     if ~isempty(newHLocalization)
         if LtmpLocalization(1,1) == minLocalization(1)
@@ -391,6 +413,61 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
             minPeaksVal = []; % be sure to clear all the old values in the vector
             minLocalization = newHLocalization(:,1);
             minPeaksVal = newHLocalization(:,2);
+        end
+    end
+
+%     repeatFiltering = 1;
+    for k = 1:2
+%         repeatFiltering = 0;
+        % Now do the same but inverting the parts
+        if maxFlag == 0
+            HtmpLocalization = [maxLocalization,maxPeaksVal];
+            LtmpLocalization = [minLocalization,minPeaksVal];
+            maxFlag = 1;
+        else if maxFlag == 1
+            HtmpLocalization = [minLocalization,minPeaksVal];
+            LtmpLocalization = [maxLocalization,maxPeaksVal];
+            maxFlag = 0;
+        end, end
+    
+        % then with the found minimum analyze all the peaks looking for
+        % sovrappositions
+        cnt = 1;
+        if HtmpLocalization(1,1) > LtmpLocalization(1,1)
+            cnt = cnt + 1;
+        end
+        checkCnt = 0;
+        newHLocalization = [];
+        for i = 1:(size(HtmpLocalization,1)-1)
+            if size(LtmpLocalization,1) >= cnt
+                if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+                    checkCnt = checkCnt + 1;
+                else
+                    if checkCnt > 0
+                        newHLocalization = [newHLocalization;mean(HtmpLocalization(i-checkCnt:i,1)),mean(HtmpLocalization(i-checkCnt:i,2))];
+                        checkCnt = 0;
+                    else
+                        newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+                    end
+                    cnt = cnt + 1;
+                end
+            end
+        end
+        newHLocalization = [newHLocalization;HtmpLocalization(end,1),HtmpLocalization(end,2)];
+    
+        if ~isempty(newHLocalization)
+            if LtmpLocalization(1,1) == minLocalization(1)
+                maxLocalization = []; % be sure to clear all the old values in the vector
+                maxPeaksVal = []; % be sure to clear all the old values in the vector
+                maxLocalization = newHLocalization(:,1);
+                maxPeaksVal = newHLocalization(:,2);
+            else
+                minLocalization = []; % be sure to clear all the old values in the vector
+                minPeaksVal = []; % be sure to clear all the old values in the vector
+                minLocalization = newHLocalization(:,1);
+                minPeaksVal = newHLocalization(:,2);
+            end
+%             repeatFiltering = 1;
         end
     end
 
@@ -461,6 +538,10 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
         newBaselineBoundaries = baselineBoundaries;
     end
 
+    if numPerson == 4
+        pause(1);
+    end
+
     % Figure saving for position
     if IMAGE_SAVING
         mkdir ..\iCub_ProcessedData\PositionVisualizing;
@@ -522,12 +603,23 @@ function [ultimateSynchPosDataSet, ultimateSynchForceDataSet, newBaselineBoundar
     
         subplot(1,3,3), grid on, hold on
         plot(tmpOrigPosDataSet(:,4).*100,tmpOrigPosDataSet(:,5).*100,'k-')
+        if numPerson > 0
+            if strcmp(personParameters(5),"L") == 1
+                plot([10.5,16],[0.5,-4.3],'b:','LineWidth',2)
+            else
+                plot([-11,-15.5],[1,-5.3],'b:','LineWidth',2)
+            end
+        end
         plot(tmpOrigPosDataSet(1,4).*100,tmpOrigPosDataSet(1,5).*100,'go','MarkerFaceColor','g')
         plot(tmpOrigPosDataSet(end,4).*100,tmpOrigPosDataSet(end,5).*100,'ro','MarkerFaceColor','r')
         ylabel("Z position [ cm ]"), xlabel("Y position [ cm ]")
         title('Hand Trajectory - Plane YZ')
-        legend("Signal","Start point","End point",'Location','southoutside')
-        
+        if numPerson > 0
+            legend("Signal","Baseline reference","Start point","End point",'Location','southoutside')
+        else
+            legend("Signal","Start point","End point",'Location','southoutside')
+        end
+
         sgtitle(defaultTitleName)
     
         if IMAGE_SAVING

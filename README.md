@@ -17,16 +17,14 @@ where X = `left` or `right`
 
 -------------------
 ## MAIN PROGRAM
-The main program can be found as `dataPlotter.m`, is the one which execute togheter
-all the fuctions that plots and analyze the data.
+The main program can be found as `mainDataAnalysis.m`, is the one which execute togheter all the fuctions that plots and analyze the data.   
+The following code is referred to the adaptive behavior processing algorithm which is slightly different from the compliant behavior analysis.
 
 ## GENERAL INSTRUCTIONS
-Inside each program or function it is possible to find the section "Simulation parameter"
-at the begin of the file, inside of that there are two cases:
-* __CAPS_CONSTANTS__: used to modify some conditions inside that program or function
-which avoid to print, save or execute some parts of the code.
+Inside each program or function it is possible to find the section "Simulation parameter" at the begin of the file, inside of that there are two cases:
+* __CAPS_CONSTANTS__: used to modify some conditions inside that program or function which avoid to print, save or execute some parts of the code.
 * __normal_variables__: used to change some common behaviors inside the program or function.
 
 ----------------
-### AUTHOR
+## AUTHOR
 Alessandro Tiozzo - alessandro.tiozzo@iit.it

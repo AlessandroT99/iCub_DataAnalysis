@@ -43,13 +43,13 @@ clearBlue = [0,0.6,1];
 clearYellow = [255,253,116]./255;
 
 %% Simulation input
-NUM_PEOPLE = 32;    % Overall number of test analyzed
+NUM_PEOPLE = 30;    % Overall number of test analyzed
 
-people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
+people = readtable("..\iCub_InputData\Dati Personali EXP3.xlsx");
 people = people(1:NUM_PEOPLE,:);
 
 imageDataSetParam = readtable("..\iCub_InputData\imageProcessing\UsefullData.xlsx");
-TEST_TO_AVOID = [];
+TEST_TO_AVOID = [16,30];
 
 totalLength = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),2);  % General variables used to contain mean and std for each test
 HumanAngle = zeros(NUM_PEOPLE-length(TEST_TO_AVOID),3);   % General variables used to contain mean, max value and std for each test
@@ -71,7 +71,7 @@ for cnt = 1:NUM_PEOPLE
         dataset = readtable(strjoin(["../iCub_InputData/imageProcessing/SingleExperimentData/Test",num2str(cnt),"_ImageProcessingData"],""));
         % Save the maximum length of the wire
         imageSubSet = 30; % 30 fps = 30 images for 1s of reality
-        secondsOfShift = 300; % 10 sec of image threshold from the choosen one to avoid initial problems
+        secondsOfShift = 0; % 0 sec of image threshold from the choosen one to avoid initial problems
         tensedWire = mean(dataset.totalLength(imageDataSetParam.FrameOfTheTensedWire(cnt)+secondsOfShift:imageDataSetParam.FrameOfTheTensedWire(cnt)+secondsOfShift+imageSubSet));
         if ~isnan(imageDataSetParam.InitialNumberConsidered(cnt))
             % Cut the dataset due to post processing decision saved in the excell file
@@ -175,6 +175,10 @@ for cnt = 1:NUM_PEOPLE
         legend("Angle of the side of wire","Envelope",'Location','eastoutside')
         xlabel("Experiment progress [ % ]"), ylabel("Angle between the center marker horizontal [ deg ]")
         hold off
+
+        if cnt == 8
+            pause(1);
+        end
     
         %% Save results
         if IMAGE_SAVING
@@ -214,6 +218,7 @@ xlabel("Max Human Angle [ deg ]"), ylabel("Tensed wire time percentage [ % ]")
 title("Tensed wire vs. max human angle")
 
 if IMAGE_SAVING
+    mkdir ..\iCub_ProcessedData\Scatters\0.ImageProcessing
     pause(PAUSE_TIME); 
     exportgraphics(fig4,"..\iCub_ProcessedData\Scatters\0.ImageProcessing\TensedWirePercentage-MaxHumanAngle.png")
     close(fig4);

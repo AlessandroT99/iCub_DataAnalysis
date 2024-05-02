@@ -37,9 +37,9 @@ maximumMovementTime = 2; % Variable used to determine the time span of the envel
 mkdir ..\iCub_ProcessedData\Scatters\6.CorrelationResearch
 
 %% Input data
-NUM_PEOPLE = 32;    % Overall number of test analyzed
+NUM_PEOPLE = 30;    % Overall number of test analyzed
 
-people = readtable("..\iCub_InputData\Dati Personali EXP2.xlsx");
+people = readtable("..\iCub_InputData\Dati Personali EXP3.xlsx");
 people = people(1:NUM_PEOPLE,:);
 
 % IMAGE PROCESSING USEFULL PARAMETERS
@@ -79,7 +79,7 @@ for i = 1:NUM_PEOPLE
     end
 
     if sum(find(i==positionDataProcessing.ID)) == 0
-        soap4dataPosProcessing(cntPos,:) = [];
+        %soap4dataPosProcessing(cntPos,:) = [];
     else 
         if  ~isnan(positionDataProcessing.Near_Hand_ms_(cntPos))
             nearHandLogicPos(cntPos) = 1;
@@ -90,7 +90,7 @@ for i = 1:NUM_PEOPLE
     end
 
     if sum(find(i==forceDataProcessing.ID)) == 0
-        soap4dataForceProcessing(cntForce,:) = [];
+        %soap4dataForceProcessing(cntForce,:) = [];
     else
         if ~isnan(positionDataProcessing.Near_Hand_ms_(cntForce))
             nearHandLogicForce(cntForce) = 1;
@@ -122,7 +122,7 @@ savingFigure(gcf,"1_TensedWire-RemovedMaterial");
 fig2 = figure('Name','Image Angle vs. Soap Indentation Angle');
 fig2.WindowState = 'maximized';
 hold on, grid on
-plot_scatterProcedure(soap4image.AngleHumanSide_deg_,1,HumanAngle)
+plot_scatterProcedure(HumanAngle,1,soap4image.AngleHumanSide_deg_)
 xlabel("Image Angle [ deg ]"), ylabel("Soap Indentation Angle [ deg ]")
 title("Image Angle vs. Soap Indentation Angle")
 legend("Participants","Trend","Mean","Standard Deviation")
@@ -323,22 +323,21 @@ hold off
 savingFigure(gcf,"21_AsymmetryfromA-MeanAngleHumanSide");
 
 fig22 = figure('Name','Mind attribution');
-fig22.WindowState = 'maximized';
+fig22.Position = [50,100,650,650];
 hold on, grid on
 clearRed = [1,0.4,0];
 clearBlue = [0,0.6,1];
-MarkerDimension = 80;
-scatter(1:height(mind), mind.mind, MarkerDimension, clearRed, "filled")
-p = polyfit(1:height(mind), mind.mind,1);
-ymean = polyval(p, linspace(0,height(mind)));
-plot(linspace(0,height(mind)),ymean,'-',"Color",clearRed, 'LineWidth', 1.5)
-scatter(1:height(mind), mind.MIND, MarkerDimension, clearBlue, "filled")
-p = polyfit(1:height(mind), mind.MIND,1);
-ymean = polyval(p, linspace(0,height(mind)));
-plot(linspace(0,height(mind)),ymean,'-',"Color",clearBlue,'LineWidth',1.5)
-ylabel("Mind Attribution"), xlabel("Number of the Participant")
-title("Mind Attribution Pre and Post Experiment")
-legend("Before","Before trend","After","After trend")
+MarkerDimension = 120;
+scatter(mind.mind, mind.MIND, MarkerDimension, clearRed, "filled")
+plot([0,7],[0,7],'k-')
+scatter(mean(mind.mind),mean(mind.MIND),MarkerDimension/2,'black','LineWidth',1)
+stdError1 = std(mind.mind)/sqrt(height(mind));
+stdError2 = std(mind.MIND)/sqrt(height(mind));
+errorbar(mean(mind.mind),mean(mind.MIND), -stdError2/2,stdError2/2,-stdError1/2,stdError1/2, 'k', 'LineStyle','none','CapSize',6,'LineWidth',1)
+ylabel("Mind Attribution Post"), xlabel("Mind Attribution Pre")
+title("Mind Attribution Pre and Post Interaction")
+legend("Mind attribution", "Bisector", "Mean", "Standard Error")
+xlim([0,7]),ylim([0,7])
 hold off
 savingFigure(gcf,"22_MindAttribution");
 
@@ -372,6 +371,26 @@ legend("Participants","Trend","Mean","Standard Deviation")
 hold off
 savingFigure(gcf,"25_MindAttribution-RemovedMaterial");
 
+fig26 = figure('Name','min Peaks number vs. Removed material');
+fig26.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.minPeaksNumber,1,soap4dataPosProcessing.PercentageOfRemovedMaterial___);
+ylabel("Removed material [ % ]"), xlabel("min Peaks Number")
+title("min Peaks Number vs. Removed material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"26_minPeaksNumber-RemovedMaterial");
+
+fig27 = figure('Name','MAX Peaks number vs. Removed material');
+fig27.WindowState = 'maximized';
+hold on, grid on
+plot_scatterProcedure(positionDataProcessing.MAXPeaksNumber,1,soap4dataPosProcessing.PercentageOfRemovedMaterial___);
+ylabel("Removed material [ % ]"), xlabel("MAX Peaks Number")
+title("MAX Peaks Number vs. Removed material")
+legend("Participants","Trend","Mean","Standard Deviation")
+hold off
+savingFigure(gcf,"27_MAXPeaksNumber-RemovedMaterial");
+
 %% End of the simulation
 fprintf("\nAnalysis completed.\n");
 
@@ -399,7 +418,7 @@ for id = 1:NUM_PEOPLE
         outputTable(id+1, width(positionDataProcessing)+width(forceDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)+width(soap)-2) = soap(soapCnt, 2:end);
         soapCnt = soapCnt + 1;
     else 
-        outputTable(id+1, width(positionDataProcessing)+width(forceDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)+width(soap)-2) = arrray2table(nan(1,width(soap)-1));
+        outputTable(id+1, width(positionDataProcessing)+width(forceDataProcessing):width(positionDataProcessing)+width(forceDataProcessing)+width(soap)-2) = array2table(nan(1,width(soap)-1));
     end
 end
 outputTable(2:end,1) = array2table((1:NUM_PEOPLE)');
@@ -409,7 +428,7 @@ POSITION = 0;
 FORCE = 1;
 SOAP = 2;
 IMAGE = 3;
-outputTable(1,:) = array2table([NONE,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION, ...
+outputTable(1,:) = array2table([NONE,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION,POSITION ...
                     FORCE,FORCE,FORCE,SOAP,SOAP,SOAP,IMAGE,IMAGE]);
 outputTable = renamevars(outputTable,1:width(outputTable),["ID",positionDataProcessing.Properties.VariableNames(2:end),forceDataProcessing.Properties.VariableNames(2:end),soap.Properties.VariableNames(2:end),"Image Human Angle", "Image Robot Angle"]);
 

@@ -97,6 +97,8 @@ function [midVelocityMean, midVelocityStd] = positionDerivatives(cuttedPosDataSe
     xlabel("Time [ min ]",'Interpreter','latex'), ylabel("Acceleration [ $\frac{m}{s^2}$ ]",'Interpreter','latex')
     hold off
 
+   
+
     %% Figure saving
     mkdir ..\iCub_ProcessedData\PositionDerivatives;
     if numPerson < 0

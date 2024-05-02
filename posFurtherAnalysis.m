@@ -63,40 +63,49 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
 %     [envHigh, envLow] = envelope(synchPosDataSet(:,2),maximumMovementTime*frequency*0.8,'peak');
 %     averageEnv = (envLow+envHigh)/2;
     
-    [maxPeaksVal, maxLocalization] = findpeaks(synchPosDataSet(:,2),'MinPeakHeight',mean(synchPosDataSet(:,2)), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015); %70 ms
-    [minPeaksVal, minLocalization] = findpeaks(-synchPosDataSet(:,2),'MinPeakHeight',-mean(synchPosDataSet(:,2)), 'MinPeakDistance', 50, 'MinPeakProminence', 0.015);
+    [maxPeaksVal, maxLocalization] = findpeaks(synchPosDataSet(:,2),'MinPeakHeight',mean(synchPosDataSet(:,2))-mean(synchPosDataSet(:,2))*0.05, 'MinPeakDistance', 40, 'MinPeakProminence', 0.01);
+    [minPeaksVal, minLocalization] = findpeaks(-synchPosDataSet(:,2),'MinPeakHeight',-mean(synchPosDataSet(:,2))+mean(synchPosDataSet(:,2))*0.05, 'MinPeakDistance', 40, 'MinPeakProminence', 0.01);
     minPeaksVal = -minPeaksVal;
     
     % If occurs that two or more maximums/minimums are not separated from
     % the opposite, it will be taken the average of them, both temporarly
     % and position value
     % firstly find the higher density of peaks
+    maxFlag = 0;
     if length(minLocalization) < length(maxLocalization)
         HtmpLocalization = [maxLocalization,maxPeaksVal];
         LtmpLocalization = [minLocalization,minPeaksVal];
+        maxFlag = 1;
     else
         HtmpLocalization = [minLocalization,minPeaksVal];
         LtmpLocalization = [maxLocalization,maxPeaksVal];
+        maxFlag = 0;
     end
 
     % then with the found maximum analyze all the peaks looking for
     % sovrappositions
     cnt = 1;
+    if HtmpLocalization(1,1) > LtmpLocalization(1,1)
+        cnt = cnt + 1;
+    end
     checkCnt = 0;
     newHLocalization = [];
     for i = 1:(size(HtmpLocalization,1)-1)
-        if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
-            checkCnt = checkCnt + 1;
-        else
-            if checkCnt > 0
-                newHLocalization = [newHLocalization;mean(HtmpLocalization(i-checkCnt:i,1)),mean(HtmpLocalization(i-checkCnt:i,2))];
-                checkCnt = 0;
+        if size(LtmpLocalization,1) >= cnt
+            if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+                checkCnt = checkCnt + 1;
             else
-                newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+                if checkCnt > 0
+                    newHLocalization = [newHLocalization;mean(HtmpLocalization(i-checkCnt:i,1)),mean(HtmpLocalization(i-checkCnt:i,2))];
+                    checkCnt = 0;
+                else
+                    newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+                end
+                cnt = cnt + 1;
             end
-            cnt = cnt + 1;
         end
     end
+    newHLocalization = [newHLocalization;HtmpLocalization(end,1),HtmpLocalization(end,2)];
 
     if ~isempty(newHLocalization)
         if LtmpLocalization(1,1) == minLocalization(1)
@@ -109,6 +118,63 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
             minPeaksVal = []; % be sure to clear all the old values in the vector
             minLocalization = newHLocalization(:,1);
             minPeaksVal = newHLocalization(:,2);
+        end
+    end
+
+    % Now do the same but inverting the parts
+    
+%     repeatFiltering = 1;
+    for k = 1:2
+%         repeatFiltering = 0;
+        % Now do the same but inverting the parts
+        if maxFlag == 0
+            HtmpLocalization = [maxLocalization,maxPeaksVal];
+            LtmpLocalization = [minLocalization,minPeaksVal];
+            maxFlag = 1;
+        else if maxFlag == 1
+            HtmpLocalization = [minLocalization,minPeaksVal];
+            LtmpLocalization = [maxLocalization,maxPeaksVal];
+            maxFlag = 0;
+        end, end
+    
+        % then with the found minimum analyze all the peaks looking for
+        % sovrappositions
+        cnt = 1;
+        if HtmpLocalization(1,1) > LtmpLocalization(1,1)
+            cnt = cnt + 1;
+        end
+        checkCnt = 0;
+        newHLocalization = [];
+        for i = 1:(size(HtmpLocalization,1)-1)
+            if size(LtmpLocalization,1) >= cnt
+                if HtmpLocalization(i+1,1) < LtmpLocalization(cnt,1)
+                    checkCnt = checkCnt + 1;
+                else
+                    if checkCnt > 0
+                        newHLocalization = [newHLocalization;mean(HtmpLocalization(i-checkCnt:i,1)),mean(HtmpLocalization(i-checkCnt:i,2))];
+                        checkCnt = 0;
+                    else
+                        newHLocalization = [newHLocalization;HtmpLocalization(i,1),HtmpLocalization(i,2)];
+                    end
+                    cnt = cnt + 1;
+                end
+            end
+        end
+        newHLocalization = [newHLocalization;HtmpLocalization(end,1),HtmpLocalization(end,2)];
+    
+        if ~isempty(newHLocalization)
+            if LtmpLocalization(1,1) == minLocalization(1)
+                maxLocalization = []; % be sure to clear all the old values in the vector
+                maxPeaksVal = []; % be sure to clear all the old values in the vector
+                maxLocalization = newHLocalization(:,1);
+                maxPeaksVal = newHLocalization(:,2);
+            else
+                minLocalization = []; % be sure to clear all the old values in the vector
+                minPeaksVal = []; % be sure to clear all the old values in the vector
+                minLocalization = newHLocalization(:,1);
+                minPeaksVal = newHLocalization(:,2);
+            end
+%             repeatFiltering = 1;
         end
     end
 
@@ -392,6 +458,65 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
         end
         exportgraphics(fig4,path)
         close(fig4);
+    end
+
+    fig4a = figure('Name','Phases relative velocity');
+    fig4a.WindowState = 'maximized';
+    hold on, grid on
+    plot(abs(HtoR_relativeVelocity).*100,'ro','DisplayName','Robot phase velocity')
+    plot(abs(RtoH_relativeVelocity).*100,'bo','DisplayName','Human phase velocity')
+    yline(abs(mean(HtoR_relativeVelocity)).*100,'r--','DisplayName',"v^{Robot}_{mean}",'LineWidth',2)
+    yline(abs(mean(RtoH_relativeVelocity)).*100,'b--','DisplayName',"v^{Human}_{mean}",'LineWidth',2)
+    title("Absolute relative velocity of phases",defaultTitleName)
+    xlabel("Phase number")
+    ylabel("Velocity [ cm/s ]")
+    legend('show','Location','east')
+    hold off
+
+    % Figure saving for phase time duration
+    if IMAGE_SAVING
+        pause(PAUSE_TIME);
+        mkdir ..\iCub_ProcessedData\AbsoluteRelativeVelocity;
+        if numPerson < 0
+            splitted = strsplit(BaselineFilesParameters(3),'\');
+            if length(splitted) > 1
+                mkdir(strjoin(["..\iCub_ProcessedData\AbsoluteRelativeVelocity",splitted(1:end-1)],'\'));
+            end
+            path = strjoin(["..\iCub_ProcessedData\AbsoluteRelativeVelocity\",BaselineFilesParameters(3),".png"],"");
+        else    
+            path = strjoin(["..\iCub_ProcessedData\AbsoluteRelativeVelocity\P",num2str(numPerson),".png"],"");
+            % Load the existing Excel file
+            file = '..\iCub_ProcessedData\AbsoluteRelativeVelocity\AbsoluteRelativeVelocity.xlsx';
+            interpSize = 200;
+            % Check if the file exists
+            if exist(file, 'file') == 2
+                if numPerson == 2
+                    delete(file);
+                    data = table;
+                else
+                    % File exists, so read the existing data
+                    data = readtable(file);
+                end
+            else
+                % File does not exist, create an empty table
+                data = table;
+            end
+            varLen = min(length(HtoR_relativeVelocity),length(RtoH_relativeVelocity));
+            new_columns_data = [abs(RtoH_relativeVelocity(1:varLen)).*100;abs(HtoR_relativeVelocity(1:varLen)).*100]';
+            Hy = interp1(linspace(1,interpSize,varLen),new_columns_data(:,1),1:interpSize);
+            Ry = interp1(linspace(1,interpSize,varLen),new_columns_data(:,2),1:interpSize);
+            new_columns_data = [Hy',Ry'];
+            % Create a table with the new column and title
+            new_data = array2table(new_columns_data);
+            new_columns_titles = [strjoin(["Human Test N.",num2str(numPerson)],""),strjoin(["Robot Test N.",num2str(numPerson)],"")];
+            new_data = renamevars(new_data,1:width(new_data),new_columns_titles);
+            % Concatenate the new table with the existing data table
+            data = [data, new_data];
+            % Write the updated table back to the Excel file
+            writetable(data, file);
+        end
+        exportgraphics(fig4a,path)
+        close(fig4a);
     end
 
     %% Peaks values
