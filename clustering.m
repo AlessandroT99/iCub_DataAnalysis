@@ -3,26 +3,62 @@ clear all, close all, clc
 % Importing this type of data raise a warning for the variable names
 % settings, which I overwrite, so I just shut it off in the following
 warning('OFF','MATLAB:table:ModifiedAndSavedVarnames');
+% Suppress the warning about creating folder that already exist
+warning('OFF','MATLAB:MKDIR:DirectoryExists');
+
+global FOLDER;
+FOLDER = "..\iCub_ProcessedData\Clustering";
+mkdir(FOLDER);
+
+clusteringVel = [1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,2,2];
+preferences = [2,2,1,2,2,1,1,2,2,2,1,2,2,2,2,1,1,2,2,2,2,2,1,1,1,1,1,1];
 
 data = readtable("..\iCub_ProcessedData\CompleteAnalysis.xlsx");
-data2analyze = [data.ID(2:end),data.Robot_PhaseRelativeVelocity_cm_s_(2:end),data.Human_PhaseRelativeVelocity_cm_s_(2:end)];
-data2analyze_clean = data2analyze(~isnan(data2analyze(:,2)),:);
+data_clean = [data(3:27,:);data(29:end,:)];
+data_clean = removevars(data_clean, "AngleHumanSide_deg_");
+data_clean = removevars(data_clean, "ImageRobotAngle");
+data_clean = removevars(data_clean, "minPeaksNumber");
+data_clean = removevars(data_clean, "RemovedSurface_mm_2_");
+data_clean = removevars(data_clean, "std_posA__cm_");
+data_clean = removevars(data_clean, "std_posB__cm_");
+data_clean = removevars(data_clean, "ImageHumanAngle");
+efficiency = data_clean.PercentageOfRemovedMaterial___;
+ID = data_clean.ID;
+data_clean = removevars(data_clean, "PercentageOfRemovedMaterial___"); 
+data_clean = removevars(data_clean, "ID");
 
-max_k = 10; % Maximum value of k to explore
+% data2analyze = [data.ID(2:end),data.Robot_PhaseRelativeVelocity_cm_s_(2:end),data.Human_PhaseRelativeVelocity_cm_s_(2:end)];
+% data2analyze_clean = data2analyze(~isnan(data2analyze(:,2)),:);
 
-% Find optimal k using elbow method
-find_optimal_k_elbow(data2analyze_clean(:,2:end), max_k);
+direct_equality = zeros(1,size(data_clean,2));
+inverse_equality = zeros(1,size(data_clean,2));
+for i = 1:size(data_clean,2)
+    newClusters = exeClustering(ID, [table2array(data_clean(:,i)),efficiency], data_clean.Properties.VariableNames{i});
+    direct_equality(i) = sum(preferences==newClusters')/length(newClusters)*100;
+    inverse_equality(i) = sum((-preferences+3)==newClusters')/length(newClusters)*100;
+    pause(2);
+    close all, clc
+end
 
-% Find and choose the optimal value of k based on the results of the analyses
-k_optimal = find_optimal_k_silhouette(data2analyze_clean(:,2:end), max_k); 
+function [cluster_labels] = exeClustering(ID, data, x_name)
+    max_k = 2; % Maximum value of k to explore
+    
+    % Find optimal k using elbow method
+    find_optimal_k_elbow(data, max_k);
+    
+    % Find and choose the optimal value of k based on the results of the analyses
+    k_optimal = find_optimal_k_silhouette(data, max_k); 
+    
+    % Run K-means clustering with the optimal k value
+    [cluster_labels, centroids] = k_means_clustering(data, k_optimal, x_name);
+    
+    clusters = [ID,cluster_labels];
+    % save("..\iCub_ProcessedData\ClusterLabels","clusters");
+end
 
-% Run K-means clustering with the optimal k value
-[cluster_labels, centroids] = k_means_clustering(data2analyze_clean(:,2:end), k_optimal);
+function [cluster_labels, centroids] = k_means_clustering(data, k, xName)
+    global FOLDER;
 
-clusters = [data2analyze_clean(:,1),cluster_labels];
-save("..\iCub_ProcessedData\ClusterLabels","clusters");
-
-function [cluster_labels, centroids] = k_means_clustering(data, k)
     % Convert the input matrix A to a data matrix
     num_samples = size(data, 1);
     num_features = size(data, 2);
@@ -31,7 +67,8 @@ function [cluster_labels, centroids] = k_means_clustering(data, k)
     [cluster_labels, centroids] = kmeans(data, k);
     
     % Plot the results
-    figure, hold on
+    fig = figure;
+    hold on
     gscatter(data(:, 1), data(:, 2), cluster_labels)
     plot(centroids(:, 1), centroids(:, 2), 'ko', 'MarkerSize', 5, 'LineWidth', 2)
     names = [];
@@ -39,10 +76,12 @@ function [cluster_labels, centroids] = k_means_clustering(data, k)
         names = [names, strjoin(["Cluster ",num2str(i)],"")];
     end
     legend([names, 'Centroids'])
-    title('K-means Clustering on velocity population')
-    xlabel('Robot Relative Velocity [cm/s]')
-    ylabel('Human Relative Velocity [cm/s]')
+    title('K-means Clustering on population',xName)
+    xlabel(xName)
+    ylabel('Removed Material [%]')
     hold off
+
+    exportgraphics(fig, strjoin([FOLDER,"\",xName,".png"],""));
 end
 
 function find_optimal_k_elbow(data, max_k)

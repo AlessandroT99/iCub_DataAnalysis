@@ -295,8 +295,24 @@ function [experimentDuration, meanHtoR_time, meanRtoH_time, meanHtoR_space, mean
     RtoH_relativeVelocity = RtoH_space./(RtoH_time./100);
     HtoR_relativeVelocity = HtoR_space./(HtoR_time./100);
 
-    %% Evaluation of phase time difference
     timePhasesNumber = min(length(HtoR_time),length(RtoH_time));
+    velocityDifference = abs(RtoH_relativeVelocity(1:timePhasesNumber))-abs(HtoR_relativeVelocity(1:timePhasesNumber));
+    differenceDerivative = zeros(1,timePhasesNumber-1);
+    RtoH_relativeAcceleration = zeros(1,timePhasesNumber-1);
+    HtoR_relativeAcceleration = zeros(1,timePhasesNumber-1);
+    for i = 1:timePhasesNumber-1
+        differenceDerivative(i) = (velocityDifference(i+1)-velocityDifference(i))/HtoR_time(i)*100;
+        RtoH_relativeAcceleration(i) = (RtoH_relativeVelocity(i+1)-RtoH_relativeVelocity(i))/RtoH_time(i)*100;
+        HtoR_relativeAcceleration(i) = (HtoR_relativeVelocity(i+1)-HtoR_relativeVelocity(i))/HtoR_time(i)*100;
+    end
+    initialHvelocity = abs(RtoH_relativeVelocity(1));
+    initialRvelocity = abs(HtoR_relativeVelocity(1));
+    mkdir ..\iCub_ProcessedData\AbsoluteRelativeVelocity\DifferenceDerivative
+    if numPerson > 0
+        save(strjoin(["..\iCub_ProcessedData\AbsoluteRelativeVelocity\DifferenceDerivative\",num2str(numPerson)],""),"HtoR_relativeVelocity","RtoH_relativeVelocity","HtoR_relativeAcceleration","RtoH_relativeAcceleration","RtoH_time","HtoR_time");
+    end
+    
+    %% Evaluation of phase time difference
 %     fprintf("Difference of number of phases: %d",length(HtoR_time)-length(RtoH_time))
     phaseTimeDifference = mean(RtoH_time(1:timePhasesNumber)-HtoR_time(1:timePhasesNumber));
     
