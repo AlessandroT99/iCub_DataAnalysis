@@ -15,16 +15,17 @@ Notice that the data are collected from different ports of iCub:
 * Force    -> `/icub/X_arm/analog:o`
 where X = `left` or `right`
 
--------------------
 ## MAIN PROGRAM
+
 The main program can be found as `mainDataAnalysis.m`, which executes together all the functions that plot and analyze the data.   
 The following code is referred to the adaptive behavior processing algorithm which is slightly different from the compliant behavior analysis.
 
 ## GENERAL INSTRUCTIONS
+
 Inside each program or function it is possible to find the section "Simulation parameter" at the beginning of the file, inside of that there are two cases:
 * __CAPS_CONSTANTS__: used to modify some conditions inside that program or function that avoid printing, saving, or executing some parts of the code.
 * __normal_variables__: used to change some common behaviors inside the program or function.
 
-----------------
 ## AUTHOR
+
 Alessandro Tiozzo - alessandro.tiozzo@iit.it
