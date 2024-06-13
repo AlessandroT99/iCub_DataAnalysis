@@ -1,7 +1,9 @@
 # Master Thesis Data Analysis
---------------------------
+
 Analysis of kinematic features of a collaborative physical human-robot interaction. The results were used to design a controller for a humanoid arm.
---------------------------
+
+## CONTEXT
+
 After performing the data collection during the Posner paradigm experiment, this script is executed to evaluate the just collected data.
 
 This program takes into input the position and the force data obtained from iCub in two different moments:
