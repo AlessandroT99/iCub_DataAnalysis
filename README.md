@@ -28,4 +28,4 @@ Inside each program or function it is possible to find the section "Simulation p
 
 ## AUTHOR
 
-Alessandro Tiozzo - alessandro.tiozzo@iit.it
+Alessandro Tiozzo
